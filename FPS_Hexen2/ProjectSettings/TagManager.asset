@@ -3,7 +3,22 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - BodyPart
+  - Projectile
+  - WeaponManager
+  - Enemy
+  - GameManager
+  - ItemManager
+  - Concrete
+  - Metal
+  - Dirt
+  - Wood
+  - Water
+  - AI
+  - WeaponCam
+  - Remote
+  - Bullet
   layers:
   - Default
   - TransparentFX
@@ -13,11 +28,11 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Weapons
+  - Player
+  - MiniMap
+  - PostEffects
+  - Scope
   - 
   - 
   - 
