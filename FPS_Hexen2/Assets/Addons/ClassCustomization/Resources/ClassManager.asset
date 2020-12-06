@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b359ebc0e90e68f4580fe50ba292de5a, type: 3}
+  m_Name: ClassManager
+  m_EditorClassIdentifier: 
+  m_Class: 3
+  DefaultAssaultClass: {fileID: 11400000, guid: c739e535e3705164dbd83796e2c8cf2f,
+    type: 2}
+  DefaultEngineerClass: {fileID: 11400000, guid: b8a49bae35785ba4c975b1bb63298385,
+    type: 2}
+  DefaultSupportClass: {fileID: 11400000, guid: 33d3d7388ff445e4996ff099114d8fc1,
+    type: 2}
+  DefaultReconClass: {fileID: 11400000, guid: 8c88b13d69472034ebf3d5d3ad4fba28, type: 2}
+  DeleteSavedClasses: 0
+  ClassKit: 0

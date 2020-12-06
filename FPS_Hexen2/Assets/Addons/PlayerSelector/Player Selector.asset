@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a776487618c5eca41bfe2a54260297f7, type: 3}
+  m_Name: Player Selector
+  m_EditorClassIdentifier: 
+  Name: Player Selector
+  Version: 1.5.7
+  MinMFPSVersion: 1.7
+  Instructions: "<b>Get Started</b>\n\r\n- After import the package in your MFPS 2.0
+    project go to (Top Bar) MFPS -> Addons -> PlayerSelector -> Enable (if is disable)\r\n-
+    Now choose between the two modes available for Character Selection mode: InLobby
+    and InMatch:\r\n\r\n    <b>InMatch:</b>\r\n\t   - Players select his operator/soldier
+    character in match (after enter in a room) like in some games like OverWatch,RainBow
+    Six, etc...\r\n\t    For integrate this mode you have to open a map of your game
+    (you have to do in each one)\r\n\t\tgo to -> (Unity Toolbar) MFPS -> Addons ->
+    PlayerSelector -> InMatch Integration\r\n\r\n   <b>InLobby:</b>\r\n       - Players
+    Select his operator/soldier character in the Lobby Menu, they select the one for
+    each team and set a favorite team to use in\r\n\t     game modes of solo player,
+    this mode is use in some games like Call Of Duty, Fortnite,etc...\r\n\t\t For
+    integrate this mode open the MainMenu Scene then in Unity Toolbar Go to MFPS ->
+    Addons -> PlayerSelector -> InLobby Integration\r\n\r\n- Ready!.\r\n\r\n<b>Add
+    an new player option:</b>\n\r\nIn order to add a new player as options in your
+    character selection menu you need 2 things:\r\n  - A player prefab located in
+    a \"Resources\" folder as the default ones of MFPS\r\n  - Sprite preview of Player.\r\n\r\n
+    \ Player Prefab:\r\n  this player prefab can contain different weapons,textures,size,model,etc..\r\n
+    \ important thing is that it need be located in a \"Resource\" folder for photon
+    can instantiated it.\r\n\r\n  them you need add it the list that you want in the
+    bl_Selector script located in the canvas prefab that you instantiate in the scene
+    hierarchy\r\n  Canvas[PlayerSelectore] -> Selector -> bl_PlayerSelector, there
+    are 3 list, one for each team and one for ffa game mode, you can select\r\n  where
+    you want that this new player can be selected, add a new field in the list and
+    drag the prefab from resources folder in the \"prefab\" var of new field list.\r\n
+    \ them add also an sprite image preview for appear in the selection box.\r\n\r\n
+    \ you have a new player to be select now!."
+  TutorialScript: PlayerSelectorDocumentation
