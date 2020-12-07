@@ -1,0 +1,244 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c95a76f1a202b0449f4122c60edc1b8, type: 3}
+  m_Name: CustomizerData
+  m_EditorClassIdentifier: 
+  Weapons:
+  - WeaponName: smg
+    GunID: 0
+    Camos:
+    - Name: Default
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 2100000, guid: cd63763af54801c4a953fe47b452497e, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 0
+    - Name: Urban
+      GlobalID: 1
+      ID: 1
+      Camo: {fileID: 2100000, guid: d02bc8852dca1f04cb4bc15ff06b9418, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 0
+    - Name: Artic
+      GlobalID: 2
+      ID: 2
+      Camo: {fileID: 2100000, guid: b91b2397a27f13044a5634a548fce076, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 0
+    - Name: Toxi
+      GlobalID: 3
+      ID: 3
+      Camo: {fileID: 2100000, guid: 39fd7e908f4cca3418157b39161347fb, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 0
+    - Name: Patriot
+      GlobalID: 4
+      ID: 4
+      Camo: {fileID: 2100000, guid: 50246aca79a845b40a8622da984ad45a, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 0
+    Attachments:
+      Suppressers:
+      - Name: No Suppressor
+        ID: 0
+        Description: 
+      - Name: Suppressor
+        ID: 1
+        Description: 
+      - Name: Barrel
+        ID: 2
+        Description: 
+      Sights:
+      - Name: Iron Sight
+        ID: 0
+        Description: 
+      - Name: Holo Sight
+        ID: 1
+        Description: 
+      - Name: Cobra
+        ID: 2
+        Description: 
+      Foregrips:
+      - Name: None
+        ID: 0
+        Description: 
+      - Name: Vertical Grip
+        ID: 1
+        Description: 
+      - Name: Horizontal Grip
+        ID: 2
+        Description: 
+      Magazines:
+      - Name: Normal
+        ID: 0
+        Description: 
+      - Name: Extended Mag
+        ID: 1
+        Description: 
+  - WeaponName: shotgun
+    GunID: 2
+    Camos:
+    - Name: Default
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 2100000, guid: e463b86907a3bd54485db0a6b2eabbad, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 1
+    - Name: Dragon
+      GlobalID: 5
+      ID: 1
+      Camo: {fileID: 2100000, guid: f54e44921cc3eaf4c8c4a78f0734050d, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 1
+    Attachments:
+      Suppressers:
+      - Name: No Suppressor
+        ID: 0
+        Description: 
+      - Name: Suppressor
+        ID: 1
+        Description: 
+      - Name: Small Barrel
+        ID: 2
+        Description: 
+      Sights:
+      - Name: Iron Sight
+        ID: 0
+        Description: 
+      - Name: Holo Sight
+        ID: 1
+        Description: 
+      - Name: Cobra
+        ID: 2
+        Description: 
+      Foregrips: []
+      Magazines: []
+  - WeaponName: sniper
+    GunID: 4
+    Camos:
+    - Name: Default
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 2100000, guid: 433fe5da84f14b944bffb40373729b59, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 2
+    - Name: Urban
+      GlobalID: 1
+      ID: 1
+      Camo: {fileID: 2100000, guid: f1ffebcb1cf483948b3f85244323add0, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 2
+    Attachments:
+      Suppressers:
+      - Name: No Suppressor
+        ID: 0
+        Description: 
+      - Name: Silencer
+        ID: 1
+        Description: 
+      - Name: Small Barrel
+        ID: 2
+        Description: 
+      Sights:
+      - Name: Scope x16
+        ID: 0
+        Description: 
+      - Name: Holo Sight
+        ID: 1
+        Description: 
+      - Name: Cobra
+        ID: 2
+        Description: 
+      Foregrips: []
+      Magazines:
+      - Name: Normal
+        ID: 0
+        Description: 
+      - Name: Extended
+        ID: 1
+        Description: 
+  - WeaponName: pistol
+    GunID: 1
+    Camos:
+    - Name: Default
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 2100000, guid: d06140c5eb850234cbd0989044e564e4, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 3
+    - Name: Urban
+      GlobalID: 1
+      ID: 1
+      Camo: {fileID: 2100000, guid: 0f5323b734db4354ea18bd943bc8c8aa, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 3
+    Attachments:
+      Suppressers:
+      - Name: No Suppressor
+        ID: 0
+        Description: 
+      - Name: Silencer
+        ID: 1
+        Description: 
+      - Name: Small Barrel
+        ID: 2
+        Description: 
+      Sights:
+      - Name: Iron Sight
+        ID: 0
+        Description: 
+      - Name: Holo Sight
+        ID: 1
+        Description: 
+      - Name: Cobra
+        ID: 2
+        Description: 
+      Foregrips: []
+      Magazines:
+      - Name: Normal
+        ID: 0
+        Description: 
+      - Name: Extended
+        ID: 1
+        Description: 
+  GlobalCamos:
+  - Name: Default
+    Preview: {fileID: 2800000, guid: 104c4440614ce2341a2e47bc7244921d, type: 3}
+    Price: 0
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Urban
+    Preview: {fileID: 2800000, guid: adcb28af44a89bf4db50eacefbe21084, type: 3}
+    Price: 100
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Artic
+    Preview: {fileID: 2800000, guid: a249e4ea789654b4fafafbcbda909c08, type: 3}
+    Price: 0
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Toxi
+    Preview: {fileID: 2800000, guid: 6d5ac6510cb98534cbd45b3a7e73507b, type: 3}
+    Price: 10
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Patriot
+    Preview: {fileID: 2800000, guid: a466bb99e281b1644bfaaf817ac40035, type: 3}
+    Price: 100
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Dragon
+    Preview: {fileID: 2800000, guid: cb3d4d8c3882bdf44ad5a83146b0c3f7, type: 3}
+    Price: 0
+    Description: 
+    m_sprite: {fileID: 0}
+  OpenedWeapon: 0

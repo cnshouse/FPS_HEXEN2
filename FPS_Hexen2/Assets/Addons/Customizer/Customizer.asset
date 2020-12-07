@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a776487618c5eca41bfe2a54260297f7, type: 3}
+  m_Name: Customizer
+  m_EditorClassIdentifier: 
+  Name: Customizer
+  Version: 1.7.6
+  MinMFPSVersion: 1.7.5
+  Instructions: "<b>Get Started</b>\n\nAfter import the package go to (Toolbar)MFPS
+    -> Addons -> Customizer -> Enable\r\nThen add the 'Customizer' scene to the Build
+    Settings, the scene is located in: Assets -> Addons -> Customizer -> Content ->
+    Scene -> *\r\nUse the example player prefab which have the rifle integrated with
+    customizer for test the system, the prefab is located in the 'Resources' folder
+    of the addon.\r\n\r\n<b>Add a new weapon:\r</b>\n\r\n- First you need create the
+    weapon info in 'CustomizerData' which is located in the 'Resources' folder of
+    Customizer addon, add a new field in the list \"Weapons\" \r\nand add all the
+    attachments and camos that you want for that weapon.\r\n\r\n- Then open the player
+    prefab, and first, select the FPWeapon -> add the bl_CustomizerWeapon.cs, select
+    the weapon name that you previously setup in the CustomizerData and\r\n click
+    in the Button 'Refresh', after this the attachments list will automatically generated
+    with the required attachments, so here you need assign the attachments models,\r\n
+    (the models need be positioned inside of the weapon not from prefabs), in 'CamoRender'
+    drag the Mesh of the weapon and assign the ID of the material (from the materials
+    list of the mesh) that will change in case of change of camo.\r\n  check 'isFirstPersonWeapon'.\r\n\r\n-
+    Now select the TPWeapon (the bl_NetworkGun in the player model) and add again
+    the script bl_CustomizerWeapon.cs where bl_NetworkGun is, and again select the
+    weapon name and click Refresh button,\r\n   add the attachments models and the
+    camo mesh, now make sure to UNCHECK 'isFirstPersonWeapon' and 'ApplyOnStart' toggles.\r\n\r\n-
+    if you have troubles, use the example player prefab that comes in the addon Resources
+    folder, check the First Person and Third Person Rifle weapon for check how it's
+    setup.\r\n\r\n<b>Make attachment affect the gun:</b>\n\r\n - For example silencers,
+    when a silencer is attached the weapon must have a different fire sound than the
+    normal, for change the sound when a silencer is attached simply\r\n   add the
+    script bl_AttachmentGunModifier.cs to the Silencer object of the FPWeapon, in
+    the script mark \"Override Fire Sound\" and add your Audio Clip,\r\n   do the
+    same for 'Sights' in order to change the Aim Position of the weapon and for Magazines
+    in order to add more bullets."
+  TutorialScript: CustomizerTutorial
