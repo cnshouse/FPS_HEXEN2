@@ -938,6 +938,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4277480985822222}
+  - component: {fileID: 8307900358633453788}
   m_Layer: 8
   m_Name: NewRifle
   m_TagString: Untagged
@@ -954,13 +955,26 @@ Transform:
   m_GameObject: {fileID: 1159556332661400}
   m_LocalRotation: {x: 0.71271986, y: 0.00000006073797, z: -0.00000005977745, w: 0.70144886}
   m_LocalPosition: {x: -0.10036755, y: -0.041380886, z: 0.13618624}
-  m_LocalScale: {x: 0.19047943, y: 0.19047919, z: 0.19047941}
+  m_LocalScale: {x: 0.01904794, y: 0.01904792, z: 0.01904794}
   m_Children:
   - {fileID: 4117606528426668}
   - {fileID: 513196870048915428}
   m_Father: {fileID: 504678873748498696}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8307900358633453788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1159556332661400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cad025e5d3e4ea43be038eed61d8004, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _scale: {x: 0, y: 0, z: 0}
 --- !u!1 &1162077881377546
 GameObject:
   m_ObjectHideFlags: 0
@@ -2277,7 +2291,7 @@ Transform:
   m_GameObject: {fileID: 1314585818319752}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3358895848656999766}
   m_Father: {fileID: 4277480985822222}
@@ -89984,7 +89998,7 @@ Transform:
   m_GameObject: {fileID: 507644841705494490}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4277480985822222}
   m_RootOrder: 1
