@@ -3,6 +3,7 @@ using System.Collections;
 
 public class bl_WeaponAnimation : MonoBehaviour
 {
+    [Header("AnimationType")]
     public AnimationType m_AnimationType = AnimationType.Animation;
 
     public AnimationClip DrawName;

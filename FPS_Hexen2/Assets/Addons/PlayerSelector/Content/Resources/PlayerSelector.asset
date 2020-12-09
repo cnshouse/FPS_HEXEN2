@@ -13,38 +13,14 @@ MonoBehaviour:
   m_Name: PlayerSelector
   m_EditorClassIdentifier: 
   AllPlayers:
-  - Name: Recon Soldier
-    Price: 0
-    Preview: {fileID: 21300000, guid: d52ded93aba596d4a958d709c14113b2, type: 3}
-    Prefab: {fileID: 1353458154535538, guid: 353d635db0698974b963c4153ac19a5d, type: 3}
-    ID: 0
-    team: 2
-  - Name: Delta Soldier
-    Price: 0
-    Preview: {fileID: 21300000, guid: fe8dd5eb451d51540b9478032e877276, type: 3}
-    Prefab: {fileID: 1568668014787886, guid: 8b43b97c50cac1d43a7c27ca8b6a6cdf, type: 3}
-    ID: 1
-    team: 1
-  - Name: West Soldier
-    Price: 200
-    Preview: {fileID: 21300000, guid: bf24a65d9e31d5642a6b0ff511ee58ef, type: 3}
-    Prefab: {fileID: 1637042944430556, guid: 66a162bd10967734faaa2ec7b4b95f82, type: 3}
-    ID: 2
-    team: 2
-  - Name: Winter Soldier
-    Price: 200
-    Preview: {fileID: 21300000, guid: 1b06f477d90517943a96dca5f666ffa5, type: 3}
-    Prefab: {fileID: 1994311279885994, guid: 2fd465e8212d0404894690a6ae6fda6e, type: 3}
-    ID: 3
-    team: 1
   - Name: Knight
     Price: 0
-    Preview: {fileID: 21300000, guid: 1b06f477d90517943a96dca5f666ffa5, type: 3}
+    Preview: {fileID: 21300000, guid: d52ded93aba596d4a958d709c14113b2, type: 3}
     Prefab: {fileID: 4783534219248756317, guid: 3265eb01329dd614eb2f2efedbb9c95c,
       type: 3}
-    ID: 3
+    ID: 0
     team: 1
-  Team1Players: 0300000002000000010000000000000004000000
-  Team2Players: 0300000002000000010000000000000004000000
-  FFAPlayers: 0100000000000000020000000300000004000000
+  Team1Players: 00000000
+  Team2Players: 00000000
+  FFAPlayers: 00000000
   PlayerSelectorMode: 1

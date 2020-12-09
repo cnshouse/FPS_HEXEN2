@@ -167,6 +167,19 @@ MonoBehaviour:
     PickUpPrefab: {fileID: 9043734865955749252, guid: e5267eb24b2bb3e44b7e5b2b4961a28c,
       type: 3}
     GunIcon: {fileID: 21300000, guid: f22b479294de3414e987ba1cb0e2e81f, type: 3}
+  - Name: Two Handed Hammer
+    Type: 6
+    Damage: 75
+    FireRate: 0.8
+    ReloadTime: 1
+    Range: 4
+    Accuracy: 0
+    Weight: 2
+    Price: 0
+    LevelUnlock: 0
+    PickUpPrefab: {fileID: 2686252656696048495, guid: 18a6784971d09b745bc389f1b7f3f269,
+      type: 3}
+    GunIcon: {fileID: 21300000, guid: f22b479294de3414e987ba1cb0e2e81f, type: 3}
   DefaultSettings:
     DefaultSensitivity: 5
     DefaultSensitivityAim: 2
@@ -246,8 +259,8 @@ MonoBehaviour:
   Team1Color: {r: 0.017799927, g: 0.08306635, b: 0.1509434, a: 1}
   Team2Name: Recon
   Team2Color: {r: 1, g: 0.89019614, b: 0, a: 1}
-  Player1: {fileID: 114038687236655164, guid: 353d635db0698974b963c4153ac19a5d, type: 3}
-  Player2: {fileID: 114797454524261884, guid: 8b43b97c50cac1d43a7c27ca8b6a6cdf, type: 3}
+  Player1: {fileID: 4896054397226446187, guid: 3265eb01329dd614eb2f2efedbb9c95c, type: 3}
+  Player2: {fileID: 4896054397226446187, guid: 3265eb01329dd614eb2f2efedbb9c95c, type: 3}
   BotTeam1: {fileID: 9002616942860423194, guid: 4193d6c26bb200c46b6fc86a117e7499,
     type: 3}
   BotTeam2: {fileID: 9002616942860423194, guid: 4193d6c26bb200c46b6fc86a117e7499,
