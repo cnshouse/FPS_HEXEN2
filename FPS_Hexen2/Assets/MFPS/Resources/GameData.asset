@@ -180,6 +180,19 @@ MonoBehaviour:
     PickUpPrefab: {fileID: 2686252656696048495, guid: 18a6784971d09b745bc389f1b7f3f269,
       type: 3}
     GunIcon: {fileID: 21300000, guid: f22b479294de3414e987ba1cb0e2e81f, type: 3}
+  - Name: Unarmed
+    Type: 6
+    Damage: 25
+    FireRate: 0.8
+    ReloadTime: 1
+    Range: 2
+    Accuracy: 0
+    Weight: 2
+    Price: 0
+    LevelUnlock: 0
+    PickUpPrefab: {fileID: 2686252656696048495, guid: 18a6784971d09b745bc389f1b7f3f269,
+      type: 3}
+    GunIcon: {fileID: 21300000, guid: f22b479294de3414e987ba1cb0e2e81f, type: 3}
   DefaultSettings:
     DefaultSensitivity: 5
     DefaultSensitivityAim: 2

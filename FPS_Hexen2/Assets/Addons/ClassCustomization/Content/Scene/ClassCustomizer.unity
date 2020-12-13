@@ -1008,6 +1008,221 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[8].Name
+      value: Two Handed Hammer
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[8].GunID
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[8].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[9].Name
+      value: Unarmed
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[9].GunID
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[9].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[8].Name
+      value: Two Handed Hammer
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[8].GunID
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[8].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[9].Name
+      value: Unarmed
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[9].GunID
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[9].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[8].Name
+      value: Two Handed Hammer
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[8].GunID
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[8].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[9].Name
+      value: Unarmed
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[9].GunID
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[9].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[8].Name
+      value: Two Handed Hammer
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[8].GunID
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[8].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[9].Name
+      value: Unarmed
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[9].GunID
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[9].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: PrimaryAllowedWeapons.AllowKnifes
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[4].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[6].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: PrimaryAllowedWeapons.AllowSnipers
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: PrimaryAllowedWeapons.AllowShotguns
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: PrimaryAllowedWeapons.AllowMachineGuns
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: SecondaryAllowedWeapons.AllowKnifes
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: SecondaryAllowedWeapons.AllowSnipers
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: SecondaryAllowedWeapons.AllowShotguns
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: SecondaryAllowedWeapons.AllowPistols
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: SecondaryAllowedWeapons.AllowMachineGuns
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: KnifeAllowedWeapons.AllowKnifes
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: KnifeAllowedWeapons.AllowMachineGuns
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: KnifeAllowedWeapons.AllowSnipers
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: KnifeAllowedWeapons.AllowShotguns
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 224167328828944426, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: m_AnchorMax.x
