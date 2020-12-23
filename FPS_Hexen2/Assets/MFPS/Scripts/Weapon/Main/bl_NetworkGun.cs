@@ -136,6 +136,16 @@ public class bl_NetworkGun : MonoBehaviour
         }
     }
 
+    public void SwingTwoHandedMelee()
+	{
+        if(LocalGun != null)
+		{
+            Source.clip = LocalGun.FireSound;
+            Source.spread = Random.Range(1.0f, 1.5f);
+            Source.Play();
+		}
+	}
+
     /// <summary>
     /// 
     /// </summary>

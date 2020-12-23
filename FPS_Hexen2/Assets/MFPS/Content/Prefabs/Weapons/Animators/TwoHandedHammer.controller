@@ -6,7 +6,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Two Handed Hammer
+  m_Name: TwoHandedHammer
   serializedVersion: 5
   m_AnimatorParameters: []
   m_AnimatorLayers:
@@ -86,7 +86,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400050, guid: 71a860de405aaeb44ace152c21808003, type: 3}
+  m_Motion: {fileID: 7400004, guid: bd68d75f916fcab4797c60bb57d4c952, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -164,7 +164,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400010, guid: bd68d75f916fcab4797c60bb57d4c952, type: 3}
+  m_Motion: {fileID: 0}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -190,7 +190,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400002, guid: 71a860de405aaeb44ace152c21808003, type: 3}
+  m_Motion: {fileID: 7400004, guid: 71a860de405aaeb44ace152c21808003, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -217,7 +217,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400002, guid: 71a860de405aaeb44ace152c21808003, type: 3}
+  m_Motion: {fileID: 7400004, guid: 71a860de405aaeb44ace152c21808003, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -244,7 +244,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400046, guid: 71a860de405aaeb44ace152c21808003, type: 3}
+  m_Motion: {fileID: 7400002, guid: bd68d75f916fcab4797c60bb57d4c952, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -270,10 +270,10 @@ AnimatorStateMachine:
     m_Position: {x: 504, y: 36, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102934787302360452}
-    m_Position: {x: 624, y: 96, z: 0}
+    m_Position: {x: 630, y: 100, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102127872608383080}
-    m_Position: {x: 624, y: 156, z: 0}
+    m_Position: {x: 630, y: 160, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102345081878720356}
     m_Position: {x: 240, y: 230, z: 0}

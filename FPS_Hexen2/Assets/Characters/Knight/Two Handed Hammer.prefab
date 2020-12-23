@@ -461,7 +461,7 @@ GameObject:
   - component: {fileID: 1318806900840669560}
   - component: {fileID: 3590502320003404092}
   m_Layer: 8
-  m_Name: Knife [FP]
+  m_Name: Two Handed Hammer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -592,7 +592,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Info:
     Name: 
-    Type: 6
+    Type: 10
     Damage: 0
     FireRate: 0.1
     ReloadTime: 2.5
@@ -2111,7 +2111,7 @@ GameObject:
   - component: {fileID: 958165591225766475}
   - component: {fileID: 5323418399077335527}
   - component: {fileID: 3168576464361651223}
-  - component: {fileID: 7628902604072162418}
+  - component: {fileID: 355056789358525527}
   m_Layer: 8
   m_Name: Two Handed Hammer
   m_TagString: Untagged
@@ -2126,8 +2126,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4659606609521743202}
-  m_LocalRotation: {x: -0.2559408, y: -0.2272361, z: 0.02164071, w: 0.939356}
-  m_LocalPosition: {x: -0.052493986, y: -1.0207729, z: 0.3978147}
+  m_LocalRotation: {x: 0.35019302, y: 0.16346857, z: 0.08268789, w: 0.918589}
+  m_LocalPosition: {x: 0.09, y: -1.29, z: -0.59}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4347200727240512275}
@@ -2139,7 +2139,7 @@ Transform:
   - {fileID: 4990855506720807553}
   m_Father: {fileID: 8348423189654558238}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -28.1, y: -29.770002, z: 10.250001}
+  m_LocalEulerAnglesHint: {x: 38.049004, y: 27.059002, z: 19.773}
 --- !u!95 &5323418399077335527
 Animator:
   serializedVersion: 3
@@ -2150,7 +2150,7 @@ Animator:
   m_GameObject: {fileID: 4659606609521743202}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: ffaf641b210f5ea41952cf36f1379d66, type: 3}
-  m_Controller: {fileID: 9100000, guid: 7f08fe5570074e44091a2c765b8e1db4, type: 2}
+  m_Controller: {fileID: 0}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2171,13 +2171,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 700cf9619c66f564db7e4069282fe3e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveTo: {x: -0.052493986, y: -1.0207729, z: 0.3978147}
-  rotateTo: {x: 331.9005, y: 330.2305, z: 10.250338}
-  moveToReload: {x: -0.052493986, y: -1.0207729, z: 0.3978147}
-  rotateToReload: {x: 331.9005, y: 330.2305, z: 10.250338}
+  moveTo: {x: 0.09, y: -1.29, z: -0.59}
+  rotateTo: {x: 38.048855, y: 27.059078, z: 19.77311}
+  moveToReload: {x: 0.09, y: -1.29, z: -0.59}
+  rotateToReload: {x: 38.048855, y: 27.059078, z: 19.77311}
   InSpeed: 15
   OutSpeed: 12
---- !u!114 &7628902604072162418
+--- !u!114 &355056789358525527
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2190,13 +2190,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AnimationType: 1
-  DrawName: {fileID: 7400002, guid: 71a860de405aaeb44ace152c21808003, type: 3}
-  TakeOut: {fileID: 7400002, guid: 71a860de405aaeb44ace152c21808003, type: 3}
-  SoloFireClip: {fileID: 7400046, guid: 71a860de405aaeb44ace152c21808003, type: 3}
+  DrawName: {fileID: 7400004, guid: 71a860de405aaeb44ace152c21808003, type: 3}
+  TakeOut: {fileID: 7400004, guid: 71a860de405aaeb44ace152c21808003, type: 3}
+  SoloFireClip: {fileID: 7400002, guid: bd68d75f916fcab4797c60bb57d4c952, type: 3}
   FireAnimations: []
-  FireAimAnimation: {fileID: 7400000, guid: bd68d75f916fcab4797c60bb57d4c952, type: 3}
+  FireAimAnimation: {fileID: 7400004, guid: bd68d75f916fcab4797c60bb57d4c952, type: 3}
   ReloadName: {fileID: 0}
-  IdleClip: {fileID: 7400000, guid: 12e47c51ad139a64ab80bb5d185aeb96, type: 3}
+  IdleClip: {fileID: 1827226128182048838, guid: 596d10d9fc7f80b4aaf2a743a7dac883,
+    type: 3}
   FireSpeed: 1
   DrawSpeed: 1
   HideSpeed: 1
@@ -2204,7 +2205,7 @@ MonoBehaviour:
   InsertAnim: {fileID: 0}
   AfterReloadAnim: {fileID: 0}
   InsertSpeed: 1
-  QuickFireAnim: {fileID: 7400002, guid: bd68d75f916fcab4797c60bb57d4c952, type: 3}
+  QuickFireAnim: {fileID: 7400000, guid: bd68d75f916fcab4797c60bb57d4c952, type: 3}
   Particles: []
   ParticleRate: 5
   HasParticles: 0
@@ -2662,7 +2663,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6547353928739629376}
-  m_LocalRotation: {x: 0.033519097, y: -0.034557577, z: 0.026498448, w: 0.9984889}
+  m_LocalRotation: {x: 0.033519104, y: -0.034557577, z: 0.026498452, w: 0.9984889}
   m_LocalPosition: {x: -6.039614e-16, y: 1.8118841e-16, z: -0.04234837}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:

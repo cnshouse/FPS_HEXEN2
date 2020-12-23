@@ -194,7 +194,7 @@ public class bl_Gun : bl_GunBase
         {
             Crosshair.Change(2);
         }
-        else if (Info.Type == GunType.Knife)
+        else if (Info.Type == GunType.Knife || Info.Type == GunType.TwoHandedMelee)
         {
             Crosshair.Change(1);
         }
@@ -791,6 +791,67 @@ public class bl_Gun : bl_GunBase
         callBack();
         StopAllCoroutines();
         gameObject.SetActive(false);
+    }
+    
+    /// <summary>
+    /// Two Handed Meleee added 
+    /// </summary>
+    private float TwoHandedMelee_Fire(bool quickFire = false)
+    {
+        // If there is more than one shot  between the last and this frame
+        // Reset the nextFireTime
+        if (Time.time - Info.FireRate > nextFireTime)
+            nextFireTime = Time.time - Time.deltaTime;
+
+        float time = 0;
+        // Keep firing until we used up the fire time
+        while (nextFireTime < Time.time)
+        {
+            isFiring = true; // fire is down, gun is firing
+            alreadyKnife = true;
+            StartCoroutine(KnifeSendFire());
+
+            Vector3 position = PlayerCamera.transform.position;
+            Vector3 direction = PlayerCamera.transform.TransformDirection(Vector3.forward);
+
+            RaycastHit hit;
+            if (Physics.Raycast(position, direction, out hit, Info.Range))
+            {
+                if (hit.transform.CompareTag("BodyPart"))
+                {
+                    if (hit.transform.GetComponent<bl_BodyPart>() != null)
+                    {
+                        hit.transform.GetComponent<bl_BodyPart>().GetDamage(Info.Damage, PhotonNetwork.NickName, DamageCause.Player, transform.position, GunID);
+                    }
+                }
+                else if (hit.transform.CompareTag("AI"))
+                {
+                    if (hit.transform.GetComponent<bl_AIShooterHealth>() != null)
+                    {
+                        hit.transform.GetComponent<bl_AIShooterHealth>().DoDamage(Info.Damage, Info.Name, transform.position, bl_GameManager.LocalPlayerViewID, false, PhotonNetwork.LocalPlayer.GetPlayerTeam(), false, 0);
+                        bl_ObjectPooling.Instance.Instantiate("blood", hit.point, Quaternion.FromToRotation(Vector3.up, hit.normal));
+                    }
+                    else if (hit.transform.GetComponent<bl_AIHitBox>() != null)
+                    {
+                        hit.transform.GetComponent<bl_AIHitBox>().DoDamage(Info.Damage, Info.Name, transform.position, bl_GameManager.LocalPlayerViewID, false, PhotonNetwork.LocalPlayer.GetPlayerTeam());
+                        bl_ObjectPooling.Instance.Instantiate("blood", hit.point, Quaternion.FromToRotation(Vector3.up, hit.normal));
+                    }
+                }
+            }
+
+            if (WeaponAnimation != null)
+            {
+                time = WeaponAnimation.TwoHandedFire(quickFire);
+            }
+            PlayerNetwork.IsFire(GunType.TwoHandedMelee, Vector3.zero);
+            PlayFireAudio();
+            nextFireTime += Info.FireRate;
+            Kick();
+            Shake();
+            Crosshair.OnFire();
+            isFiring = false;
+        }
+        return time;
     }
 
     /// <summary>
@@ -1614,7 +1675,7 @@ public class bl_Gun : bl_GunBase
             {
                 can = true;
             }
-            if (Info.Type == GunType.Knife && nextFireTime < Time.time)
+            if (Info.Type == GunType.Knife && nextFireTime < Time.time || Info.Type == GunType.TwoHandedMelee && nextFireTime < Time.time)
             {
                 can = false;
             }

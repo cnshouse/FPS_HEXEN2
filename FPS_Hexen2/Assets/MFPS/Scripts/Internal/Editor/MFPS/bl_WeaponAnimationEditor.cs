@@ -58,7 +58,7 @@ public class bl_WeaponAnimationEditor : Editor
             AnimatorGUI();
         }
         GUILayout.EndVertical();
-        if (Gun.SoundReloadByAnim && gType != GunType.Knife)
+        if (Gun.SoundReloadByAnim && gType != GunType.Knife && gType != GunType.OneHandedMelee && gType != GunType.TwoHandedMelee && gType != GunType.Unarmed)
         {
             GUILayout.BeginVertical("box");
             script.Reload_1 = EditorGUILayout.ObjectField("Clip Out Audio", script.Reload_1, typeof(AudioClip), allowSceneObjects) as AudioClip;
@@ -95,7 +95,7 @@ public class bl_WeaponAnimationEditor : Editor
             script.TakeOut = EditorGUILayout.ObjectField("Hide Animation", script.TakeOut, typeof(AnimationClip), allowSceneObjects) as AnimationClip;
             script.SoloFireClip = EditorGUILayout.ObjectField("Fire Animation", script.SoloFireClip, typeof(AnimationClip), allowSceneObjects) as AnimationClip;
             script.FireAimAnimation = EditorGUILayout.ObjectField("Aim Fire Animation", script.FireAimAnimation, typeof(AnimationClip), allowSceneObjects) as AnimationClip;
-            if (gType != GunType.Knife)
+            if (gType != GunType.Knife && gType != GunType.OneHandedMelee && gType != GunType.TwoHandedMelee && gType != GunType.Unarmed)
             {
                 if (Gun.reloadPer == bl_Gun.ReloadPer.Bullet)
                 {
@@ -153,7 +153,7 @@ public class bl_WeaponAnimationEditor : Editor
                 script.ReloadName = EditorGUILayout.ObjectField("Reload Animation", script.ReloadName, typeof(AnimationClip), allowSceneObjects) as AnimationClip;
                 GUILayout.EndHorizontal();
             }
-            else if (gType == GunType.Shotgun || gType == GunType.Sniper)
+            else if (gType == GunType.Shotgun || gType == GunType.Sniper || gType == GunType.Crossbow || gType == GunType.Bow)
             {
                 GUILayout.BeginHorizontal("box");
                 script.SoloFireClip = EditorGUILayout.ObjectField("Fire Animation", script.SoloFireClip, typeof(AnimationClip), allowSceneObjects) as AnimationClip;
@@ -204,7 +204,7 @@ public class bl_WeaponAnimationEditor : Editor
                 GUILayout.Space(2);
                 script.DrawAfterFire = EditorGUILayout.ToggleLeft("Draw After Fire", script.DrawAfterFire, EditorStyles.toolbarButton);
             }
-            else if (gType == GunType.Knife)
+            else if (gType == GunType.Knife || gType == GunType.Unarmed || gType == GunType.TwoHandedMelee || gType == GunType.OneHandedMelee)
             {
                 GUILayout.BeginHorizontal("box");
                 script.FireAimAnimation = EditorGUILayout.ObjectField("Fire Animation", script.FireAimAnimation, typeof(AnimationClip), allowSceneObjects) as AnimationClip;
@@ -214,6 +214,7 @@ public class bl_WeaponAnimationEditor : Editor
                 script.QuickFireAnim = EditorGUILayout.ObjectField("Quick Fire Animation", script.QuickFireAnim, typeof(AnimationClip), allowSceneObjects) as AnimationClip;
                 GUILayout.EndHorizontal();
             }
+
             GUILayout.BeginHorizontal("box");
             script.IdleClip = EditorGUILayout.ObjectField("Idle Animation", script.IdleClip, typeof(AnimationClip), allowSceneObjects) as AnimationClip;
             GUILayout.EndHorizontal();
@@ -245,7 +246,7 @@ public class bl_WeaponAnimationEditor : Editor
             s.state.motion = script.TakeOut;
             s = rootStateMachine.states.ToList().Find(x => x.state.name == "Fire");
             s.state.motion = script.SoloFireClip;
-            if (gType != GunType.Knife && gType != GunType.Grenade)
+            if (gType != GunType.Knife && gType != GunType.Grenade && gType != GunType.OneHandedMelee && gType != GunType.TwoHandedMelee && gType != GunType.Unarmed)
             {
                 s = rootStateMachine.states.ToList().Find(x => x.state.name == "AimFire");
                 s.state.motion = script.FireAimAnimation;
@@ -260,7 +261,7 @@ public class bl_WeaponAnimationEditor : Editor
                 s = rootStateMachine.states.ToList().Find(x => x.state.name == "Reload");
                 s.state.motion = script.ReloadName;
             }
-            else if (gType == GunType.Sniper || gType == GunType.Shotgun)
+            else if (gType == GunType.Sniper || gType == GunType.Shotgun || gType == GunType.Crossbow || gType == GunType.Bow)
             {
                 if (Gun.reloadPer != bl_Gun.ReloadPer.Bullet)
                 {
@@ -315,7 +316,7 @@ public class bl_WeaponAnimationEditor : Editor
             GUILayout.EndHorizontal();
             list.DoLayoutList();
         }
-        else if (gType == GunType.Shotgun || gType == GunType.Sniper)
+        else if (gType == GunType.Shotgun || gType == GunType.Sniper || gType == GunType.Crossbow || gType == GunType.Bow)
         {
             GUILayout.BeginHorizontal("box");
             script.FireAimAnimation = EditorGUILayout.ObjectField("Aim Fire Animation", script.FireAimAnimation, typeof(AnimationClip), allowSceneObjects) as AnimationClip;
@@ -364,7 +365,7 @@ public class bl_WeaponAnimationEditor : Editor
                 serializedObject.ApplyModifiedProperties();
             }
         }
-        else if (gType == GunType.Knife)
+        else if (gType == GunType.Knife || gType == GunType.Unarmed || gType == GunType.TwoHandedMelee || gType == GunType.OneHandedMelee)
         {
             GUILayout.BeginHorizontal("box");
             script.FireAimAnimation = EditorGUILayout.ObjectField("Fire Animation", script.FireAimAnimation, typeof(AnimationClip), allowSceneObjects) as AnimationClip;

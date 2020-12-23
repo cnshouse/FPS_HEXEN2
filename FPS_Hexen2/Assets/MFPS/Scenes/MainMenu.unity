@@ -894,12 +894,44 @@ PrefabInstance:
       propertyPath: viewIdField
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1295859428470252, guid: f594b14f498bf4744ae89d213732e723, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1695665893847122, guid: f594b14f498bf4744ae89d213732e723, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1898477813806002, guid: f594b14f498bf4744ae89d213732e723, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 82677485363501138, guid: f594b14f498bf4744ae89d213732e723,
         type: 3}
       propertyPath: OutputAudioMixerGroup
       value: 
       objectReference: {fileID: 24323422, guid: 4d9f0a86cfdf01a4f892912497d155e0,
         type: 2}
+    - target: {fileID: 114568328562637430, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114568328562637430, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114568328562637430, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114568328562637430, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 114774212519360408, guid: f594b14f498bf4744ae89d213732e723,
         type: 3}
       propertyPath: viewIdField
@@ -989,6 +1021,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5858700305995617532, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5858700305995617532, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.01886791
+      objectReference: {fileID: 0}
+    - target: {fileID: 5858700305995617532, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.01886791
+      objectReference: {fileID: 0}
+    - target: {fileID: 5858700305995617532, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.01886791
       objectReference: {fileID: 0}
     - target: {fileID: 6036177996001401014, guid: f594b14f498bf4744ae89d213732e723,
         type: 3}

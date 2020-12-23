@@ -148,6 +148,31 @@ public class bl_WeaponAnimation : MonoBehaviour
             return SoloFireClip.length / FireSpeed;
         }
     }
+    /// <summary>
+    /// Twho Handed Melee
+    /// </summary>
+    public float TwoHandedFire(bool Quickfire)
+    {
+        if (m_AnimationType == AnimationType.Animation)
+        {
+            if (FireAimAnimation == null)
+                return 0;
+
+            string an = Quickfire ? QuickFireAnim.name : FireAimAnimation.name;
+            Anim.Rewind(an);
+            Anim[an].speed = FireSpeed;
+            Anim.Play(an);
+
+            return Anim[an].length / FireSpeed;
+        }
+        else
+        {
+            string an = Quickfire ? "QuickFire" : "Fire";
+            animator.Play(an, 0, 0);
+            animator.speed = FireSpeed;
+            return SoloFireClip.length / FireSpeed;
+        }
+    }
 
     /// <summary>
     /// 

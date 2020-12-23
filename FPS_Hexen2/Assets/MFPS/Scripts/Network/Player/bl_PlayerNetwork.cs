@@ -366,6 +366,11 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
                 CurrenGun.KnifeFire();//if you need add your custom fire launcher in networkgun
                 m_PlayerAnimation.PlayFireAnimation(GunType.Knife);
                 break;
+            case GunType.TwoHandedMelee:
+                CurrenGun.SwingTwoHandedMelee();
+                m_PlayerAnimation.PlayFireAnimation(GunType.TwoHandedMelee);
+                //add audio here as well...
+                break;
             default:
                 Debug.LogWarning("Not defined weapon type to sync bullets.");
                 break;

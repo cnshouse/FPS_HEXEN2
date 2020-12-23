@@ -294,6 +294,9 @@ public class bl_PlayerAnimations : bl_MonoBehaviour
             case GunType.Launcher:
                 m_animator.Play("LauncherFire", 1, 0);
                 break;
+            case GunType.TwoHandedMelee:
+                m_animator.Play("SwingTwoHandedMelee", 1, 0);
+                break;
         }
     }
 
