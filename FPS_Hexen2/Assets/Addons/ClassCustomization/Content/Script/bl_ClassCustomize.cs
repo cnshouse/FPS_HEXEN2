@@ -16,6 +16,7 @@ namespace MFPS.ClassCustomization
         public ClassWeapons engineerWeapons;
         public ClassWeapons supportWeapons;
         public ClassWeapons reconWeapons;
+        public ClassWeapons dragosWeapons;
 
         [Header("Slots Rules")]
         public ClassAllowedWeaponsType PrimaryAllowedWeapons;
@@ -68,13 +69,15 @@ namespace MFPS.ClassCustomization
                             break;
                         case PlayerClass.Engineer:
                             ClassManager.EngineerClass.Primary = id;
- 
                             break;
                         case PlayerClass.Support:
                             ClassManager.SupportClass.Primary = id;
                             break;
                         case PlayerClass.Recon:
                             ClassManager.ReconClass.Primary = id;
+                            break;
+                        case PlayerClass.Dragos:
+                            ClassManager.DragosClass.Primary = id;
                             break;
                     }
 
@@ -94,6 +97,9 @@ namespace MFPS.ClassCustomization
                         case PlayerClass.Recon:
                             ClassManager.ReconClass.Secondary = id;
                             break;
+                        case PlayerClass.Dragos:
+                            ClassManager.DragosClass.Secondary = id;
+                            break;
                     }
                     break;
                 case 2:
@@ -111,6 +117,9 @@ namespace MFPS.ClassCustomization
                         case PlayerClass.Recon:
                             ClassManager.ReconClass.Perks = id;
                             break;
+                        case PlayerClass.Dragos:
+                            ClassManager.DragosClass.Perks = id;
+                            break;
                     }
                     break;
                 case 3:
@@ -127,6 +136,9 @@ namespace MFPS.ClassCustomization
                             break;
                         case PlayerClass.Recon:
                             ClassManager.ReconClass.Letal = id;
+                            break;
+                        case PlayerClass.Dragos:
+                            ClassManager.DragosClass.Letal = id;
                             break;
                     }
                     break;
@@ -278,6 +290,40 @@ namespace MFPS.ClassCustomization
                             break;
                     }
                     break;
+                case PlayerClass.Dragos:
+                    switch (slot)
+                    {
+                        case 0:
+                            UI.PrimaryHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.PrimaryHUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.PrimaryHUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.PrimaryHUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
+                            UI.PrimaryHUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 1:
+                            UI.SecundaryHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.SecundaryHUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.SecundaryHUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.SecundaryHUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
+                            UI.SecundaryHUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 2:
+                            UI.KnifeHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.KnifeHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.KnifeHUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.KnifeHUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.KnifeHUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
+                            UI.KnifeHUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 3:
+                            UI.GrenadeHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.GrenadeHUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.GrenadeHUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.GrenadeHUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
+                            UI.GrenadeHUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                    }
+                    break;
             }
         }
 
@@ -393,6 +439,19 @@ namespace MFPS.ClassCustomization
                         }
                     }
                     break;
+                case PlayerClass.Dragos://-----------------------------------------------------------------------------
+                    for (int i = 0; i < reconWeapons.AllWeapons.Count; i++)
+                    {
+                        if (isAllowedWeapon(reconWeapons.AllWeapons[i].Info, slot))
+                        {
+                            if (!dragosWeapons.AllWeapons[i].isEnabled) continue;
+                            GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
+                            bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
+                            iui.GetInfo(dragosWeapons.AllWeapons[i], slot, i);
+                            b.transform.SetParent(UI.PanelWeaponList, false);
+                        }
+                    }
+                    break;
             }
         }
 
@@ -445,6 +504,13 @@ namespace MFPS.ClassCustomization
                     UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Secondary), 1);
                     UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Perks), 2);
                     UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Letal), 3);
+                    break;
+                case PlayerClass.Dragos:
+                    i = 4;
+                    UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Primary), 0);
+                    UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Secondary), 1);
+                    UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Perks), 2);
+                    UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Letal), 3);
                     break;
             }
             PlayerPrefs.SetInt(ClassKey.ClassType, i);
@@ -502,6 +568,15 @@ namespace MFPS.ClassCustomization
                     for (int i = 0; i < reconWeapons.AllWeapons.Count; i++)
                     {
                         if (reconWeapons.AllWeapons[i].GunID == id)
+                        {
+                            return i;
+                        }
+                    }
+                    break;
+                case PlayerClass.Dragos:
+                    for (int i = 0; i < dragosWeapons.AllWeapons.Count; i++)
+                    {
+                        if (dragosWeapons.AllWeapons[i].GunID == id)
                         {
                             return i;
                         }
@@ -746,6 +821,56 @@ namespace MFPS.ClassCustomization
                         }
                     }
                     break;
+                case PlayerClass.Dragos://--------------------------------------------------------------------------------------
+                    foreach (WeaponItemData ci in dragosWeapons.AllWeapons)
+                    {
+                        if (ci.GunID == ClassManager.DragosClass.Primary)
+                        {
+                            UI.PrimaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.PrimaryHUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.PrimaryHUD.DamageSlider.value = ci.Info.Damage;
+                            UI.PrimaryHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.PrimaryHUD.RateSlider.value = ci.Info.FireRate;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in dragosWeapons.AllWeapons)
+                    {
+                        if (ci.GunID == ClassManager.DragosClass.Secondary)
+                        {
+                            UI.SecundaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.SecundaryHUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.SecundaryHUD.DamageSlider.value = ci.Info.Damage;
+                            UI.SecundaryHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.SecundaryHUD.RateSlider.value = ci.Info.FireRate;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in dragosWeapons.AllWeapons)
+                    {
+                        if (ci.GunID == ClassManager.DragosClass.Perks)
+                        {
+                            UI.KnifeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.KnifeHUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.KnifeHUD.DamageSlider.value = ci.Info.Damage;
+                            UI.KnifeHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.KnifeHUD.RateSlider.value = ci.Info.FireRate;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in dragosWeapons.AllWeapons)
+                    {
+                        if (ci.GunID == ClassManager.DragosClass.Letal)
+                        {
+                            UI.GrenadeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.GrenadeHUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.GrenadeHUD.DamageSlider.value = ci.Info.Damage;
+                            UI.GrenadeHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.GrenadeHUD.RateSlider.value = ci.Info.FireRate;
+                            break;
+                        }
+                    }
+                    break;
             }
         }
 
@@ -768,6 +893,7 @@ namespace MFPS.ClassCustomization
             engineerWeapons.UpdateList(this);
             supportWeapons.UpdateList(this);
             reconWeapons.UpdateList(this);
+            dragosWeapons.UpdateList(this);
         }
 
         private void OnValidate()

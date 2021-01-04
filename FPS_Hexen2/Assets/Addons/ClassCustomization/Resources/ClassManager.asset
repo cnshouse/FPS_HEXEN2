@@ -7,12 +7,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b359ebc0e90e68f4580fe50ba292de5a, type: 3}
   m_Name: ClassManager
   m_EditorClassIdentifier: 
-  m_Class: 3
+  m_Class: 1
   DefaultAssaultClass: {fileID: 11400000, guid: c739e535e3705164dbd83796e2c8cf2f,
     type: 2}
   DefaultEngineerClass: {fileID: 11400000, guid: b8a49bae35785ba4c975b1bb63298385,
@@ -20,5 +20,6 @@ MonoBehaviour:
   DefaultSupportClass: {fileID: 11400000, guid: 33d3d7388ff445e4996ff099114d8fc1,
     type: 2}
   DefaultReconClass: {fileID: 11400000, guid: 8c88b13d69472034ebf3d5d3ad4fba28, type: 2}
+  DefaultDragosClass: {fileID: 11400000, guid: 0e91d547d41d9874b99b584fa7a981ee, type: 2}
   DeleteSavedClasses: 0
   ClassKit: 0

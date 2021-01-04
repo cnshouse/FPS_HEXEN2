@@ -1,0 +1,283 @@
+fileFormatVersion: 2
+guid: 98603ca55cd91ee459584d4f9790729a
+timeCreated: 1484202931
+licenseType: Pro
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: Bone001
+    100004: Bone002
+    100006: Bone003
+    100008: Bone004
+    100010: Bone005
+    100012: Bone007
+    100014: Bone009
+    100016: Bone009(mirrored)
+    100018: Bone010
+    100020: Bone010(mirrored)
+    100022: Bone011
+    100024: Bone011(mirrored)
+    100026: Bone012
+    100028: Bone012(mirrored)
+    100030: Bone014
+    100032: Bone014(mirrored)
+    100034: Bone015
+    100036: Bone015(mirrored)
+    100038: Bone017
+    100040: Bone017(mirrored)
+    100042: Bone018
+    100044: Bone018(mirrored)
+    100046: Bone019
+    100048: Bone019(mirrored)
+    100050: Bone020
+    100052: Bone020(mirrored)
+    100054: Bone022
+    100056: Bone022(mirrored)
+    100058: Bone024
+    100060: Bone024(mirrored)
+    100062: Point001
+    100064: x
+    100066: x_
+    100068: xx
+    100070: xx_
+    100072: xxx
+    100074: xxx_
+    100076: xxxx
+    100078: xxxx_
+    100080: xxxxx
+    100082: xxxxx_
+    100084: bianfu_1
+    100086: zongkong
+    400000: //RootNode
+    400002: Bone001
+    400004: Bone002
+    400006: Bone003
+    400008: Bone004
+    400010: Bone005
+    400012: Bone007
+    400014: Bone009
+    400016: Bone009(mirrored)
+    400018: Bone010
+    400020: Bone010(mirrored)
+    400022: Bone011
+    400024: Bone011(mirrored)
+    400026: Bone012
+    400028: Bone012(mirrored)
+    400030: Bone014
+    400032: Bone014(mirrored)
+    400034: Bone015
+    400036: Bone015(mirrored)
+    400038: Bone017
+    400040: Bone017(mirrored)
+    400042: Bone018
+    400044: Bone018(mirrored)
+    400046: Bone019
+    400048: Bone019(mirrored)
+    400050: Bone020
+    400052: Bone020(mirrored)
+    400054: Bone022
+    400056: Bone022(mirrored)
+    400058: Bone024
+    400060: Bone024(mirrored)
+    400062: Point001
+    400064: x
+    400066: x_
+    400068: xx
+    400070: xx_
+    400072: xxx
+    400074: xxx_
+    400076: xxxx
+    400078: xxxx_
+    400080: xxxxx
+    400082: xxxxx_
+    400084: bianfu_1
+    400086: zongkong
+    2300000: bianfu_1
+    3300000: bianfu_1
+    4300000: bianfu_1
+    7400000: stand
+    9500000: //RootNode
+    11100000: //RootNode
+    13700000: bianfu_1
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 3
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 2
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: stand
+      takeName: Take 001
+      firstFrame: 0
+      lastFrame: 24
+      wrapMode: 2
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
+      keepOriginalOrientation: 1
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 1
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: bianfu_1
+        weight: 1
+      - path: zongkong
+        weight: 1
+      - path: zongkong/Bone001
+        weight: 1
+      - path: zongkong/Bone001/Bone002
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone004
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone004/Bone005
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone004/Bone005/Point001
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone004/Bone005/Point001/Bone007
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017/Bone018
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017/Bone018/Bone019
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017/Bone018/Bone019/Bone020
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017/Bone018/Bone019/Bone020/x_
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017/Bone018/Bone019/Bone022
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017/Bone018/Bone019/Bone022/xx_
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017/Bone018/Bone024
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017/Bone018/Bone024/xxx_
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017(mirrored)/Bone018(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017(mirrored)/Bone018(mirrored)/Bone019(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017(mirrored)/Bone018(mirrored)/Bone019(mirrored)/Bone020(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017(mirrored)/Bone018(mirrored)/Bone019(mirrored)/Bone020(mirrored)/x
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017(mirrored)/Bone018(mirrored)/Bone019(mirrored)/Bone022(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017(mirrored)/Bone018(mirrored)/Bone019(mirrored)/Bone022(mirrored)/xx
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017(mirrored)/Bone018(mirrored)/Bone024(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone002/Bone003/Bone017(mirrored)/Bone018(mirrored)/Bone024(mirrored)/xxx
+        weight: 1
+      - path: zongkong/Bone001/Bone009
+        weight: 1
+      - path: zongkong/Bone001/Bone009/Bone010
+        weight: 1
+      - path: zongkong/Bone001/Bone009/Bone010/Bone011
+        weight: 1
+      - path: zongkong/Bone001/Bone009/Bone010/Bone011/Bone014
+        weight: 1
+      - path: zongkong/Bone001/Bone009/Bone010/Bone011/Bone014/Bone012
+        weight: 1
+      - path: zongkong/Bone001/Bone009/Bone010/Bone011/Bone014/Bone012/xxxxx_
+        weight: 1
+      - path: zongkong/Bone001/Bone009/Bone010/Bone011/Bone014/Bone015
+        weight: 1
+      - path: zongkong/Bone001/Bone009/Bone010/Bone011/Bone014/Bone015/xxxx_
+        weight: 1
+      - path: zongkong/Bone001/Bone009(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone009(mirrored)/Bone010(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone009(mirrored)/Bone010(mirrored)/Bone011(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone009(mirrored)/Bone010(mirrored)/Bone011(mirrored)/Bone014(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone009(mirrored)/Bone010(mirrored)/Bone011(mirrored)/Bone014(mirrored)/Bone012(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone009(mirrored)/Bone010(mirrored)/Bone011(mirrored)/Bone014(mirrored)/Bone012(mirrored)/xxxxx
+        weight: 1
+      - path: zongkong/Bone001/Bone009(mirrored)/Bone010(mirrored)/Bone011(mirrored)/Bone014(mirrored)/Bone015(mirrored)
+        weight: 1
+      - path: zongkong/Bone001/Bone009(mirrored)/Bone010(mirrored)/Bone011(mirrored)/Bone014(mirrored)/Bone015(mirrored)/xxxx
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 1
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: bianfu_1
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: dab0f7481de1dad44b8aa020b18f8071,
+    type: 3}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -27,6 +27,7 @@ public class bl_GunManager : bl_MonoBehaviour
     public bl_PlayerClassLoadout m_EngineerClass;
     public bl_PlayerClassLoadout m_ReconClass;
     public bl_PlayerClassLoadout m_SupportClass;
+    public bl_PlayerClassLoadout m_DragosClass;
 
     [Header("Settings")]
     /// <summary>

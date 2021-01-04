@@ -19,6 +19,8 @@ public class bl_ClassManager : ScriptableObject {
     public bl_PlayerClassLoadout DefaultSupportClass;
     [Header("Recon")]
     public bl_PlayerClassLoadout DefaultReconClass;
+    [Header("Dragos")]
+    public bl_PlayerClassLoadout DefaultDragosClass;
 
 #if UNITY_EDITOR
     [Space(10)]
@@ -29,6 +31,7 @@ public class bl_ClassManager : ScriptableObject {
     public bl_PlayerClassLoadout EngineerClass { get; set; }
     public bl_PlayerClassLoadout SupportClass { get; set; }
     public bl_PlayerClassLoadout ReconClass { get; set; }
+    public bl_PlayerClassLoadout DragosClass { get; set; }
     [HideInInspector] public int ClassKit = 0;
     public const string LOADOUT_KEY_FORMAT = "mfps.loadout.{0}";
 
@@ -41,6 +44,7 @@ public class bl_ClassManager : ScriptableObject {
         PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Engineer));
         PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Recon));
         PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Support));
+        PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Dragos));
     }
 
     /// <summary>
@@ -80,6 +84,9 @@ public class bl_ClassManager : ScriptableObject {
             case 3:
                 m_Class = PlayerClass.Recon;
                 break;
+            case 4:
+                m_Class = PlayerClass.Dragos;
+                break;
         }
 
 #if ULSP
@@ -100,6 +107,9 @@ public class bl_ClassManager : ScriptableObject {
 
                 SupportClass = Instantiate(DefaultSupportClass);
                 SupportClass.FromString(dbData, 3);
+
+                DragosClass = Instantiate(DefaultDragosClass);
+                DragosClass.FromString(dbData, 4);
                 return;
             }
         }
@@ -132,6 +142,12 @@ public class bl_ClassManager : ScriptableObject {
         data = PlayerPrefs.GetString(key, DefaultSupportClass.ToString());
         SupportClass = Instantiate(DefaultSupportClass);
         SupportClass.FromString(data);
+
+        key = string.Format(format, PlayerClass.Dragos);
+        data = PlayerPrefs.GetString(key, DefaultDragosClass.ToString());
+        DragosClass = Instantiate(DefaultDragosClass);
+        DragosClass.FromString(data);
+
     }
 
     public void SetUpClasses(bl_GunManager gm)
@@ -152,6 +168,9 @@ public class bl_ClassManager : ScriptableObject {
                 break;
             case PlayerClass.Support:
                 pcl = SupportClass;
+                break;
+            case PlayerClass.Dragos:
+                pcl = DragosClass;
                 break;
         }
 
@@ -175,7 +194,7 @@ public class bl_ClassManager : ScriptableObject {
 #if ULSP
         if (bl_DataBase.Instance != null)
         {
-            string dbdata = $"{AssaultClass.ToString()},{EngineerClass.ToString()},{ReconClass.ToString()},{SupportClass.ToString()}";
+            string dbdata = $"{AssaultClass.ToString()},{EngineerClass.ToString()},{ReconClass.ToString()},{SupportClass.ToString()},{DragosClass.ToString()}";
             bl_DataBase.Instance.LocalUser.metaData.rawData.WeaponsLoadouts = dbdata;
             bl_DataBase.Instance.LocalUser.metaData.rawData.ClassKit = ClassKit;
             bl_DataBase.Instance.SaveUserMetaData(() => { callBack?.Invoke(); });
@@ -201,6 +220,10 @@ public class bl_ClassManager : ScriptableObject {
         data = SupportClass.ToString();
         PlayerPrefs.SetString(key, data);
 
+        key = string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Dragos);
+        data = DragosClass.ToString();
+        PlayerPrefs.SetString(key, data);
+
         PlayerPrefs.SetInt(ClassKey.ClassKit, ClassKit);
     }
 
@@ -216,6 +239,8 @@ public class bl_ClassManager : ScriptableObject {
                 return (EngineerClass.Primary == gunID || EngineerClass.Secondary == gunID || EngineerClass.Perks == gunID || EngineerClass.Letal == gunID);
             case PlayerClass.Support:
                 return (SupportClass.Primary == gunID || SupportClass.Secondary == gunID || SupportClass.Perks == gunID || SupportClass.Letal == gunID);
+            case PlayerClass.Dragos:
+                return (DragosClass.Primary == gunID || DragosClass.Secondary == gunID || DragosClass.Perks == gunID || DragosClass.Letal == gunID);
         }
         return false;
     }
