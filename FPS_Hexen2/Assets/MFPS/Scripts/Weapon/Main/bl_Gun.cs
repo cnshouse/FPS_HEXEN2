@@ -368,10 +368,12 @@ public class bl_Gun : bl_GunBase
                     if (weaponLogic != null) { weaponLogic.OnFire(); }
                     else
                     {
+                        // Handle Machinegun constant rate of fire
                         if (Info.Type == GunType.Machinegun)
                         {
                             MachineGunFire();
                         }
+                        //TODO: Add in constant rate of fire for beam weapons BEAM
                     }
                 }
             }
@@ -428,6 +430,7 @@ public class bl_Gun : bl_GunBase
         {
             Reload();
         }
+        //TODO add in Beam Weapon to change type of Fire 
         if (Info.Type == GunType.Machinegun || Info.Type == GunType.Burst || Info.Type == GunType.Pistol)
         {
             ChangeTypeFire();
@@ -446,6 +449,7 @@ public class bl_Gun : bl_GunBase
             }
             else
             {
+                // TODO: Add logic for BEAM weapon heres
                 if (Info.Type == GunType.Machinegun)
                 {
                     isFiring = (FireButton && m_CanFire); // fire is down, gun is firing
@@ -477,6 +481,7 @@ public class bl_Gun : bl_GunBase
 #endif 
         if (inp)
         {
+            //TODO add in beam switch as well...
             switch (Info.Type)
             {
                 case GunType.Machinegun:
