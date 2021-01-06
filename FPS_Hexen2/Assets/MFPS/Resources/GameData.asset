@@ -180,6 +180,19 @@ MonoBehaviour:
     PickUpPrefab: {fileID: 6553476045170373605, guid: a948126ce5af6724e97809860392b4b7,
       type: 3}
     GunIcon: {fileID: 21300000, guid: 67817f6c38715a64a8074a1940d6b966, type: 3}
+  - Name: Machinegun
+    Type: 1
+    Damage: 20
+    FireRate: 0.09
+    ReloadTime: 2
+    Range: 200
+    Accuracy: 1
+    Weight: 2
+    Price: 0
+    LevelUnlock: 0
+    PickUpPrefab: {fileID: 5570815165933397051, guid: 7ece80da55d465041bc95470b764ec57,
+      type: 3}
+    GunIcon: {fileID: 21300000, guid: cd419051581e25942b9d4e33fa5854c6, type: 3}
   DefaultSettings:
     DefaultSensitivity: 5
     DefaultSensitivityAim: 2
@@ -255,18 +268,18 @@ MonoBehaviour:
     GoalName: Rounds
     onRoundStartedSpawn: 1
     onPlayerDie: 1
-  Team1Name: Delta
-  Team1Color: {r: 0.017799927, g: 0.08306635, b: 0.1509434, a: 1}
-  Team2Name: Recon
-  Team2Color: {r: 1, g: 0.89019614, b: 0, a: 1}
+  Team1Name: The Wardens
+  Team1Color: {r: 0, g: 0.08306635, b: 0.1509434, a: 1}
+  Team2Name: Royal Guard
+  Team2Color: {r: 0.735849, g: 0.6550499, b: 0, a: 1}
   Player1: {fileID: 114038687236655164, guid: 353d635db0698974b963c4153ac19a5d, type: 3}
   Player2: {fileID: 114797454524261884, guid: 8b43b97c50cac1d43a7c27ca8b6a6cdf, type: 3}
-  BotTeam1: {fileID: 9002616942860423194, guid: 4193d6c26bb200c46b6fc86a117e7499,
+  BotTeam1: {fileID: 9113025235818439629, guid: 0364f93b9879e3442a3f8f3a8935f8d8,
     type: 3}
-  BotTeam2: {fileID: 9002616942860423194, guid: 4193d6c26bb200c46b6fc86a117e7499,
+  BotTeam2: {fileID: 9113025235818439629, guid: 0364f93b9879e3442a3f8f3a8935f8d8,
     type: 3}
   GameTeam:
-  - UserName: Lovatto
+  - UserName: 2Axion
     m_Role: 0
     Password: 123456
     m_Color: {r: 1, g: 0, b: 0.1862073, a: 1}

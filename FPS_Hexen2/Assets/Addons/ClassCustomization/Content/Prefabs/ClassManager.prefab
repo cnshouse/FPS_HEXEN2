@@ -255,6 +255,9 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 0
+    - Name: Machinegun
+      GunID: 9
+      isEnabled: 1
   engineerWeapons:
     AllWeapons:
     - Name: Rifle
@@ -284,6 +287,9 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 0
+    - Name: Machinegun
+      GunID: 9
+      isEnabled: 1
   supportWeapons:
     AllWeapons:
     - Name: Rifle
@@ -313,6 +319,9 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 0
+    - Name: Machinegun
+      GunID: 9
+      isEnabled: 1
   reconWeapons:
     AllWeapons:
     - Name: Rifle
@@ -342,6 +351,9 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 0
+    - Name: Machinegun
+      GunID: 9
+      isEnabled: 1
   dragosWeapons:
     AllWeapons:
     - Name: Rifle
@@ -371,10 +383,13 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
+    - Name: Machinegun
+      GunID: 9
+      isEnabled: 1
   PrimaryAllowedWeapons:
     AllowMachineGuns: 1
-    AllowPistols: 0
-    AllowShotguns: 0
+    AllowPistols: 1
+    AllowShotguns: 1
     AllowSnipers: 1
     AllowKnifes: 0
     AllowGrenades: 0
