@@ -8,19 +8,24 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: lb_qiang_xk_nog
-  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _EMISSION _NORMALMAP _SPECGLOSSMAP
+  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_ShaderKeywords: _EMISSION _NORMALMAP
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_CustomRenderQueue: 2050
+  stringTagMap:
+    RenderType: Opaque
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _AlphaMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: db81dc8ed1d7e884286fa3262912e3a6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BlendMap:
@@ -162,6 +167,8 @@ Material:
     m_Floats:
     - PixelSnap: 0
     - _Alpha: 0
+    - _AlphaClip: 0
+    - _Blend: 0
     - _Brightness: 3
     - _BumpAmt: 10
     - _BumpScale: 1
@@ -176,6 +183,7 @@ Material:
     - _DstBlend: 0
     - _Emission: 0.5
     - _Emit: 60
+    - _EnvironmentReflections: 1
     - _FPOW: 5
     - _FlowIntensity: 0.01
     - _ForceX: 0.749
@@ -200,11 +208,14 @@ Material:
     - _Opacity: 0
     - _Outline: 0.0026
     - _Parallax: 0
+    - _QueueOffset: 0
     - _R0: 0.05
     - _RFpowe: -0.5
     - _Range: 1
+    - _ReceiveShadows: 1
     - _RimPower: 2.5
     - _Shininess: 0.4
+    - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _Specular: 1
     - _SpecularHighlights: 1
@@ -213,6 +224,7 @@ Material:
     - _Speed02: 2
     - _SrcBlend: 1
     - _Steps: 3
+    - _Surface: 0
     - _TexSpeed: -0.5
     - _TileFactor: 1
     - _ToonEffect: 0.5
@@ -220,12 +232,14 @@ Material:
     - _UVSec: 0
     - _VSpeed: 0
     - _WindQuality: 0
+    - _WorkflowMode: 1
     - _ZWrite: 1
     - _node_1272: 1
     - _node_1826: 2
     - _node_3325: 3
     - _rfpw: 0.193
     m_Colors:
+    - _BaseColor: {r: 0, g: 0.5034485, b: 1, a: 1}
     - _Color: {r: 0, g: 0.5034485, b: 1, a: 1}
     - _Color01: {r: 1, g: 1, b: 1, a: 1}
     - _Color02: {r: 1, g: 1, b: 1, a: 1}
@@ -246,3 +260,16 @@ Material:
     - _node_3971: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _node_6854: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _node_9669: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+--- !u!114 &1366413608111146200
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 1

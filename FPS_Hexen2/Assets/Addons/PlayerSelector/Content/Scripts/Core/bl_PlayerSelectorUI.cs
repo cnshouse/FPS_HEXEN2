@@ -18,10 +18,12 @@ namespace MFPS.PlayerSelector
         private bl_PlayerSelector Selector;
         private bl_PlayerSelectorInfo Info;
         private Animator Anim;
+        private int HeroClass;
 
         public void Set(bl_PlayerSelectorInfo info, bl_PlayerSelector script)
         {
             Info = info;
+            HeroClass = info.Hero;
             PlayerPreview.sprite = info.Preview;
             PlayerNameText.text = string.Format("<b>NAME:</b> {0}", info.Name.ToUpper());
             Selector = script;
@@ -38,6 +40,7 @@ namespace MFPS.PlayerSelector
 #if SHOP && ULSP
             if (info.Price > 0 && bl_DataBase.Instance != null)
             {
+                Debug.Log("Player is locked!!!!!");
                 int pID = bl_PlayerSelectorData.Instance.GetPlayerID(info.Name);
                 bool unlock = bl_DataBase.Instance.LocalUser.ShopData.isItemPurchase(ShopItemType.PlayerSkin, pID);
                 LockedUI.SetActive(!unlock);
@@ -75,6 +78,7 @@ namespace MFPS.PlayerSelector
                 yield return null;
             }
             yield return new WaitForSeconds(time * 0.5f);
+
             Selector.SelectPlayer(Info);
             Destroy(gameObject);
         }

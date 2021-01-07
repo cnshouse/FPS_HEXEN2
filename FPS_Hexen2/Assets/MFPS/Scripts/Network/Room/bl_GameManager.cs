@@ -6,7 +6,8 @@ using Photon.Realtime;
 using Random = UnityEngine.Random;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
-public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCallbacks {
+public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCallbacks
+{
 
     public static int LocalPlayerViewID = -1;
     public static int SuicideCount = 0;
@@ -21,7 +22,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     [Header("References")]
     public bool DrawSpawnPoints = true;
     public Mesh SpawnPointPlayerGizmo;
-    [HideInInspector]public List<Transform> AllSpawnPoints = new List<Transform>();
+    [HideInInspector] public List<Transform> AllSpawnPoints = new List<Transform>();
     private List<Transform> ReconSpawnPoint = new List<Transform>();
     private List<Transform> DeltaSpawnPoint = new List<Transform>();
     private int currentReconSpawnPoint = 0;
@@ -43,16 +44,16 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     {
         get
         {
-            if(cameraRender == null)
+            if (cameraRender == null)
             {
-               // Debug.Log("Not Camera has been setup.");
+                // Debug.Log("Not Camera has been setup.");
                 return Camera.current;
             }
             return cameraRender;
         }
         set
         {
-            if(cameraRender != null && cameraRender.isActiveAndEnabled)
+            if (cameraRender != null && cameraRender.isActiveAndEnabled)
             {
                 //if the current render over the set camera, keep it as renderer camera
                 if (cameraRender.depth >= value.depth) return;
@@ -104,7 +105,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     /// </summary>
     void Start()
     {
-        if(GameModeLogic == null)//check on start cuz game mode should be assigned on awake
+        if (GameModeLogic == null)//check on start cuz game mode should be assigned on awake
         {
             Debug.LogWarning("No Game Mode has been assigned yet!");
         }
@@ -124,9 +125,9 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     private void OnDisable()
     {
         bl_EventHandler.RemoteActorsChange -= OnRemoteActorChange;
-        if(registered)
-        PhotonNetwork.RemoveCallbackTarget(this);
-        if(GameModeLogic != null)
+        if (registered)
+            PhotonNetwork.RemoveCallbackTarget(this);
+        if (GameModeLogic != null)
         {
             bl_PhotonCallbacks.PlayerEnteredRoom -= GameModeLogic.OnOtherPlayerEnter;
             bl_PhotonCallbacks.RoomPropertiesUpdate -= GameModeLogic.OnRoomPropertiesUpdate;
@@ -172,12 +173,13 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
                     else
                     {
                         ps.OpenSelection(t_team);
+                        return false;
                     }
                 }
                 else
                 {
-                    if(!PhotonNetwork.OfflineMode)
-                    SpawnSelectedPlayer(MFPS.PlayerSelector.bl_PlayerSelectorData.Instance.GetSelectedPlayerFromTeam(t_team), t_team);
+                    if (!PhotonNetwork.OfflineMode)
+                        SpawnSelectedPlayer(MFPS.PlayerSelector.bl_PlayerSelectorData.Instance.GetSelectedPlayerFromTeam(t_team), t_team);
                     else
                     {
                         SpawnPlayerModel(t_team);
@@ -304,7 +306,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     public void OnGameTimeFinish(bool gameOver)
     {
         GameFinish = true;
-        if(GameModeLogic != null) { GameModeLogic.OnFinishTime(gameOver); }
+        if (GameModeLogic != null) { GameModeLogic.OnFinishTime(gameOver); }
     }
 
     /// <summary>
@@ -312,8 +314,8 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     /// </summary>
     public void SpawnPlayerWithCurrentTeam()
     {
-        SpawnPlayer(PhotonNetwork.LocalPlayer.GetPlayerTeam());
-        bl_RoomMenu.Instance.OnAutoTeam();
+        if (SpawnPlayer(PhotonNetwork.LocalPlayer.GetPlayerTeam()))
+            bl_RoomMenu.Instance.OnAutoTeam();
     }
 
     #region GameModes
@@ -385,7 +387,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     /// <summary>
     /// 
     /// </summary>
-    public void SpawnSelectedPlayer(MFPS.PlayerSelector.bl_PlayerSelectorInfo info,Team playerTeam)
+    public void SpawnSelectedPlayer(MFPS.PlayerSelector.bl_PlayerSelectorInfo info, Team playerTeam)
     {
         Vector3 pos;
         Quaternion rot;
@@ -438,7 +440,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
                 {
                     if (PhotonNetwork.PlayerList.GetPlayersInTeam(Team.Team1).Length > 0 && PhotonNetwork.PlayerList.GetPlayersInTeam(Team.Team2).Length > 0)
                     {
-                        if(onAllPlayersRequiredIn != null) { onAllPlayersRequiredIn.Invoke(); }
+                        if (onAllPlayersRequiredIn != null) { onAllPlayersRequiredIn.Invoke(); }
                         return false;
                     }
                 }
@@ -456,10 +458,10 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     /// </summary>
     public void GetSpawn(Transform[] list, out Vector3 position, out Quaternion Rotation)
     {
-       int random = Random.Range(0, list.Length);
-       Vector3 s = Random.insideUnitSphere * list[random].GetComponent<bl_SpawnPoint>().SpawnSpace;
-       position = list[random].position + new Vector3(s.x, 0.55f, s.z);
-       Rotation = list[random].rotation;
+        int random = Random.Range(0, list.Length);
+        Vector3 s = Random.insideUnitSphere * list[random].GetComponent<bl_SpawnPoint>().SpawnSpace;
+        position = list[random].position + new Vector3(s.x, 0.55f, s.z);
+        Rotation = list[random].rotation;
     }
 
     /// <summary>
@@ -534,7 +536,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
             }
             else
             {
-                if(OthersActorsInScene[id].Actor == null)
+                if (OthersActorsInScene[id].Actor == null)
                 {
                     OthersActorsInScene[id].isAlive = false;
                 }
@@ -544,8 +546,8 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
         {
             if (spawning)
             {
-               if(playerData == null) { Debug.LogWarning($"Actor data for {actorName} has not been build yet."); return; }
-               if(playerData.ActorView == null) { playerData.ActorView = playerData.Actor?.GetComponent<PhotonView>(); }
+                if (playerData == null) { Debug.LogWarning($"Actor data for {actorName} has not been build yet."); return; }
+                if (playerData.ActorView == null) { playerData.ActorView = playerData.Actor?.GetComponent<PhotonView>(); }
                 OthersActorsInScene.Add(playerData);
             }
         }
@@ -559,12 +561,12 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     {
         for (int i = 0; i < OthersActorsInScene.Count; i++)
         {
-            if(OthersActorsInScene[i].ActorView != null && OthersActorsInScene[i].ActorView.ViewID == ViewID) 
+            if (OthersActorsInScene[i].ActorView != null && OthersActorsInScene[i].ActorView.ViewID == ViewID)
             {
                 return OthersActorsInScene[i].Actor;
             }
         }
-        if(LocalPlayer != null && LocalPlayer.GetPhotonView().ViewID == ViewID) { return LocalPlayer.transform; }
+        if (LocalPlayer != null && LocalPlayer.GetPhotonView().ViewID == ViewID) { return LocalPlayer.transform; }
         return null;
     }
 
@@ -609,7 +611,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     public MFPSPlayer GetMFPSPlayer(string nickName)
     {
         MFPSPlayer player = OthersActorsInScene.Find(x => x.Name == nickName);
-        if(player == null && nickName == LocalName)
+        if (player == null && nickName == LocalName)
         {
             player = LocalActor;
         }
@@ -651,7 +653,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
             return;
         }
         PhotonNetwork.RegisterPhotonView(photonView);
-       // Debug.Log("Game State Update: " + state.ToString());
+        // Debug.Log("Game State Update: " + state.ToString());
         photonView.RPC(nameof(RPCMatchState), RpcTarget.All, state);
     }
 
@@ -742,7 +744,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
 
     public void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
-      
+
     }
 
     public void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
@@ -773,12 +775,12 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
 
     public void OnConnected()
     {
-      
+
     }
 
     public void OnConnectedToMaster()
     {
-       
+
     }
 
     public void OnDisconnected(DisconnectCause cause)
@@ -793,19 +795,19 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
 
     public void OnRegionListReceived(RegionHandler regionHandler)
     {
-     
+
     }
 
     public void OnCustomAuthenticationResponse(Dictionary<string, object> data)
     {
-       
+
     }
 
     public void OnCustomAuthenticationFailed(string debugMessage)
     {
-       
+
     }
-#endregion
+    #endregion
 
     public bool alreadyEnterInGame
     {
@@ -842,4 +844,4 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
             return _instance;
         }
     }
-}		
+}

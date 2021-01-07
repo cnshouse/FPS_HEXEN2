@@ -32,7 +32,7 @@ public class PlayerSelectorInitializer : MonoBehaviour
         bl_RoomSettings lb = FindObjectOfType<bl_RoomSettings>();
         if (lb != null)
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Addons/PlayerSelector/Content/Prefabs/UI/Canvas[PlayerSelectore].prefab", typeof(GameObject)) as GameObject;
+            GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Addons/PlayerSelector/Content/Prefabs/UI/Canvas[PlayerSelector].prefab", typeof(GameObject)) as GameObject;
             if (prefab != null)
             {
                 GameObject g = PrefabUtility.InstantiatePrefab(prefab, UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene()) as GameObject;

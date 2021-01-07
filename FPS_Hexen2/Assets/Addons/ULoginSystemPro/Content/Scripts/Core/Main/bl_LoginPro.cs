@@ -41,7 +41,7 @@ public class bl_LoginPro : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        //PlayerPrefs.DeleteAll();
+        PlayerPrefs.DeleteAll();
         if (FindObjectOfType<bl_DataBase>() == null)
         {
             Instantiate(DataBasePrefab);
