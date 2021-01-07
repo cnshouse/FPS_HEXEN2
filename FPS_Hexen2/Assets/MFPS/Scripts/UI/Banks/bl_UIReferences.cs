@@ -1016,6 +1016,9 @@ public class bl_UIReferences : bl_PhotonHelper,IInRoomCallbacks
             case 3:
                 bl_RoomMenu.PlayerClass = PlayerClass.Support;
                 break;
+            case 4:
+                bl_RoomMenu.PlayerClass = PlayerClass.Dragos;
+                break;
         }
 
         bl_RoomMenu.PlayerClass.SavePlayerClass();
@@ -1024,7 +1027,7 @@ public class bl_UIReferences : bl_PhotonHelper,IInRoomCallbacks
 #if CLASS_CUSTOMIZER
         bl_ClassManager.Instance.m_Class = bl_RoomMenu.PlayerClass;
 #endif
-        RoomMenu.ChangeClass();
+        //RoomMenu.ChangeClass();
     }
 
     /// <summary>

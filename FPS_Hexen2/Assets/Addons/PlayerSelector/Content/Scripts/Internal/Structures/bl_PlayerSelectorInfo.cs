@@ -6,6 +6,7 @@ namespace MFPS.PlayerSelector
     {
         public string Name;
         public int Price;
+        public int Hero; //this will over ride the players class as a hero;
         public Sprite Preview;
         public GameObject Prefab;
 

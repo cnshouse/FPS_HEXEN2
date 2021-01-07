@@ -32,7 +32,7 @@ namespace MFPS.PlayerSelector
             }
             else if (team == Team.Team2)
             {
-                return AllPlayers[Team2Players[id]];
+                return AllPlayers[Team2Players[id]]; 
             }
             else
             {

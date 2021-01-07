@@ -212,6 +212,7 @@ static class bl_Extensions
     public static void SavePlayerClass(this PlayerClass pc)
     {
         string key = string.Format(PLAYER_CLASS_KEY, Application.productName);
+        Debug.Log("Change Player class to :" + pc);
         PlayerPrefs.SetInt(key, (int)pc);
     }
 
@@ -222,6 +223,9 @@ static class bl_Extensions
         PlayerClass pclass = PlayerClass.Assault;
         switch (id)
         {
+            case 0:
+                pclass = PlayerClass.Assault;
+                break;
             case 1:
                 pclass = PlayerClass.Recon;
                 break;
@@ -230,6 +234,9 @@ static class bl_Extensions
                 break;
             case 3:
                 pclass = PlayerClass.Engineer;
+                break;
+            case 4:
+                pclass = PlayerClass.Dragos;
                 break;
         }
         return pclass;

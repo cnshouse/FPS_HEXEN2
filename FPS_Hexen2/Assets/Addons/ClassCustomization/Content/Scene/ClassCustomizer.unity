@@ -1008,6 +1008,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[8].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 224167328828944426, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: m_AnchorMax.x

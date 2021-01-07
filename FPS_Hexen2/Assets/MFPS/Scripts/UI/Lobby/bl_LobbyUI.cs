@@ -541,8 +541,8 @@ public class bl_LobbyUI : MonoBehaviour
 
     public void OnChangeClass(int classID)
     {
-        foreach (Button b in ClassButtons) { b.interactable = true; }
-        ClassButtons[classID].interactable = false;
+        //foreach (Button b in ClassButtons) { b.interactable = true; }
+        //ClassButtons[classID].interactable = false;
         PlayerClass p = (PlayerClass)classID;
         p.SavePlayerClass();
     }

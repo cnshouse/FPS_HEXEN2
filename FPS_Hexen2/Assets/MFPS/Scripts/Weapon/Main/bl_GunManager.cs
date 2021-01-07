@@ -580,6 +580,8 @@ public class bl_GunManager : bl_MonoBehaviour
         else
         {
             Debug.LogError("Gun: " + id + " has not been added on this player list.");
+            int tempId = id - 1;
+            gun = AllGuns.Find(x => x.GunID == tempId);
         }
         return gun;
     }
