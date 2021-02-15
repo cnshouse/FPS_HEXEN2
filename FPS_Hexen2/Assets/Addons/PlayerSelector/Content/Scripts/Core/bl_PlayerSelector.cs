@@ -40,6 +40,10 @@ public class bl_PlayerSelector : MonoBehaviour
     {
         Info = info;
         ContentUI.SetActive(false);
+
+        //Select the characters class
+
+        ChangeClass(info.Hero);
 #if PSELECTOR
         GameManager.SpawnSelectedPlayer(info, SelectTeam);
 #endif
@@ -47,7 +51,32 @@ public class bl_PlayerSelector : MonoBehaviour
         isSelected = true;
     }
 
-    public void SpawnSelected(Team team)
+
+    //switch for the class
+    public void ChangeClass(int m_class)
+    {
+        switch (m_class)
+        {
+            case 0:
+                bl_RoomMenu.PlayerClass = PlayerClass.Assault;
+                break;
+            case 1:
+                bl_RoomMenu.PlayerClass = PlayerClass.Engineer;
+                break;
+            case 2:
+                bl_RoomMenu.PlayerClass = PlayerClass.Recon;
+                break;
+            case 3:
+                bl_RoomMenu.PlayerClass = PlayerClass.Support;
+                break;
+            case 4:
+                bl_RoomMenu.PlayerClass = PlayerClass.Dragos;
+                break;
+        }
+
+        bl_ClassManager.Instance.m_Class = bl_RoomMenu.PlayerClass;
+    }
+        public void SpawnSelected(Team team)
     {
         ContentUI.SetActive(false);
 #if PSELECTOR
