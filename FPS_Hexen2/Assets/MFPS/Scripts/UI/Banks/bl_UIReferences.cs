@@ -820,6 +820,22 @@ public class bl_UIReferences : bl_PhotonHelper,IInRoomCallbacks
         CacheGunPickUp = gun;
     }
 
+    public void ShowTeleportPromt(bool show)
+	{
+		if (show)
+		{
+            PlayerUI.PickUpText.text = "Press E to use Teleporter";
+            PlayerUI.PickUpUI.SetActive(true);
+            if(PlayerUI.PickUpIconUI != null)
+			{
+                //edit this part... to have a portal Icon...
+                //PlayerUI.PickUpIconUI.transform.GetChild(0).GetComponent<Image>().sprite = info.GunIcon;
+                //PlayerUI.PickUpIconUI.SetActive(info.GunIcon != null);
+            }
+		}
+        else { PlayerUI.PickUpUI.SetActive(false); }
+    }
+
     public void OnPickUpClicked()
     {
         if (CacheGunPickUp != null)

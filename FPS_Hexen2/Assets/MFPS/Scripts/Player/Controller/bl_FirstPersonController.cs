@@ -35,7 +35,7 @@ public class bl_FirstPersonController : bl_MonoBehaviour
     [Range(0.1f, 5f), SerializeField]
     private float SafeFallDistance = 3;
     [Range(3, 25), SerializeField]
-    private float DeathFallDistance = 15;
+    private float DeathFallDistance = 50;
     [Header("Mouse Look"), FormerlySerializedAs("m_MouseLook")]
     public MouseLook mouseLook;
     [FormerlySerializedAs("HeatRoot")]
@@ -67,6 +67,7 @@ public class bl_FirstPersonController : bl_MonoBehaviour
     private bool m_PreviouslyGrounded;
     private bool m_Jumping;
     private bool Crounching = false;
+    private bool Dodge = false;
     private AudioSource m_AudioSource;
     [HideInInspector]
     public Vector3 Velocity;
@@ -96,6 +97,7 @@ public class bl_FirstPersonController : bl_MonoBehaviour
     private Vector3 desiredMove = Vector3.zero;
     private float VerticalInput, HorizontalInput;
     private bool lastCrouchState = false;
+    private bool lastDodgeState = false;
     private float fallingTime = 0;
     public float RunFov { get; set; }
     private bool haslanding = false;
@@ -246,15 +248,22 @@ public class bl_FirstPersonController : bl_MonoBehaviour
 
         if (!bl_UtilityHelper.isMobile)
         {
-            if (!m_Jump && State != PlayerState.Crouching && (Time.time - lastJumpTime) > JumpMinRate)
+            //bool _teleport = bl_GameInput.Teleport();
+            //if(_teleport == true)
+			//
+            //    Debug.Log("Teleport!!!!!");
+			//}
+
+            if (!m_Jump && State != PlayerState.Crouching && (Time.time - lastJumpTime) > JumpMinRate && State != PlayerState.Dodge)
             {
                 m_Jump = bl_GameInput.Jump();
             }
-            if (State != PlayerState.Jumping && State != PlayerState.Climbing)
+            if (State != PlayerState.Jumping && State != PlayerState.Climbing && State != PlayerState.Dodge)
             {
                 if (KeepToCrouch)
                 {
                     Crounching = bl_GameInput.Crouch();
+                    Dodge = bl_GameInput.Dodge();
                     if (Crounching != lastCrouchState)
                     {
                         if (Crounching)
@@ -275,6 +284,26 @@ public class bl_FirstPersonController : bl_MonoBehaviour
                         bl_UCrosshair.Instance.OnCrouch(Crounching);
                         lastCrouchState = Crounching;
                     }
+                    if (Dodge != lastDodgeState)
+                    {
+                        if (Dodge)
+                        {
+                            State = PlayerState.Dodge;
+
+                            //Dodge implementation
+                            if (VelocityMagnitude > WalkSpeed)
+                            {
+                                DoDodge();
+                            }
+                        }
+                        else
+                        {
+                            State = PlayerState.Idle;
+                        }
+                        bl_UCrosshair.Instance.OnCrouch(Crounching);
+                        lastDodgeState = Dodge;
+                    }
+
                 }
                 else
                 {
@@ -299,6 +328,24 @@ public class bl_FirstPersonController : bl_MonoBehaviour
                         }
                         bl_UCrosshair.Instance.OnCrouch(Crounching);
                     }
+					if (bl_GameInput.Dodge(GameInputType.Down))
+					{
+                        Dodge = !Dodge;
+						if (Dodge)
+						{
+                            State = PlayerState.Dodge;
+
+                            //Dodge implementation
+                            if(VelocityMagnitude > WalkSpeed)
+							{
+                                DoDodge();
+							}
+						}
+						else
+						{
+                            State = PlayerState.Idle;
+						}
+					}
                 }
             }
         }
@@ -390,7 +437,7 @@ public class bl_FirstPersonController : bl_MonoBehaviour
         }
         if (ver > SafeFallDistance)
         {
-            int damage = Mathf.FloorToInt((ver / DeathFallDistance) * 100);
+            int damage = Mathf.FloorToInt((ver / DeathFallDistance) * 10);
             DamageManager.GetFallDamage(damage);
         }
         PlayLandingSound((ver / DeathFallDistance));
@@ -553,6 +600,40 @@ public class bl_FirstPersonController : bl_MonoBehaviour
         });
     }
 
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void DoDodge()
+    {
+        if ((Time.time - lastSlideTime) < slideTime * 1.2f) return; //wait the equivalent of one extra Dodge before be able to slide again
+        Vector3 startPosition = (m_Transform.position - feetPositionOffset) + (m_Transform.forward * m_CharacterController.radius);
+        if (Physics.Linecast(startPosition, startPosition + m_Transform.forward)) return;//there is something in front of the feet's
+
+        State = PlayerState.Dodge;
+        slideForce = slideSpeed;//slide force will be continually decreasing
+        speed = slideSpeed;
+        GunManager.HeadAnimator.Play("slide-start", 0, 0);
+        if (slideSound != null)
+        {
+            m_AudioSource.clip = slideSound;
+            m_AudioSource.volume = 0.7f;
+            m_AudioSource.Play();
+        }
+        mouseLook.UseOnlyCameraRotation();
+        this.InvokeAfter(slideTime, () =>
+        {
+            if (Crounching)
+                State = PlayerState.Crouching;
+            else if (State != PlayerState.Jumping)
+                State = PlayerState.Idle;
+
+            Crounching = false;
+            Dodge = false;
+            lastSlideTime = Time.time;
+            mouseLook.PortBodyOrientationToCamera();
+        });
+    }
     /// <summary>
     /// 
     /// </summary>
@@ -763,6 +844,13 @@ public class bl_FirstPersonController : bl_MonoBehaviour
         m_AudioSource.Play();
     }
 
+    public void OnTeleport(Vector3 TelePosition, Quaternion TeleRotation)
+	{
+        Debug.Log("Teleport the player to " + TelePosition + " with a rotation of " + TeleRotation);
+        TelePosition.y = TelePosition.y + 1;
+        transform.position = TelePosition;
+        transform.rotation = TeleRotation;
+	}
 
     void OnTriggerEnter(Collider other)
     {

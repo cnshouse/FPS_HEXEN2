@@ -7,6 +7,7 @@
     Jumping = 4,
     Climbing = 5,
     Sliding = 6,
+    Dodge = 7,
 }
 
 public enum PlayerFPState

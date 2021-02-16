@@ -263,6 +263,9 @@ public class bl_Bullet : bl_MonoBehaviour
     /// </summary>
     void InstanceHitParticle(string poolPrefab, RaycastHit hit)
     {
+        //if (hit.transform.gameObject.layer == 8)
+        //    return;
+
         GameObject go = bl_ObjectPooling.Instance.Instantiate(poolPrefab, hit.point, Quaternion.LookRotation(hit.normal));
         if(go != null)
         go.transform.parent = hit.transform;

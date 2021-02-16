@@ -56,6 +56,7 @@
     public static string FireTypeAuto = "AUTO";
     public static string FireTypeSemi = "SEMI";
     public static string FireTypeSingle = "SINGLE";
+    public static string FireTypeBeam = "BEAM";
 
     public static string[] AntiStropicOptions = new string[] { "Disable", "Enable", "Force Enable" };
 

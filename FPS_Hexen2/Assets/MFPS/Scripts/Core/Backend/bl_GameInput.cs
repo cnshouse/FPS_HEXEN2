@@ -52,6 +52,15 @@ public class bl_GameInput
 #endif
     }
 
+    public static bool Dodge(GameInputType inputType = GameInputType.Hold)
+    {
+#if INPUT_MANAGER
+        return GetInputManager("Dodge", inputType);
+#else
+        return GetButton(KeyCode.X, inputType);
+#endif
+    }
+
     public static bool Jump(GameInputType inputType = GameInputType.Down)
     {
 #if INPUT_MANAGER
@@ -60,6 +69,17 @@ public class bl_GameInput
         return GetButton(KeyCode.Space, inputType);
 #endif
     }
+
+    public static bool Teleport(GameInputType inputType = GameInputType.Down)
+    {
+        if (!bl_RoomMenu.Instance.isCursorLocked || bl_GameData.Instance.isChating) return false;
+#if INPUT_MANAGER
+        return GetInputManager("Jump", inputType);
+#else
+        return GetButton(KeyCode.Z, inputType);
+#endif
+    }
+
 
     public static bool WeaponSlot(int slotID)
     {

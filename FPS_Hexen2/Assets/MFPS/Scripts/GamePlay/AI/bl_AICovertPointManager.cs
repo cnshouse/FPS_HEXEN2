@@ -53,6 +53,11 @@ public class bl_AICovertPointManager : MonoBehaviour
         {
             cp = list[Random.Range(0, list.Count)];
         }
+        if(AllCovers.Count <= 0)
+		{
+            return null;
+		}
+
         if(cp == null) { cp = AllCovers[Random.Range(0, AllCovers.Count)]; }
 
         return cp;

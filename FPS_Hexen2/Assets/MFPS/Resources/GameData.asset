@@ -62,6 +62,14 @@ MonoBehaviour:
     m_Scene: {fileID: 102900000, guid: 7b433244bb0354246a7c6a8c682e5441, type: 3}
     RealSceneName: ExampleLevel
     Preview: {fileID: 21300000, guid: 6566c02619a33c04b83af91ef6aa5026, type: 3}
+  - ShowName: Mid Palace
+    m_Scene: {fileID: 102900000, guid: 20495e51629064f47a01ef6ae7349d52, type: 3}
+    RealSceneName: Persian_4
+    Preview: {fileID: 21300000, guid: 77ac79c04ba523e4dac6d9bd612e75ef, type: 3}
+  - ShowName: Mausoleum
+    m_Scene: {fileID: 102900000, guid: 74b93ba6a00b02c4d974089b83ed5a22, type: 3}
+    RealSceneName: 
+    Preview: {fileID: 21300000, guid: e5bb234b3f8904f4bb183ef7253f8092, type: 3}
   AllWeapons:
   - Name: Rifle
     Type: 1
@@ -168,12 +176,12 @@ MonoBehaviour:
       type: 3}
     GunIcon: {fileID: 21300000, guid: f22b479294de3414e987ba1cb0e2e81f, type: 3}
   - Name: Dragos
-    Type: 3
-    Damage: 75
-    FireRate: 2
-    ReloadTime: 3
+    Type: 13
+    Damage: 15
+    FireRate: 0.09
+    ReloadTime: 2
     Range: 100
-    Accuracy: 0
+    Accuracy: 1
     Weight: 2
     Price: 0
     LevelUnlock: 0
@@ -193,6 +201,19 @@ MonoBehaviour:
     PickUpPrefab: {fileID: 5570815165933397051, guid: 7ece80da55d465041bc95470b764ec57,
       type: 3}
     GunIcon: {fileID: 21300000, guid: cd419051581e25942b9d4e33fa5854c6, type: 3}
+  - Name: Angel
+    Type: 3
+    Damage: 20
+    FireRate: 0.12
+    ReloadTime: 1.2
+    Range: 200
+    Accuracy: 3
+    Weight: 2
+    Price: 0
+    LevelUnlock: 0
+    PickUpPrefab: {fileID: 6093322561488042215, guid: 2a2715a9713a43f40a852144e1a9a391,
+      type: 3}
+    GunIcon: {fileID: 21300000, guid: 19516943777febc499922c851560f17c, type: 3}
   DefaultSettings:
     DefaultSensitivity: 5
     DefaultSensitivityAim: 2

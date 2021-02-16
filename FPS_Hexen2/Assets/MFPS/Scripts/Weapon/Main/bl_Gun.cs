@@ -373,6 +373,12 @@ public class bl_Gun : bl_GunBase
                         {
                             MachineGunFire();
                         }
+
+                        if(Info.Type == GunType.Vampire)
+						{
+                            Debug.Log("Try to Fire Vampire Beam");
+                            VampireGun_Fire();
+						}
                         //TODO: Add in constant rate of fire for beam weapons BEAM
                     }
                 }
@@ -431,7 +437,7 @@ public class bl_Gun : bl_GunBase
             Reload();
         }
         //TODO add in Beam Weapon to change type of Fire 
-        if (Info.Type == GunType.Machinegun || Info.Type == GunType.Burst || Info.Type == GunType.Pistol)
+        if (Info.Type == GunType.Machinegun || Info.Type == GunType.Burst || Info.Type == GunType.Pistol || Info.Type == GunType.Vampire)
         {
             ChangeTypeFire();
         }
@@ -450,7 +456,7 @@ public class bl_Gun : bl_GunBase
             else
             {
                 // TODO: Add logic for BEAM weapon heres
-                if (Info.Type == GunType.Machinegun)
+                if (Info.Type == GunType.Machinegun || Info.Type == GunType.Vampire)
                 {
                     isFiring = (FireButton && m_CanFire); // fire is down, gun is firing
                 }
@@ -493,6 +499,16 @@ public class bl_Gun : bl_GunBase
                     {
                         Info.Type = GunType.Pistol;
                     }
+                    break;
+                case GunType.Vampire:
+					if (CanSemi)
+					{
+                        Info.Type = GunType.Vampire;
+					}
+                    else if (CanSingle)
+					{
+                        Info.Type = GunType.Pistol;
+					}
                     break;
                 case GunType.Burst:
                     if (CanSingle)
@@ -589,6 +605,9 @@ public class bl_Gun : bl_GunBase
                     break;
                 case GunType.Knife:
                     Knife_Fire();
+                    break;
+                case GunType.Vampire:
+                    VampireGun_Fire();
                     break;
                 default:
                     if (Info.Type != GunType.Machinegun)
@@ -964,6 +983,51 @@ public class bl_Gun : bl_GunBase
             }
         }
         isBursting = false;
+    }
+
+    ///<summary>
+    ///fire the Vampire
+    ///</summary>
+    void VampireGun_Fire()
+	{
+        Debug.Log("Fire the Vampire Gun....");
+        // If there is more than one bullet between the last and this frame
+        float time = Time.time;
+        if (time - Info.FireRate > nextFireTime)
+            nextFireTime = time - Time.deltaTime;
+
+        // Keep firing until we used up the fire time
+        while (nextFireTime < time)
+        {
+            StartCoroutine(FireOneShot());
+            if (WeaponAnimation != null)
+            {
+                //if (isAiming)
+                //{
+                //    WeaponAnimation.AimFire();
+                //}
+                //else
+                //{
+                    WeaponAnimation.Fire();
+                //}
+            }
+            PlayFireAudio();
+            bulletsLeft--;
+            UpdateUI();
+            nextFireTime += Info.FireRate;
+            EjectShell();
+            Kick();
+            Shake();
+            if (!isAiming)
+            {
+                if (muzzleFlash) { muzzleFlash.Play(); }
+            }
+            //is Auto reload
+            if (bulletsLeft <= 0 && numberOfClips > 0 && AutoReload)
+            {
+                Reload();
+            }
+        }
     }
 
     /// <summary>
@@ -1495,6 +1559,9 @@ public class bl_Gun : bl_GunBase
             case GunType.Shotgun:
             case GunType.Sniper:
                 n = bl_GameTexts.FireTypeSingle;
+                break;
+            case GunType.Vampire:
+                n = bl_GameTexts.FireTypeBeam;
                 break;
             default:
                 n = "--";
