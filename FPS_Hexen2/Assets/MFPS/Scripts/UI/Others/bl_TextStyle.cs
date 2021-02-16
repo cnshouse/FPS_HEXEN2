@@ -1,15 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using UnityEngine.UI;
 
-namespace UnityEngine.UI
+namespace MFPS.Runtime.UI
 {
     [AddComponentMenu("UI/Letter Spacing", 14)]
     public class bl_TextStyle : BaseMeshEffect
     {
         [SerializeField, Range(0, 100)]
         private float Spacing = 7f;
-
         private const string SupportedTagRegexPattersn = @"<b>|</b>|<i>|</i>|<size=.*?>|</size>|<color=.*?>|</color>|<material=.*?>|</material>";
 
         protected bl_TextStyle() { }
@@ -98,21 +98,26 @@ namespace UnityEngine.UI
                     alignmentFactor = 1f;
                     break;
             }
+
             for (int lineIdx = 0; lineIdx < lines.Length; lineIdx++)
             {
+                //the real line
                 string realLine = lines[lineIdx];
-                string line = WithoutRichText(lines[lineIdx]);
-                int lineLength = line.Length;
+                string parsedLine = "";
+                //line without rich text characters
+                string unrichLine = WithoutRichText(realLine, out parsedLine);
 
-                float lineOffset = (lineLength - 1) * letterOffset * alignmentFactor;
+                float lineOffset = (unrichLine.Length - 1) * letterOffset * alignmentFactor;
 
+                int skipChar = 0;
                 for (int charIdx = 0, charPositionIndex = 0; charIdx < realLine.Length; charIdx++, charPositionIndex++)
                 {
 #if UNITY_2019_OR_LATER
-                    if (line[charIdx] == ' ') continue;
+                    if (realLine[charIdx] == ' ') continue;
+#else
+                    if (parsedLine[charIdx] == '♯') { skipChar++; }
 #endif
-
-                    int idx1 = glyphIdx * 6 + 0;
+                    int idx1 = glyphIdx * 6;
                     int idx2 = glyphIdx * 6 + 1;
                     int idx3 = glyphIdx * 6 + 2;
                     int idx4 = glyphIdx * 6 + 3;
@@ -120,7 +125,7 @@ namespace UnityEngine.UI
                     int idx6 = glyphIdx * 6 + 5;
 
                     // Check for truncated text (doesn't generate verts for all characters)
-                    if (idx4 > verts.Count - 1) return;
+                    if (idx6 > verts.Count - 1) { return; }
 
                     UIVertex vert1 = verts[idx1];
                     UIVertex vert2 = verts[idx2];
@@ -129,7 +134,7 @@ namespace UnityEngine.UI
                     UIVertex vert5 = verts[idx5];
                     UIVertex vert6 = verts[idx6];
 
-                    pos = Vector3.right * (letterOffset * charPositionIndex - lineOffset);
+                    pos = Vector3.right * ((letterOffset * (charPositionIndex - skipChar)) - lineOffset);
 
                     vert1.position += pos;
                     vert2.position += pos;
@@ -144,10 +149,14 @@ namespace UnityEngine.UI
                     verts[idx4] = vert4;
                     verts[idx5] = vert5;
                     verts[idx6] = vert6;
-                    #if !UNITY_2019_OR_LATER
+
+#if !UNITY_2019_OR_LATER
                     glyphIdx++;
-                    #endif
+#endif
                 }
+#if !UNITY_2019_OR_LATER
+                glyphIdx++;
+#endif
             }
         }
 
@@ -165,8 +174,12 @@ namespace UnityEngine.UI
             vh.AddUIVertexTriangleStream(vertexList);
         }
 
-        private string WithoutRichText(string line)
+        private string WithoutRichText(string line, out string parseLine)
         {
+            parseLine = Regex.Replace(line, SupportedTagRegexPattersn, m =>
+            {
+                return new string('♯', m.Groups[0].Value.Length);
+            });
             line = Regex.Replace(line, SupportedTagRegexPattersn, "");
             return line;
         }

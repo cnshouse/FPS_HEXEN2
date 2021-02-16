@@ -83,19 +83,19 @@ Material:
     - _DstBlend: 0
     - _EmissionScaleUI: 0
     - _EnvironmentReflections: 1
-    - _GlossMapScale: 0
+    - _GlossMapScale: 0.005
     - _Glossiness: 0.15
     - _GlossyReflections: 1
     - _Illuminate: 0.5
-    - _Metallic: 0.862
+    - _Metallic: 0.041
     - _Mode: 0
-    - _OcclusionStrength: 0.595
+    - _OcclusionStrength: 0.772
     - _Parallax: 0.08
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RimPower: 3
     - _Shininess: 0.13603544
-    - _Smoothness: 0
+    - _Smoothness: 0.005
     - _SmoothnessTextureChannel: 1
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -106,8 +106,8 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 1, g: 0.9925373, b: 0.9925373, a: 1}
-    - _Color: {r: 1, g: 0.9925373, b: 0.9925373, a: 1}
+    - _BaseColor: {r: 0.7169812, g: 0.7169812, b: 0.7169812, a: 1}
+    - _Color: {r: 0.7169812, g: 0.7169812, b: 0.7169812, a: 1}
     - _ColorAnimate: {r: 1, g: 1, b: 1, a: 1}
     - _DissColor: {r: 1, g: 1, b: 1, a: 1}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
@@ -118,7 +118,7 @@ Material:
 --- !u!1002 &2100001
 EditorExtensionImpl:
   serializedVersion: 6
---- !u!114 &2323522499794331221
+--- !u!114 &923803881582178932
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

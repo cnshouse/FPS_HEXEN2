@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class bl_AIHitBox : MonoBehaviour, IMFPSDamageable
 {
-
     public bl_AIShooterHealth AI;
     public Collider m_Collider;
     public bool isHead = false;
@@ -30,12 +29,13 @@ public class bl_AIHitBox : MonoBehaviour, IMFPSDamageable
         if(damageData.GunID < 0)
         {
             //try to find the custom weapon name
-            var iconData = bl_KillFeed.Instance.GetCustomIconByIndex(Mathf.Abs(damageData.GunID));
+            var iconData = bl_KillFeed.Instance.GetCustomIconByIndex(Mathf.Abs(damageData.GunID + 1));
             if (iconData != null)
             {
                 weaponName = $"cmd:{iconData.Name}";
             }
         }
+
         AI.DoDamage(damageData.Damage, weaponName, damageData.Direction, damageData.ActorViewID, !damageData.MFPSActor.isRealPlayer, damageData.MFPSActor.Team, isHead, ID);
     }
 }

@@ -161,6 +161,8 @@ public class bl_WaitingRoom : bl_PhotonHelper, IMatchmakingCallbacks, IInRoomCal
     /// </summary>
     public void OnEventCustom(EventData data)
     {
+        if (data.CustomData == null) return;
+        
         HashTable t = (HashTable)data.CustomData;
         switch (data.Code)
         {
@@ -213,7 +215,7 @@ public class bl_WaitingRoom : bl_PhotonHelper, IMatchmakingCallbacks, IInRoomCal
         AutoJoinToTeam();
         yield return new WaitForSeconds(0.5f);
         bl_WaitingRoomUI.Instance.Show();
-        yield return bl_LobbyUI.Instance.DoBlackFade(false, 0.4f);
+        bl_LobbyUI.Instance.blackScreenFader.FadeOut(0.4f);
     }
 
     /// <summary>
@@ -223,7 +225,7 @@ public class bl_WaitingRoom : bl_PhotonHelper, IMatchmakingCallbacks, IInRoomCal
     {
         bl_WaitingRoomUI.Instance.LoadingMapUI.SetActive(true);
         yield return new WaitForSeconds(2);
-        yield return StartCoroutine(bl_LobbyUI.Instance.DoBlackFade(true, 0.3f));
+        yield return bl_LobbyUI.Instance.blackScreenFader.FadeIn(0.3f);
         LoadMap();
     }
 
@@ -262,7 +264,7 @@ public class bl_WaitingRoom : bl_PhotonHelper, IMatchmakingCallbacks, IInRoomCal
         if (PhotonNetwork.IsConnected)
         {
             if (!PhotonNetwork.InLobby) { PhotonNetwork.JoinLobby(); }
-            else { Debug.Log("Leave Pre Match but already connected to lobby."); }
+            else { Debug.Log("Leave Pre Match but already connected to lobby."); bl_LobbyUI.Instance.blackScreenFader.FadeOut(0.5f); }
         }
         else
         {
@@ -304,7 +306,7 @@ public class bl_WaitingRoom : bl_PhotonHelper, IMatchmakingCallbacks, IInRoomCal
         else
         {
             bl_WaitingRoomUI.Instance.UpdateRoomInfoUI();
-            if (propertiesThatChanged.ContainsKey(PropertiesKeys.TeamKey))
+            if (propertiesThatChanged.ContainsKey(PropertiesKeys.GameModeKey) || propertiesThatChanged.ContainsKey(PropertiesKeys.TeamKey))
             {
                 if (!isOneTeamModeUpdate && PhotonNetwork.LocalPlayer.GetPlayerTeam() == Team.All)
                 {

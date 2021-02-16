@@ -1,22 +1,10 @@
-﻿//////////////////////////////////////////////////////////////////
-// bl_BodyPartManager.cs
-//
-// This script helps us manage our remote player hitboxes
-// mind just place it in the root of the remote player
-// and executes the last two options of the "ContextMenu" component. 
-//                       Lovatto Studio
-//////////////////////////////////////////////////////////////////
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 
 public class bl_BodyPartManager : bl_PhotonHelper
 {
-    /// <summary>
-    /// Change the tag if you use other
-    /// </summary>
-    public const string HitBoxTag = "BodyPart";
     [Header("Hit Boxes"), Reorderable]
     public List<BodyHitBox> HitBoxs = new List<BodyHitBox>();
     public List<Rigidbody> rigidBodys = new List<Rigidbody>();
@@ -57,7 +45,7 @@ public class bl_BodyPartManager : bl_PhotonHelper
         }
         Ragdolled(hitPos, isExplosion, false);
 
-        if (bl_RoomSettings.Instance.currentGameMode.GetGameModeInfo().onPlayerDie == bl_GameData.GameModesEnabled.OnPlayerDie.SpawnAfterRoundFinish)
+        if (bl_RoomSettings.Instance.CurrentGameMode.GetGameModeInfo().onPlayerDie == GameModeSettings.OnPlayerDie.SpawnAfterRoundFinish)
         {
             bl_UIReferences.Instance.OnKillCam(false);
             Destroy(gameObject, 5);
@@ -68,7 +56,7 @@ public class bl_BodyPartManager : bl_PhotonHelper
     }
 
     /// <summary>
-    /// 
+    /// Wait until respawn the player
     /// </summary>
     /// <returns></returns>
     IEnumerator RespawnCountdown()
@@ -97,9 +85,13 @@ public class bl_BodyPartManager : bl_PhotonHelper
     /// </summary>
     void OnLocalSpawn()
     {
+        //check that this is just a ragdoll
+        if (transform == null || transform.parent != null) return;
+
         bl_EventHandler.onLocalPlayerSpawn -= OnLocalSpawn;
         if (KillCameraCache != null) { Destroy(KillCameraCache); }
         bl_UIReferences.Instance.OnKillCam(false);
+
         Destroy(gameObject);
     }
 
@@ -124,7 +116,18 @@ public class bl_BodyPartManager : bl_PhotonHelper
     public void Ragdolled(Vector3 hitPos, bool isExplosion, bool autoDestroy = true)
     {
         this.transform.parent = null;
+        if (!autoDestroy)
+        {
+            //apply the a frame to the animator with the current player state
+            m_Animator.speed = 5;
+            PlayerAnimation.UpdateStates();
+            //update multiple at once in order to play the right pose
+            for (int i = 0; i < 4; i++)
+                m_Animator.Update(1);
+        }
+
         m_Animator.enabled = false;
+        ActiveLocalRagdoll(true);
         foreach (Rigidbody r in rigidBodys)
         {
             r.isKinematic = false;
@@ -166,19 +169,38 @@ public class bl_BodyPartManager : bl_PhotonHelper
     /// <summary>
     /// 
     /// </summary>
-    public void DisableLocalRagdoll()
+    public void ActiveLocalRagdoll(bool active)
     {
         for (int i = 0; i < HitBoxs.Count; i++)
         {
-            HitBoxs[i].collider.enabled = false;
+            HitBoxs[i].collider.enabled = active;
         }
         foreach (var item in rigidBodys)
         {
-            item.isKinematic = true;
+            item.isKinematic = !active;
         }
     }
 
     public BodyHitBox GetHitBox(int identifier) { return HitBoxs[identifier]; }
+
+    private Collider[] allPlayerCollider;
+    public void IgnoreColliders(Collider[] list, bool ignore)
+    {
+        if (allPlayerCollider == null || allPlayerCollider.Length <= 0)
+        {
+            allPlayerCollider = transform.GetComponentsInChildren<Collider>();
+        }
+        for (int e = 0; e < list.Length; e++)
+        {
+            for (int i = 0; i < allPlayerCollider.Length; i++)
+            {
+                if (allPlayerCollider[i] != null)
+                {
+                    Physics.IgnoreCollision(allPlayerCollider[i], list[e], ignore);
+                }
+            }
+        }
+    }
 
     [ContextMenu("Setup")]
     public void SetUpHitBoxes()
@@ -217,7 +239,7 @@ public class bl_BodyPartManager : bl_PhotonHelper
         if (col == null) { Debug.LogWarning("The bone: " + bone.ToString() + " doesn't have a collider."); return; }
 
         col.gameObject.layer = LayerMask.NameToLayer("Player");
-        col.gameObject.tag = HitBoxTag;
+        col.gameObject.tag = bl_MFPS.HITBOX_TAG;
         box.Name = col.name;
         box.Bone = bone;
         box.collider = col;

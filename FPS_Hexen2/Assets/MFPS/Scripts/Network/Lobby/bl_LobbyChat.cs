@@ -94,6 +94,8 @@ public class bl_LobbyChat : MonoBehaviour, IChatClientListener
     public void Connect(string version)
     {
         if (string.IsNullOrEmpty(PhotonNetwork.PhotonServerSettings.AppSettings.AppIdChat)) return;
+        if (chatClient != null && chatClient.State != ChatState.Disconnected) return;
+
         this.chatClient = new ChatClient(this);
 #if !UNITY_WEBGL
         this.chatClient.UseBackgroundWorkerForSending = false;
@@ -108,6 +110,8 @@ public class bl_LobbyChat : MonoBehaviour, IChatClientListener
     {
         if (this.chatClient != null)
         {
+            if (chatClient.State == ChatState.Disconnected || chatClient.State == ChatState.Disconnecting) return;
+
             this.chatClient.Disconnect();
         }
         if (!enabled || !subscribed) return;
@@ -331,7 +335,7 @@ public class bl_LobbyChat : MonoBehaviour, IChatClientListener
         this.ChatPanel.gameObject.SetActive(true);
         this.chatClient.SetOnlineStatus(ChatUserStatus.Online); // You can set your online state (without a mesage).
         ChannelText.text = selectedChannelName.ToUpper();
-        ChatButton.SetActive(true);
+        ChatButton.SetActive(bl_GameData.Instance.UseLobbyChat);
         this.chatClient.SetOnlineStatus(ChatUserStatus.Online);
         Debug.Log("Lobby Chat connected");
     }
@@ -491,4 +495,15 @@ public class bl_LobbyChat : MonoBehaviour, IChatClientListener
     }
 
     public bool isConnected() { if (chatClient == null) { return false; } return chatClient.State == ChatState.ConnectedToFrontEnd; }
+
+    private static bl_LobbyChat _instance;
+    public static bl_LobbyChat Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = FindObjectOfType<bl_LobbyChat>();
+            return _instance;
+        }
+    }
 }

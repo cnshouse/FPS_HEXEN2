@@ -1,5 +1,5 @@
 Thanks for purchase ULogin Pro
-Version 1.8
+Version 1.9.2
 
 
 Get Started: 
@@ -21,6 +21,30 @@ email: lovattostudio@gmail.com
 forum: http://www.lovattostudio.com/forum/index.php
 
 Change Log:
+
+1.9.2
+-Fix: Ban System.
+-Fix: Non-defined exceptions from the server in some client requests.
+-Improve: Update build-in documentation.
+
+1.9 (Not compatible with older versions, a complete new installation is required.)
+-Improve: Added support for custom authenticators.
+-Improve: PHP scripts.
+-Improve: Now PHP scripts return propers HTTP codes.
+-Add: PerToPer encryption using RSA and AES (combined) algorithms from the phpseclib, this is a big improve in security,
+   now all user will request an unique public key to the server who will store the private key pair in a per user session.
+-Add: Max login attempts, once the user reaches it, he must wait some time until try again.
+-Improve: Now password_hash() with BCRYPT is used to hash the passwords, an newest and secure method than the old md5.
+-Improve: Added UI Navigation with axis.
+-Improve: Added support for controller navigation.
+-Improve: Now is possible reset player stats (kills, deaths, score, etc...) from the admin panel.
+-Fix: Error caused by multi-line messages in support tickets.
+-Fix: Moderators could ban Admins. (rule does not apply on Editor)
+-Fix: 'Play as guest' use the account player name if the player have previously login and logout in the same session.
+-Fix: Can't ban ipv6 users ip's
+-Improve: now all the coins updates operations are processed in the server-side.
+-Improve: Optimized database table structures.
+-Improve: Check INTERNET connection.
 
 1.8
 -Add: Remember Me behave option, now you can select to remember just the user name or the session in LoginDataBasePro -> RememberMeBehave,

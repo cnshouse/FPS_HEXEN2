@@ -33,7 +33,9 @@ public class AddWeaponTutorial : TutorialWizard
         new NetworkImages{Name = "img-20.jpg", Image = null},
         new NetworkImages{Name = "img-21.jpg", Image = null},
         new NetworkImages{Name = "img-22.jpg", Image = null},
-         new NetworkImages{Name = "img-23.jpg", Image = null},
+        new NetworkImages{Name = "img-23.jpg", Image = null},
+        new NetworkImages{Name = "img-24.png", Image = null},
+        new NetworkImages{Name = "img-25.png", Image = null},
     };
     private readonly GifData[] AnimatedImages = new GifData[]
    {
@@ -44,6 +46,7 @@ public class AddWeaponTutorial : TutorialWizard
         new GifData{ Path = "gif-5.gif"},
         new GifData{ Path = "gif-6.gif"},
         new GifData{ Path = "gif-7.gif"},
+        new GifData{ Path = "gif-8.gif"},
    };
     private Steps[] AllSteps = new Steps[] {
      new Steps { Name = "Weapon Model", StepsLenght = 0 },
@@ -97,7 +100,8 @@ public class AddWeaponTutorial : TutorialWizard
         else if (window == 4)
         {
             DrawPickUpPrefab();
-        }else if(window == 5) { DrawExportWeapons(); }
+        }
+        else if (window == 5) { DrawExportWeapons(); }
     }
 
     void DrawWeaponModel()
@@ -106,8 +110,8 @@ public class AddWeaponTutorial : TutorialWizard
         {
             DrawText("In order to add a new weapon you need of course a Weapon 3D model.\nNow, there are different approaches to add a new weapon, someones just replace the weapon model and use the MFPS default hands model and animations <i>(basically just positioned in the hands the new weapon model)</i>, Although this is not prohibited or wrong, it definitely is not the best solution since the hand model and animations of MFPS are placeholders that works as example only, and they animations will not look right with different weapon models.\n\nIs highly recommended that you use your own models and animations <i>(including the arms model)</i>, you can use the default MFPS hands but by doing this you will have to animated them for each weapon that you want to add and if you are not an Animator or have experience animating that could be a hard time for you since <b>you need at least 4 animations which are: Take In, Take Out, Fire and Reload</b> animations.\n\n<b>Optionally</b> if you want to save time and effort you can get weapons models packages that are compatible with MFPS and comes with the required animations and their own arms models, bellow I'll leave you a Asset Store collection list of those assets:");
             GUILayout.Space(5);
-            Rect r =  EditorGUILayout.BeginHorizontal();
-            MFPSEditorStyles.DrawBackground(r, new Color(0,0,0,0.3f));
+            Rect r = EditorGUILayout.BeginHorizontal();
+            MFPSEditorStyles.DrawBackground(r, new Color(0, 0, 0, 0.3f));
             GUILayout.Space(10);
             weaponList.OnGUI();
             EditorGUILayout.EndHorizontal();
@@ -181,7 +185,7 @@ public class AddWeaponTutorial : TutorialWizard
             {
                 PlayerInstantiated = PrefabUtility.InstantiatePrefab(bl_GameData.Instance.Player1.gameObject) as GameObject;
 #if UNITY_2018_3_OR_NEWER
-        PrefabUtility.UnpackPrefabInstance(PlayerInstantiated, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+                PrefabUtility.UnpackPrefabInstance(PlayerInstantiated, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
 #endif
                 Selection.activeObject = PlayerInstantiated;
                 EditorGUIUtility.PingObject(PlayerInstantiated);
@@ -192,7 +196,7 @@ public class AddWeaponTutorial : TutorialWizard
             {
                 PlayerInstantiated = PrefabUtility.InstantiatePrefab(bl_GameData.Instance.Player2.gameObject) as GameObject;
 #if UNITY_2018_3_OR_NEWER
-        PrefabUtility.UnpackPrefabInstance(PlayerInstantiated, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+                PrefabUtility.UnpackPrefabInstance(PlayerInstantiated, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
 #endif
                 Selection.activeObject = PlayerInstantiated;
                 EditorGUIUtility.PingObject(PlayerInstantiated);
@@ -222,6 +226,9 @@ public class AddWeaponTutorial : TutorialWizard
             DrawText("To duplicate, simply select the weapon in hierarchy -> Right Mouse Click -> Duplicate.");
             // DrawImage(GetServerImage(0));
             DrawAnimatedImage(1);
+            DownArrow();
+            DrawText("Select the duplicated weapon and in the <b>Inspector</b> window -> <b>bl_Gun</b> -> <b>Gun ID</b> -> Set the weapon info that you created for this weapon.");
+            DrawAnimatedImage(7);
         }
         else if (subStep == 3)
         {
@@ -236,7 +243,7 @@ public class AddWeaponTutorial : TutorialWizard
                  "and Muzzleflash on the end of the weapon barrel) and then delete the old model.");
             DownArrow();
             DrawAnimatedImage(3);
-            DrawImage(GetServerImage(2));
+            // DrawImage(GetServerImage(2));
         }
         else if (subStep == 5)
         {
@@ -245,7 +252,7 @@ public class AddWeaponTutorial : TutorialWizard
             DownArrow();
             if (animationType == 0)
             {
-                DrawText("Now select which Animation system are your weapon model using:");
+                DrawText("Now select which Animation system your weapon model is using:");
                 Space(5);
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
@@ -292,7 +299,7 @@ public class AddWeaponTutorial : TutorialWizard
             DownArrow();
             DrawImage(GetServerImage(5));
             DownArrow();
-            DrawText("Now position <i>(move and rotate)</i> the weapon model in the editor view simulating where will be when the player is running, like this:");
+            DrawText("Now position <i>(move and rotate)</i> the weapon object in the editor view simulating where it will be when the player is running, <i>you should have the Game View window open to see how the player will see the weapon.</i>");
             DrawImage(GetServerImage(6));
             DownArrow();
             DrawText("When you have it set, go to the bl_WeaponMovements inspector and click on the first button <b>Get Actual Position</b>, that will get the current transform values and copy in the " +
@@ -320,6 +327,7 @@ public class AddWeaponTutorial : TutorialWizard
             DrawText("Once you're sure that you have the right position, click the button again, to automatically assign the Aim position and return to the default position. That's it for this part.");
             DrawImage(GetServerImage(11));
             DownArrow();
+            DrawText("Here a short explanation of the properties of <b>bl_Gun</b> script that you can tweak\n");
             DrawPropertieInfo("Aim Smooth", "float", "the speed of the default position to the aim position transition.");
             DrawPropertieInfo("Aim Delay Movement", "float", "the amount of the delay movement effect when is aiming.");
             DrawPropertieInfo("Aim FoV", "float", "the Field Of View (Zoom) of the camera when is aiming, less value = more zooming.");
@@ -347,9 +355,11 @@ public class AddWeaponTutorial : TutorialWizard
         }
         else if (subStep == 8)
         {
-            DrawText("To finish with this, select the <b>WeaponManager</b> object and go to -> bl_GunManager -> GunList. In the list add a new field. Into this new field, drag the new weapon.");
+            DrawText("Finally, at the bottom the <b>bl_Gun</b> inspector of your weapon, you should see the button \"<b>Add to list</b>\", simply click that button and the weapon will be automatically added to the <b>AllWeapons</b> list of <b>bl_GunManager</b>.");
+            DrawImage(GetServerImage(24));
+            DrawText("In case the button doesn't appear, just make sure that the weapon is already listed, select the <b>WeaponsManager</b> -> <b>bl_GunManager</b> -> <b>Gun List</b> -> <i>*Check if the weapon is in the list*</i>.\n\nIf it's not in the list, you can add it manually by adding a new field in the list and dragging the new weapon on that field.\n");
             DownArrow();
-            DrawImage(GetServerImage(12));
+            DrawImage(GetServerImage(25));
             DownArrow();
             DrawText("Now if you want assign it to as the default weapon of a player class, simply (always in bl_GunManager)" +
                 " open the wanted player class section (Assault, Support, Recon or Engineer) and in the slot that you want (Primary, Secondary, Knife or Projectile) select" +
@@ -466,7 +476,7 @@ public class AddWeaponTutorial : TutorialWizard
         DrawText("Ok, now you have the exported weapon ready, now you can <b>Import</b> in any player prefab, for it simple open the Player prefab where you want to import the weapon, but this time select the <b>WeaponManager</b> object and in the inspector of bl_GunManager click on the <b>Import</b> button <i>(top right)</i>, after this a new window will open, on this window you'll have a empty field <b>Weapon To Import</b> in this field drag the <b>Exported Weapon</b> prefab that you just saved and click on the <b>Import</b> button.\n\nThat's now the weapon will be fully integrated in this player prefab too.\n");
     }
 
-    [MenuItem("MFPS/Tutorials/Add Weapon", false , 500)]
+    [MenuItem("MFPS/Tutorials/Add Weapon", false, 500)]
     private static void ShowWindow()
     {
         EditorWindow.GetWindow(typeof(AddWeaponTutorial));

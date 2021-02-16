@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using MFPS.Addon.Customizer;
 
 public class bl_CustomizerWeapon : MonoBehaviour
 {
@@ -16,36 +15,24 @@ public class bl_CustomizerWeapon : MonoBehaviour
     private int[] AttachmentsIds = new int[] { 0, 0, 0, 0, 0 };
     private bool isSync = false;
     private bl_Gun Gun;
+    private PhotonView photonView;
 
     /// <summary>
     /// 
     /// </summary>
     private void OnEnable()
     {
+        if(photonView == null) { photonView = transform.root.GetComponent<PhotonView>(); }
         if (isFPWeapon && !isSync)
         {
             LoadAttachments();
             ApplyAttachments();
             Gun = GetComponent<bl_Gun>();
             string line = bl_CustomizerData.Instance.CompileArray(AttachmentsIds);
-            transform.root.GetComponent<PhotonView>().RPC("SyncCustomizer", RpcTarget.Others, Gun.GunID, line);
+            photonView.RPC("SyncCustomizer", RpcTarget.Others, Gun.GunID, line);
             isSync = true;
             bl_PhotonCallbacks.PlayerEnteredRoom += OnNewPlayerEnter;
         }
-    }
-
-    void OnNewPlayerEnter(Player player)
-    {
-        if (isFPWeapon)
-        {
-            string line = bl_CustomizerData.Instance.CompileArray(AttachmentsIds);
-            transform.root.GetComponent<PhotonView>().RPC("SyncCustomizer", RpcTarget.Others, Gun.GunID, line);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        bl_PhotonCallbacks.PlayerEnteredRoom -= OnNewPlayerEnter;
     }
 
     /// <summary>
@@ -65,17 +52,56 @@ public class bl_CustomizerWeapon : MonoBehaviour
         CamoRender.ApplyCamo(WeaponName, AttachmentsIds[(int)bl_AttachType.Camo]);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="customIds"></param>
     public void ApplyAttachments(int[] customIds)
     {
         Attachments.Apply(customIds);
         CamoRender.ApplyCamo(WeaponName, customIds[(int)bl_AttachType.Camo]);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="line"></param>
     public void ApplyAttachments(string line)
     {
         AttachmentsIds = bl_CustomizerData.Instance.DecompileLine(line);
         ApplyAttachments();
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="player"></param>
+    void OnNewPlayerEnter(Player player)
+    {
+        if (isFPWeapon)
+        {
+            string line = bl_CustomizerData.Instance.CompileArray(AttachmentsIds);
+            photonView.RPC("SyncCustomizer", RpcTarget.Others, Gun.GunID, line);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool RenderIsAttachment(GameObject model)
+    {
+        if (model == null) return false;
+        return Attachments.CheckIfIsAttachment(model);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void OnDestroy()
+    {
+        bl_PhotonCallbacks.PlayerEnteredRoom -= OnNewPlayerEnter;
+    }
+
 
 #if UNITY_EDITOR
 

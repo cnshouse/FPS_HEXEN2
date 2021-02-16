@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 public class bl_KillCamUI : MonoBehaviour
 {
-
-    [SerializeField] private Text KillerNameText;
-    [SerializeField] private Text KillerHealthText;
-    [SerializeField] private Text GunNameText;
-    [SerializeField] private Image GunImage;
+    [SerializeField] private Text KillerNameText = null;
+    [SerializeField] private Text KillerHealthText = null;
+    [SerializeField] private Text GunNameText = null;
+    [SerializeField] private Image GunImage = null;
+    public Image levelIcon;
     public Text KillCamSpectatingText;
 
     public void Show(string killer, int gunID)
@@ -24,6 +24,7 @@ public class bl_KillCamUI : MonoBehaviour
 #else
         KillCamSpectatingText.text = string.Format("<size=8>{0}:</size>\n{1}", bl_GameTexts.Spectating.ToUpper(), killer);
 #endif
+        levelIcon.gameObject.SetActive(false);
         MFPSPlayer actor = bl_GameManager.Instance.FindActor(killer);
         if(actor != null)
         {
@@ -32,6 +33,14 @@ public class bl_KillCamUI : MonoBehaviour
                 bl_PlayerHealthManager pdm = actor.Actor.GetComponent<bl_PlayerHealthManager>();
                 int health = Mathf.FloorToInt(pdm.health);
                 if (pdm != null) { KillerHealthText.text = string.Format("HEALTH: {0}", health); }
+#if LM
+                if (actor.ActorView != null)
+                {
+                    var level = bl_LevelManager.Instance.GetPlayerLevelInfo(actor.ActorView.Owner);
+                    levelIcon.sprite = level.Icon;
+                    levelIcon.gameObject.SetActive(true);
+                }
+#endif
             }
             else
             {

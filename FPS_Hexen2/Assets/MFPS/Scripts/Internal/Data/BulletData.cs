@@ -9,9 +9,22 @@ public class BulletData
     public float MaxSpread;
     public float Spread;
     public float Speed;
-    public float LifeTime;
+    public float Range;
     public int WeaponID;
     public bool isNetwork;
     public int ActorViewID { get; set; }
     public MFPSPlayer MFPSActor { get; set; }
+
+    public BulletData()
+    {
+    }
+
+    public BulletData(DamageData data)
+    {
+        MFPSActor = data.MFPSActor;
+        Damage = data.Damage;
+        ActorViewID = data.ActorViewID;
+        WeaponID = data.GunID;
+        Position = data.Direction;
+    }
 }

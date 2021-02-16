@@ -246,7 +246,7 @@ public class AddPlayerTutorial : TutorialWizard
                     DrawPlayerInstanceButton(bl_GameData.Instance.Player1.gameObject);
                     DrawPlayerInstanceButton(bl_GameData.Instance.Player2.gameObject);
 #if PSELECTOR
-                    foreach (var p in MFPS.PlayerSelector.bl_PlayerSelectorData.Instance.AllPlayers)
+                    foreach (var p in bl_PlayerSelector.Data.AllPlayers)
                     {
                         if (p == null || p.Prefab == null) continue;
                         DrawPlayerInstanceButton(p.Prefab);

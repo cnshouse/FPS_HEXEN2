@@ -1,27 +1,20 @@
-﻿//////////////////////////////////////////////////////////////////////////////
-// bl_PlayerHealthManager.cs
-//
-// this contains all the logic of the player health
-// This is enabled locally or remotely
-//                      Lovatto Studio
-/////////////////////////////////////////////////////////////////////////////
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
-using Hashtable = ExitGames.Client.Photon.Hashtable; //Replace default Hashtables with Photon hashtables
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using MFPS.Core.Motion;
+using MFPS.Runtime.UI;
 
 public class bl_PlayerHealthManager : bl_MonoBehaviour
 {
-
-    [HideInInspector] public bool DamageEnabled = true;
+    #region Public members
     [Header("Settings")]
-    //currentKillStreak Player Health
     [Range(0, 100)] public float health = 100;
     [Range(1, 100)] public float maxHealth = 100;
     [Range(1, 10)] public float StartRegenerateIn = 4f;
     [Range(1, 5)] public float RegenerationSpeed = 3f;
+    [Range(10, 100)] public int RegenerateUpTo = 100;
     [Range(1, 10)] public float DeathIconShowTime = 5f;
 
     [Header("GUI")]
@@ -36,25 +29,27 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
 
     [Header("Effects")]
     public AudioClip[] HitsSound;
-    [SerializeField] private AudioClip[] InjuredSounds;
+    [SerializeField] private AudioClip[] InjuredSounds = null;
 
     [Header("References")]
     public GameObject KillCamPrefab;
     public bl_BodyPartManager BodyManager;
-    [SerializeField] private GameObject DeathIconPrefab;
 
+    public bool DamageEnabled { get; set; } = true;
+    private bool m_HealthRegeneration = false;
+    public bool HealthRegeneration { get => m_HealthRegeneration; set => m_HealthRegeneration = value; }
+    #endregion
+
+    #region Private members
     private Text HealthTextUI;
     private Image HealthBar;
-
     const string FallMethod = "FallDown";
     private CharacterController m_CharacterController;
-    private bool dead = false;
+    private bool isDead = false;
     private string lastDamageGiverActor;
     private int ScorePerKill, ScorePerHeatShot;
     private bl_GameData GameData;
-    private bl_DamageIndicator Indicator;
-    private bl_PlayerNetwork PlayerSync;
-    private bool HealthRegeneration = false;
+    private bl_PlayerNetwork PlayerSync;   
     private float TimeToRegenerate = 4;
     private bl_GunManager GunManager;
     private bool isSuscribed = false;
@@ -64,7 +59,12 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
     private CanvasGroup DamageAlpha;
     private float damageAlphaValue = 0;
     private Team thisPlayerTeam = Team.None;
+    private bool showIndicator = false;
+    private float nextHealthSend = 0;
+    private bl_PlayerReferences playerReferences;
+    #endregion
 
+    #region Unity Callbacks
     /// <summary>
     /// 
     /// </summary>
@@ -73,14 +73,15 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
         if (!PhotonNetwork.IsConnected) return;
 
         base.Awake();
-        m_CharacterController = GetComponent<CharacterController>();
+        playerReferences = GetComponent<bl_PlayerReferences>();
+        m_CharacterController = playerReferences.characterController;
         GameData = bl_GameData.Instance;
-        Indicator = GetComponent<bl_DamageIndicator>();
-        PlayerSync = GetComponent<bl_PlayerNetwork>();
-        GunManager = transform.GetComponentInChildren<bl_GunManager>(true);
+        PlayerSync = playerReferences.playerNetwork;
+        GunManager = playerReferences.gunManager;
         DamageAlpha = bl_UIReferences.Instance.PlayerUI.DamageAlpha;
-        HealthRegeneration = GameData.HealthRegeneration;
+        m_HealthRegeneration = GameData.HealthRegeneration;
         protecTime = bl_GameData.Instance.SpawnProtectedTime;
+        showIndicator = bl_GameData.Instance.showDamageIndicator;
     }
 
     /// <summary>
@@ -101,7 +102,7 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
             HealthBar = bl_UIReferences.Instance.PlayerUI.HealthBar;
             UpdateUI();
         }
-        if (protecTime > 0) { InvokeRepeating("OnProtectCount", 1, 1); }
+        if (protecTime > 0) { InvokeRepeating(nameof(OnProtectCount), 1, 1); }
     }
 
     /// <summary>
@@ -113,13 +114,13 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
         if (this.isMine)
         {
             bl_GameManager.LocalPlayerViewID = this.photonView.ViewID;
-            bl_EventHandler.onPickUpItem += this.OnPickUp;
-            bl_EventHandler.OnRoundEnd += this.OnRoundEnd;
-            bl_EventHandler.OnDamage += this.GetDamage;
+            bl_EventHandler.onPickUpHealth += this.OnPickUp;
+            bl_EventHandler.onRoundEnd += this.OnRoundEnd;
             bl_PhotonCallbacks.PlayerEnteredRoom += OnPhotonPlayerConnected;
             isSuscribed = true;
         }
     }
+
     /// <summary>
     /// 
     /// </summary>
@@ -128,12 +129,12 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
         base.OnDisable();
         if (isSuscribed)
         {
-            bl_EventHandler.onPickUpItem -= this.OnPickUp;
-            bl_EventHandler.OnRoundEnd -= this.OnRoundEnd;
-            bl_EventHandler.OnDamage -= this.GetDamage;
+            bl_EventHandler.onPickUpHealth -= this.OnPickUp;
+            bl_EventHandler.onRoundEnd -= this.OnRoundEnd;
             bl_PhotonCallbacks.PlayerEnteredRoom -= OnPhotonPlayerConnected;
         }
     }
+
     /// <summary>
     /// 
     /// </summary>
@@ -141,17 +142,11 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
     {
         if (isMine)
         {
-            if (damageAlphaValue > 0)
-            {
-                DamageUI();
-            }
-            else { DamageAlpha.alpha = 0; }
-            if (HealthRegeneration)
-            {
-                RegenerateHealth();
-            }
+            DamageUI();
+            RegenerateHealth();
         }
     }
+    #endregion
 
     /// <summary>
     /// Call this to make a new damage to the player
@@ -173,7 +168,7 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
             }
             return;
         }
-        photonView.RPC("SyncDamage", RpcTarget.AllBuffered, e.Damage, e.From, e.Cause, e.Direction, e.isHeadShot, e.GunID, PhotonNetwork.LocalPlayer);
+        photonView.RPC(nameof(SyncDamage), RpcTarget.AllBuffered, e.Damage, e.From, e.Cause, e.Direction, e.isHeadShot, e.GunID, PhotonNetwork.LocalPlayer);
     }
 
     /// <summary>
@@ -185,7 +180,7 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
             return;
 
         Vector3 downpos = transform.position - transform.TransformVector(new Vector3(0, 5, 1));
-        photonView.RPC("SyncDamage", RpcTarget.AllBuffered, damage, PhotonNetwork.NickName, DamageCause.FallDamage, downpos, false, 103, PhotonNetwork.LocalPlayer);
+        photonView.RPC(nameof(SyncDamage), RpcTarget.AllBuffered, damage, PhotonNetwork.NickName, DamageCause.FallDamage, downpos, false, 103, PhotonNetwork.LocalPlayer);
     }
 
     /// <summary>
@@ -194,7 +189,7 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
     [PunRPC]
     void SyncDamage(int damage, string killer, DamageCause cause, Vector3 m_direction, bool isHeatShot, int weaponID, Player m_sender)
     {
-        if (dead || isProtectionEnable)
+        if (isDead || isProtectionEnable)
             return;
 
         if (DamageEnabled)
@@ -205,20 +200,15 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
                 {
                     damageAlphaValue += (damage + ((maxHealth - health) * (Time.deltaTime * Mathf.PI))) * 0.2f;
                     bl_EventHandler.DoPlayerCameraShake(damageShakerPresent, "damage");
-                    if (Indicator != null)
-                    {
-                        Indicator.AttackFrom(m_direction);
-                    }
+                    if (showIndicator) bl_DamageIndicator.Instance?.AttackFrom(m_direction);
                     TimeToRegenerate = StartRegenerateIn;
                 }
                 else
                 {
-                    if (m_sender != null)
+                    if (m_sender != null && m_sender.NickName == LocalName && cause != DamageCause.Bot)
                     {
-                        if (m_sender.NickName == LocalName && cause != DamageCause.Bot)
-                        {
-                            bl_UCrosshair.Instance.OnHit();
-                        }
+                        bl_UCrosshair.Instance.OnHit();
+                        bl_EventHandler.DispatchLocalPlayerHitEnemy(gameObject.name);
                     }
                 }
             }
@@ -236,6 +226,7 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
 
             lastDamageGiverActor = killer;
         }
+
         if (health > 0)
         {
             health -= damage;
@@ -255,22 +246,9 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
             if (isMine)
             {
                 bl_GameManager.isLocalAlive = false;
-                bl_EventHandler.PlayerLocalDeathEvent();
+                bl_EventHandler.DispatchPlayerLocalDeathEvent();
             }
             Die(lastDamageGiverActor, isHeatShot, cause, weaponID, m_direction, m_sender);
-        }
-    }
-
-    /// <summary>
-    /// Sync Health when pick up a med kit.
-    /// </summary>
-    [PunRPC]
-    void PickUpHealth(float t_amount)
-    {
-        this.health = t_amount;
-        if (health > maxHealth)
-        {
-            health = maxHealth;
         }
     }
 
@@ -279,7 +257,9 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
     /// </summary>
 	void Die(string killer, bool isHeadshot, DamageCause cause, int gunID, Vector3 hitPos, Player sender)
     {
-        dead = true;
+       // Debug.Log($"{gameObject.name} die cause {cause.ToString()} from {killer} and GunID {gunID}");
+        isDead = true;
+        transform.parent = null;
         m_CharacterController.enabled = false;
         bl_GameManager.Instance.GetMFPSPlayer(gameObject.name).isAlive = false;
         bl_GunInfo gunInfo = bl_GameData.Instance.GetWeapon(gunID);
@@ -291,25 +271,29 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
         }
         else
         {
+            //Make the remote players drop their weapon
             Transform ngr = (bl_GameData.Instance.DropGunOnDeath) ? null : PlayerSync.NetGunsRoot;
             BodyManager.SetLocalRagdoll(hitPos, ngr, m_CharacterController.velocity, isExplosion);
         }
+        //disable all other player prefabs child's
         for (int i = 0; i < transform.childCount; i++)
         {
             transform.GetChild(i).gameObject.SetActive(false);
         }
+
         string weapon = cause.ToString();
         if (cause == DamageCause.Player || cause == DamageCause.Bot || cause == DamageCause.Explosion)
         {
             weapon = gunInfo.Name;
-        }
-        //Spawn ragdoll
+        }        
         if (!isMine)// when player is not ours
         {
+            //if the local player was how kill this player
             if (lastDamageGiverActor == LocalName)
             {
                 AddKill(isHeadshot, weapon, gunID);
             }
+
             if (!isOneTeamMode)
             {
                 if (photonView.Owner.GetPlayerTeam() == PhotonNetwork.LocalPlayer.GetPlayerTeam())
@@ -318,6 +302,9 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
                     di.GetComponent<bl_ClampIcon>().SetTempIcon(DeathIcon, DeathIconShowTime, 20);
                 }
             }
+
+            var mplayer = new MFPSPlayer(photonView, true, false);
+            bl_EventHandler.DispatchRemotePlayerDeath(mplayer);
         }
         else//when is local player
         {
@@ -325,6 +312,7 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
             //show kill cam
             BodyManager.gameObject.name = "YOU";
             GameObject kc = Instantiate(KillCamPrefab, transform.position, transform.rotation) as GameObject;
+
             if (bl_GameData.Instance.killCameraType == bl_KillCam.KillCameraType.OrbitTarget)
             {
                 kc.GetComponent<bl_KillCam>().SetTarget(sender, cause, killer, BodyManager.PelvisBone);
@@ -333,6 +321,7 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
             {
                 kc.GetComponent<bl_KillCam>().PositionedAndLookAt(transform);
             }
+
             bl_UIReferences.Instance.OnKillCam(true, killer, gunID);
             BodyManager.KillCameraCache = kc;
 #if ELIM
@@ -395,7 +384,7 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
         localKillInfo.Killed = gameObject.name;
         localKillInfo.byHeadShot = isHeadshot;
         localKillInfo.KillMethod = m_weapon;
-        bl_EventHandler.FireLocalKillEvent(localKillInfo);
+        bl_EventHandler.DispatchLocalKillEvent(localKillInfo);
 
         //Send to update score to player
         PhotonNetwork.LocalPlayer.PostScore(score);
@@ -419,17 +408,17 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Do constant damage to the player in a loop until cancel.
     /// </summary>
     public void DoRepetingDamage(int damage, int each, DamageData info = null)
     {
         m_RepetingDamage = damage;
         RepetingDamageInfo = info;
-        InvokeRepeating("MakeDamageRepeting", 0, each);
+        InvokeRepeating(nameof(MakeDamageRepeting), 0, each);
     }
 
     /// <summary>
-    /// 
+    /// Apply damage from a custom loop
     /// </summary>
     void MakeDamageRepeting()
     {
@@ -453,20 +442,20 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
     /// </summary>
     public void CancelRepetingDamage()
     {
-        CancelInvoke("MakeDamageRepeting");
+        CancelInvoke(nameof(MakeDamageRepeting));
     }
 
     /// <summary>
-    /// 
+    /// Update the player health UI with this player stats
     /// </summary>
     void UpdateUI()
     {
-        float h = Mathf.Clamp(health, 0, 900);
+        float h = Mathf.Max(health, 0);
         float deci = h * 0.01f;
         CurColor = HealthColorGradient.Evaluate(deci);
         if (HealthTextUI != null)
         {
-            HealthTextUI.text = string.Concat(Mathf.FloorToInt(health), "<size=12>/", maxHealth, "</size>");
+            HealthTextUI.text = Mathf.FloorToInt(health).ToString();
             HealthTextUI.color = CurColor;
         }
         if (HealthBar != null) { HealthBar.fillAmount = deci; HealthBar.color = CurColor; }
@@ -477,6 +466,12 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
     /// </summary>
     void DamageUI()
     {
+        if(damageAlphaValue <= 0)
+        {
+            DamageAlpha.alpha = 0;
+            return;
+        }
+
         DamageAlpha.alpha = Mathf.Lerp(DamageAlpha.alpha, damageAlphaValue, Time.deltaTime * 6);
         damageAlphaValue -= Time.deltaTime;
     }
@@ -484,10 +479,11 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    private float nextHealthSend = 0;
     void RegenerateHealth()
     {
-        if (health < maxHealth)
+        if (!m_HealthRegeneration) return;
+
+        if (health < RegenerateUpTo)
         {
             if (TimeToRegenerate <= 0)
             {
@@ -500,14 +496,14 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
             if (Time.time - nextHealthSend > 1)
             {
                 nextHealthSend = Time.time + 1;
-                photonView.RPC("PickUpHealth", RpcTarget.Others, health);
+                photonView.RPC(nameof(PickUpHealth), RpcTarget.Others, health);
             }
             UpdateUI();
         }
     }
 
     /// <summary>
-    /// Suicide player
+    /// Make the local player kill himself
     /// </summary>
     public void Suicide()
     {
@@ -534,20 +530,19 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
         }
         if (protecTime <= 0)
         {
-            CancelInvoke("OnProtectCount");
+            CancelInvoke(nameof(OnProtectCount));
         }
     }
     private bool isProtectionEnable { get { return (protecTime > 0); } }
 
     IEnumerator DestroyThis()
     {
-        yield return new WaitForSeconds(0.15f);
+        yield return new WaitForSeconds(0.3f);
         PhotonNetwork.Destroy(this.gameObject);
     }
 
     /// <summary>
     /// This event is called when player pick up a med kit
-    /// use PhotonTarget.OthersBuffered to save bandwidth
     /// </summary>
     /// <param name="amount"> amount for sum at current health</param>
     void OnPickUp(int amount)
@@ -559,9 +554,10 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
             if (health > maxHealth)
             {
                 health = maxHealth;
+                damageAlphaValue = 1;
             }
             UpdateUI();
-            photonView.RPC("PickUpHealth", RpcTarget.OthersBuffered, newHealth);
+            photonView.RPC(nameof(PickUpHealth), RpcTarget.OthersBuffered, newHealth);
         }
     }
 
@@ -574,11 +570,24 @@ public class bl_PlayerHealthManager : bl_MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sync Health when pick up a med kit.
+    /// </summary>
+    [PunRPC]
+    void PickUpHealth(float t_amount)
+    {
+        this.health = t_amount;
+        if (health > maxHealth)
+        {
+            health = maxHealth;
+        }
+    }
+
     public void OnPhotonPlayerConnected(Player newPlayer)
     {
         if (photonView.IsMine)
         {
-            photonView.RPC("RpcSyncHealth", newPlayer, health);
+            photonView.RPC(nameof(RpcSyncHealth), newPlayer, health);
         }
     }
 

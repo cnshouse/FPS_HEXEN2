@@ -2,21 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public class bl_UserMetaData
+namespace MFPS.ULogin
 {
-    public RawData rawData = new RawData();
-
-    public override string ToString()
-    {
-        string data = JsonUtility.ToJson(this);
-        return data;
-    }
-
     [Serializable]
-    public class RawData
+    public class bl_UserMetaData
     {
-        public string WeaponsLoadouts;
-        public int ClassKit = 0;
+        public RawData rawData = new RawData();
+
+        public override string ToString()
+        {
+            string data = JsonUtility.ToJson(this);
+            return data;
+        }
+
+        [Serializable]
+        public class RawData
+        {
+            public string WeaponsLoadouts;
+            public int ClassKit = 0;
+        }
     }
 }

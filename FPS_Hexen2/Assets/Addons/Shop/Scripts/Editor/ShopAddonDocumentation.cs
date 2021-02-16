@@ -8,7 +8,7 @@ public class ShopAddonDocumentation : TutorialWizard
 {
     //required//////////////////////////////////////////////////////
     private const string ImagesFolder = "mfps2/editor/shop/";
-    private NetworkImages[] ServerImages = new NetworkImages[]
+    private NetworkImages[] m_ServerImages = new NetworkImages[]
     {
         new NetworkImages{Name = "img-1.jpg", Image = null},
         new NetworkImages{Name = "img-2.jpg", Image = null},
@@ -32,7 +32,7 @@ public class ShopAddonDocumentation : TutorialWizard
     public override void OnEnable()
     {
         base.OnEnable();
-        base.Initizalized(ServerImages, AllSteps, ImagesFolder);
+        base.Initizalized(m_ServerImages, AllSteps, ImagesFolder);
         GUISkin gs = Resources.Load<GUISkin>("content/MFPSEditorSkin") as GUISkin;
         if (gs != null)
         {

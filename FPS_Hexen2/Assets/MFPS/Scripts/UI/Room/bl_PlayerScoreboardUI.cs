@@ -13,22 +13,25 @@ public class bl_PlayerScoreboardUI : MonoBehaviour
     [SerializeField] private Image LevelIcon = null;
     public Text levelNumberText;
 
-    private Player cachePlayer = null;
-    private bl_UIReferences UIReference;
     private bool isInitializated = false;
     private Image BackgroundImage;
     private Team InitTeam = Team.None;
-    private bl_AIMananger.BotsStats Bot;
+    public bl_AIMananger.BotsStats Bot { get; set; }
+    public bool isBotBinding { get; set; } = false;
+    public Player cachePlayer { get; set; }
 
-    public void Init(Player player, bl_UIReferences uir, bl_AIMananger.BotsStats bot = null)
+    /// <summary>
+    /// 
+    /// </summary>
+    public void Init(Player player, bl_AIMananger.BotsStats bot = null)
     {
         Bot = bot;
-        UIReference = uir;
         BackgroundImage = GetComponent<Image>();
+        isBotBinding = bot != null;
 
         if (Bot != null)
         {
-            InitBot();
+            UpdateBot();
             return;
         }
 
@@ -54,7 +57,7 @@ public class bl_PlayerScoreboardUI : MonoBehaviour
         else { KickButton.SetActive(false); }
 #if LM
          LevelIcon.gameObject.SetActive(true);
-        LevelInfo li = bl_LevelManager.Instance.GetPlayerLevelInfo(cachePlayer);
+         var li = bl_LevelManager.Instance.GetPlayerLevelInfo(cachePlayer);
          LevelIcon.sprite = li.Icon;
         if (levelNumberText != null) levelNumberText.text = li.LevelID.ToString();
 #else
@@ -62,16 +65,22 @@ public class bl_PlayerScoreboardUI : MonoBehaviour
 #endif
     }
 
-    public void Refresh()
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool Refresh()
     {
-        if (Bot != null) { InitBot(); return; }
+        if (Bot != null || isBotBinding) {  return UpdateBot(); }
 
         if (cachePlayer == null || cachePlayer.GetPlayerTeam() != InitTeam)
         {
-            UIReference.RemoveUIPlayer(this);
-            Destroy(gameObject);
+            if (!bl_PlayerScoreboard.Instance.RemoveUIBinding(this))
+            {
+                Destroy();
+            }
+            return false;
         }
-        if (!cachePlayer.CustomProperties.ContainsKey(PropertiesKeys.KillsKey)) return;
+        if (!cachePlayer.CustomProperties.ContainsKey(PropertiesKeys.KillsKey)) return true;
 
         NameText.text = cachePlayer.NickNameAndRole();
         KillsText.text = cachePlayer.CustomProperties[PropertiesKeys.KillsKey].ToString();
@@ -84,17 +93,27 @@ public class bl_PlayerScoreboardUI : MonoBehaviour
         }
         else { KickButton.SetActive(false); }
 #if LM
-        LevelInfo li = bl_LevelManager.Instance.GetPlayerLevelInfo(cachePlayer);
+        var li = bl_LevelManager.Instance.GetPlayerLevelInfo(cachePlayer);
         LevelIcon.sprite = li.Icon;
         if (levelNumberText != null) levelNumberText.text = li.LevelID.ToString();
 #endif
+        return true;
     }
 
     /// <summary>
     /// 
     /// </summary>
-    public void InitBot()
+    public bool UpdateBot()
     {
+        if (Bot == null || string.IsNullOrEmpty(Bot.Name) || !bl_AIMananger.Instance.BotsStatistics.Exists(x => x.Name == Bot.Name))
+        {
+            if (!bl_PlayerScoreboard.Instance.RemoveUIBinding(this))
+            {
+                Destroy();
+                return false;
+            }
+        }
+
         gameObject.name = Bot.Name;
         NameText.text = Bot.Name;
         KillsText.text = Bot.Kills.ToString();
@@ -103,6 +122,7 @@ public class bl_PlayerScoreboardUI : MonoBehaviour
         InitTeam = Bot.Team;
         KickButton.SetActive(false);
         LevelIcon.gameObject.SetActive(false);
+        return true;
     }
 
     public void Kick()
@@ -125,7 +145,12 @@ public class bl_PlayerScoreboardUI : MonoBehaviour
 
     void OnEnable()
     {
-        if (cachePlayer == null && isInitializated)
+        if (cachePlayer == null && !isBotBinding && isInitializated)
+        {
+            Destroy(gameObject);
+            isInitializated = true;
+        }
+        else if (isBotBinding && Bot == null && isInitializated)
         {
             Destroy(gameObject);
             isInitializated = true;

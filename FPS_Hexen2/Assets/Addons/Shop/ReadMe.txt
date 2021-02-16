@@ -1,10 +1,9 @@
 Thanks for purchase Shop Addon for MFPS 2.0
-Version 1.1.2
+Version 1.1.6
 
 Require:---------------------------------------------------------------------
-MFPS 2.0 v1.6++
-ULogin Pro v1.6++
-Unity 2017.4++
+MFPS 2.0 v1.8++
+ULogin Pro v1.9++
 
 Optional:
 Class Customization 1.4++ (Optional)
@@ -25,6 +24,17 @@ forum:http://www.lovattostudio.com/forum/index.php
 email: contact.lovattostudio@gmail.com
 
 Change Log:
+
+1.1.6
+Fix: Purchase items were not being saved.
+
+1.1.5
+Compatibility with ULogin Pro 1.9
+Compatibility with Paypal Checkout addon.
+Improve: Now is easier to modify the product item UI.
+Fix: Error when open the coins window without open the shop window before.
+Improve: Localized the Shop UI text
+Improve: Now you can change the price prefix '$' in ShopData -> Price Prefix.
 
 1.1.2
 Fix: Error with Unity IAP addon after make a coin purchase.

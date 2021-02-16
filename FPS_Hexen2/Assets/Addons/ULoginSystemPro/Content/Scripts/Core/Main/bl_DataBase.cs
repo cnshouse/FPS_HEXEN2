@@ -4,30 +4,36 @@ using System;
 using UnityEngine.Networking;
 using MFPS.ULogin;
 
-public class bl_DataBase : MonoBehaviour
+public class bl_DataBase : bl_LoginProBase
 {
     [Header("Local User Info")]
     public LoginUserInfo LocalUser;
 
-    private float StartPlayTime = 0;
+    #region Public properties
     public bool isLogged { get; set; }
-    private bool isSavingData = false;
     public string CacheAccessToken { get; set; }
-    private bl_LoginProDataBase Data;
     public bool isGuest { get; set; }
+    public string RSAPublicKey { get; set; }
+    public static LoginUserInfo LocalLoggedUser => Instance.LocalUser;
+    #endregion
+
+    #region Private members
+    private int TasksRunning = 0;
+    private bl_LoginProDataBase Data;
+    private float StartPlayTime = 0;
+    #endregion
 
     public delegate void OnUpdateDataEvent(LoginUserInfo userInfo);
     public static OnUpdateDataEvent OnUpdateData;
 
-    private int TasksRunning = 0;
-    private bl_ULoginWebRequest _webRequest;
-    public bl_ULoginWebRequest WebRequest { get { if (_webRequest == null) { _webRequest = new bl_ULoginWebRequest(this); } return _webRequest; } }
+    public static LoginUserInfo LocalUserInstance => Instance.LocalUser;
 
     /// <summary>
     /// 
     /// </summary>
     private void Awake()
     {
+        gameObject.name = "Database";
         DontDestroyOnLoad(gameObject);
         Data = bl_LoginProDataBase.Instance;
     }
@@ -43,7 +49,7 @@ public class bl_DataBase : MonoBehaviour
         if (Data.BanComprobationInMid)
         {
             float t = Data.CheckBanEach;
-            InvokeRepeating("BanComprobation", t, t);
+            InvokeRepeating(nameof(BanComprobation), t, t);
         }
         if(info.UserStatus == LoginUserInfo.Status.Admin || info.UserStatus == LoginUserInfo.Status.Moderator)
         {
@@ -74,21 +80,22 @@ public class bl_DataBase : MonoBehaviour
     /// <param name="value">value to save (string or int)</param>
     public void SaveValue(string key, object value, Action callBack = null)
     {
-        var wf = bl_DataBaseUtils.CreateWWWForm();
-        wf.AddField("typ", 8);
-        wf.AddField("name", LocalUser.ID);
-        wf.AddField("key", key);
-        wf.AddField("data", (string)value);
+        var wf = bl_DataBaseUtils.CreateWWWForm(FormHashParm.Name, true);
+        wf.AddSecureField("typ", 8);
+        wf.AddSecureField("id", LocalUser.ID);
+        wf.AddSecureField("key", key);
+        wf.AddSecureField("data", (string)value);
 
         WebRequest.POST(DataBaseURL, wf, (result) =>
          {
              if (!result.isError)
              {
-                 if (result.Text.Contains("save"))
+                 if (result.resultState == ULoginResult.Status.Success)
                  {
                      Debug.Log($"{key} value saved!");
-                 }else
-                 result.Print();
+                 }
+                 else
+                     result.Print();
              }
              else
              {
@@ -107,51 +114,45 @@ public class bl_DataBase : MonoBehaviour
     }
 
     /// <summary>
-    /// Start record the play time from this exactly moment
+    /// Update the given fields of the logged user in the external database
     /// </summary>
-    public void RecordTime()
+    public void UpdateUserData(ULoginUpdateFields fieldsToUpdate, Action<bool> callback = null)
     {
-        StartPlayTime = Time.time;
-        //Debug.Log("Start track play time on : " + StartPlayTime);
-    }
-
-    /// <summary>
-    /// stop record time and save and sum this play time to the store 
-    /// in database
-    /// </summary>
-    public void StopAndSaveTime()
-    {
-        if (LocalUser == null || isGuest)
+        if (LocalUser == null || !isLogged || isGuest)
+        {
+            Debug.LogWarning("To save data user have to be log-in.");
             return;
-        if (StartPlayTime <= 0)
-            return;
+        }
+        if (fieldsToUpdate == null) return;
 
-        float total = Time.time - StartPlayTime;
-        int seconds = Mathf.FloorToInt(total);
-        StartCoroutine(SetPlayTime(seconds));
-    }
+        var wf = CreateForm(false, true);
+        wf.AddSecureField("hash", bl_DataBaseUtils.CreateSecretHash(LocalUser.LoginName));
+        wf.AddSecureField("name", LocalUser.LoginName);
+        wf.AddSecureField("id", LocalUser.ID);
+        wf.AddSecureField("typ", 0);
+        wf = fieldsToUpdate.AddToWebForm(wf);
 
-    /// <summary>
-    /// Set local data to data base
-    /// </summary>
-    public void SaveData()
-    {
-        if (!isLogged || LocalUser == null || isGuest)
-            return;
+        WebRequest.POST(GetURL(bl_LoginProDataBase.URLType.DataBase), wf, (result) =>
+        {
+            if (result.isError)
+            {
+                result.PrintError();
+                callback?.Invoke(false);
+                return;
+            }
+            if (ULoginSettings.FullLogs) result.Print();
 
-        StartCoroutine(IESaveData());
-    }
-
-    /// <summary>
-    /// Set local data to data base
-    /// </summary>
-    public Coroutine SaveData(int score, int kills, int deaths)
-    {
-        if (!isLogged || LocalUser == null || isGuest)
-            return null;
-
-        LocalUser.SetNewData(score, kills, deaths);
-        return StartCoroutine(IESaveData());
+            if (result.resultState == ULoginResult.Status.Success)
+            {
+                Debug.LogFormat("Data update successfully for user: {0}", LocalUser.NickName);
+                FireUpdateData();
+            }
+            else if (result.resultState == ULoginResult.Status.Fail)
+            {
+                Debug.Log("Update user data fail, that could be caused to the data sent were the same that the one already saved.");
+            }
+            callback?.Invoke(true);
+        });
     }
 
     /// <summary>
@@ -160,13 +161,7 @@ public class bl_DataBase : MonoBehaviour
     /// <param name="newCoins"></param>
     public void SaveNewCoins(int newCoins)
     {
-        if (newCoins <= 0)
-            return;
-        if (!isLogged || LocalUser == null || isGuest)
-            return;
-
-        int allCoins = LocalUser.Coins + newCoins;
-        StartCoroutine(SetGameCoins(allCoins));
+        UpdateUserCoins(newCoins, ULoginCoinsOp.Add);
     }
 
     /// <summary>
@@ -175,77 +170,58 @@ public class bl_DataBase : MonoBehaviour
     /// <param name="coins"></param>
     public bool SubtractCoins(int coins)
     {
-        if (!isLogged || LocalUser == null || isGuest)
-            return false;
-
-        int userCoins = LocalUser.Coins;
-        int result = userCoins - coins;
-        if(result > 0)
-        {
-            StartCoroutine(SetGameCoins(result));
-        }
-        else
-        {
-            Debug.LogWarning("User wallet can't be negative, coins will not be saved!.");
-        }
-        return result > 0;
+        UpdateUserCoins(coins, ULoginCoinsOp.Deduct);
+        return true;
     }
 
     /// <summary>
-    /// Save the user coins
+    /// Update user coins.
     /// </summary>
-    /// <param name="Coins">the user coins to save</param>
-    public void SavenAllCoins(int Coins)
+    /// <param name="coins"></param>
+    /// <param name="coinsOp">add or deduct coins?</param>
+    public void UpdateUserCoins(int coins, ULoginCoinsOp coinsOp, Action callback = null)
     {
-        if (!isLogged || LocalUser == null || isGuest)
-            return;
+        if (!IsUserLogged) return;
 
-        StartCoroutine(SetGameCoins(Coins));
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    IEnumerator IESaveData()
-    {
-        TasksRunning++;
-        if (isSavingData) { yield break; }
-        isSavingData = true;
-        WWWForm wf = new WWWForm();
-        string hash = bl_DataBaseUtils.Md5Sum(LocalUser.LoginName + bl_LoginProDataBase.Instance.SecretKey).ToLower();
-        wf = LocalUser.AddData(wf);
-        wf.AddField("name", LocalUser.LoginName);
-        wf.AddField("typ", 1);
-        wf.AddField("hash", hash);
-
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.DataBase), wf))
+        if(coinsOp == ULoginCoinsOp.Deduct && (LocalUser.Coins - coins) <= 0)
         {
+            Debug.LogWarning("User wallet shouldn't be negatived.");
+        }
 
-            yield return www.SendWebRequest();
+        var wf = CreateForm(FormHashParm.Name, true);
+        wf.AddSecureField("id", LocalUser.ID);
+        wf.AddSecureField("typ", 6);
+        wf.AddSecureField("values", coins);
+        wf.AddSecureField("key", (int)coinsOp);
 
-            if (www.error == null && !www.isNetworkError)
+        WebRequest.POST(GetURL(bl_LoginProDataBase.URLType.DataBase), wf, (result) =>
+        {
+            if (result.isError)
             {
-                if (www.downloadHandler.text.Contains("success"))
+                Debug.Log(result.RawText);
+                result.PrintError();
+                return;
+            }
+            if (ULoginSettings.FullLogs) result.Print();
+
+            if (result.resultState == ULoginResult.Status.Success)
+            {
+                int newCoins = 0;
+                if (int.TryParse(result.Text, out newCoins))
                 {
-                    Debug.Log("<color=green>User data save!</color>");
-#if LM
-             bl_LevelManager.Instance.Check(LocalUser.Score);
-#endif
+                    LocalUser.Coins = newCoins;
+                    Debug.LogFormat("User coins updated, the new total is: {0}", newCoins);
                     FireUpdateData();
                 }
                 else
                 {
-                    Debug.Log(www.downloadHandler.text);
+                    Debug.LogWarning("Unknown response: " + result.RawText);
                 }
             }
-            else
-            {
-                Debug.LogError(www.error);
-            }
-        }
-        TasksRunning--;
-        isSavingData = false;
+            else result.Print(true);
+
+            callback?.Invoke();
+        });
     }
 
 #if CLANS
@@ -288,50 +264,17 @@ public class bl_DataBase : MonoBehaviour
     }
 #endif
 
-    IEnumerator SetGameCoins(int coins)
-    {
-        WWWForm wf = new WWWForm();
-        string hash = bl_DataBaseUtils.Md5Sum(LocalUser.ID + bl_LoginProDataBase.Instance.SecretKey).ToLower();
-        wf.AddField("coins", coins);
-        wf.AddField("name", LocalUser.ID);
-        wf.AddField("typ", 6);
-        wf.AddField("hash", hash);
-
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.DataBase), wf))
-        {
-            yield return www.SendWebRequest();
-
-            if (!www.isNetworkError)
-            {
-                if (www.downloadHandler.text.Contains("save"))
-                {
-                    LocalUser.Coins = coins;
-                    Debug.Log("Player coins store successfully!");
-                    FireUpdateData();
-                }
-                else
-                {
-                    Debug.Log(www.downloadHandler.text);
-                }
-            }
-            else
-            {
-                Debug.LogError(www.error);
-            }
-        }
-    }
-
     /// <summary>
     /// Store virtual coins that has been acquired by purchase
-    /// if the coins was NOT acquired real purchase use SaveNewCoins() function instead
+    /// if the coins was NOT acquired by a real purchase use SaveNewCoins() function instead
     /// </summary>
     public void SetCoinPurchase(CoinPurchaseData data, Action<bool> callback)
     {
-        var wf = bl_DataBaseUtils.CreateWWWForm();
-        wf.AddField("typ", 7);
-        wf.AddField("name", LocalUser.ID);
-        wf.AddField("data", JsonUtility.ToJson(data));
-
+        var wf = CreateForm(FormHashParm.Name, true);
+        wf.AddSecureField("typ", 7);
+        wf.AddSecureField("id", LocalUser.ID);
+        var jsonData = JsonUtility.ToJson(data);
+        wf.AddField("data", jsonData);
         WebRequest.POST(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.DataBase), wf, (result) =>
         {
             result.Print();
@@ -339,46 +282,9 @@ public class bl_DataBase : MonoBehaviour
             {
                 LocalUser.Coins = int.Parse(result.Text.Trim());
             }
+
             if (callback != null) { callback.Invoke(result.resultState == ULoginResult.Status.Success); }
         });
-    }
-
-    IEnumerator SetPlayTime(int plusSeconds)
-    {
-        TasksRunning++;
-        WWWForm wf = new WWWForm();
-        string hash = bl_DataBaseUtils.Md5Sum(LocalUser.LoginName + bl_LoginProDataBase.Instance.SecretKey).ToLower();
-        wf.AddField("playTime", plusSeconds);
-        wf.AddField("name", LocalUser.LoginName);
-        wf.AddField("typ", 3);
-        wf.AddField("hash", hash);
-
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.DataBase), wf))
-        {
-            yield return www.SendWebRequest();
-
-            if (www.error == null && !www.isNetworkError)
-            {
-                if (www.downloadHandler.text.Contains("successpt"))
-                {
-                   // Debug.Log(www.downloadHandler.text);
-                    LocalUser.PlayTime += plusSeconds;
-                    TimeSpan t = TimeSpan.FromSeconds((double)LocalUser.PlayTime);
-                    string answer = string.Format("{0:D2}h:{1:D2}m", t.Hours, t.Minutes);
-                    Debug.Log("Save Time: " + plusSeconds + " Total Play Time: " + answer);
-                    FireUpdateData();
-                }
-                else
-                {
-                    Debug.Log(www.downloadHandler.text);
-                }
-            }
-            else
-            {
-                Debug.LogError(www.error);
-            }
-        }
-        TasksRunning--;
     }
 
     /// <summary>
@@ -386,119 +292,114 @@ public class bl_DataBase : MonoBehaviour
     /// </summary>
     void BanComprobation()
     {
-        StartCoroutine(CheckBan());
+        WWWForm wf = new WWWForm();
+        wf.AddField("typ", 3);
+        wf.AddField("name", LocalUser.LoginName);
+        wf.AddField("ip", LocalUser.IP);
+
+        WebRequest.POST(GetURL(bl_LoginProDataBase.URLType.BanList), wf, (result) =>
+          {
+              if(result.isError)
+              {
+                  result.PrintError();
+                  CancelInvoke();
+                  return;
+              }
+
+              if(result.HTTPCode == 302)
+              {
+                  Debug.Log("You're banned");
+                  bl_DataBaseUtils.LoadLevel(0);
+              }
+          });
+    }
+
+    /// <summary>
+    /// Verify if user exist
+    /// </summary>
+    public static void CheckIfUserExist(MonoBehaviour reference, string where, string index, Action<bool> callback)
+    {
+        bl_ULoginWebRequest webRequest = new bl_ULoginWebRequest(reference);
+        var wf = bl_DataBaseUtils.CreateWWWForm(FormHashParm.Name, true);
+        wf.AddSecureField("typ", 4);
+        wf.AddSecureField("key", where);
+        wf.AddSecureField("values", index);
+
+        webRequest.POST(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.DataBase), wf, (result) =>
+        {
+            if (result.isError)
+            {
+                result.PrintError();
+                return;
+            }
+
+            callback?.Invoke(result.resultState == ULoginResult.Status.Success);
+        });
+    }
+
+    /// <summary>
+    /// Start record the play time from this exactly moment
+    /// </summary>
+    public void RecordTime()
+    {
+        StartPlayTime = Time.time;
+        //Debug.Log("Start track play time on : " + StartPlayTime);
+    }
+
+    /// <summary>
+    /// stop record time and save and sum this play time to the store 
+    /// in database
+    /// </summary>
+    public void StopAndSaveTime()
+    {
+        if (!IsUserLogged)
+            return;
+        if (StartPlayTime <= 1)
+            return;
+
+        float total = Time.time - StartPlayTime;
+        int minutes = Mathf.CeilToInt(total);
+        if (minutes <= 1)
+            return;
+
+        var wf = CreateForm(FormHashParm.Name, true);
+        wf.AddSecureField("id", LocalUser.ID);
+        wf.AddSecureField("values", minutes);
+        wf.AddSecureField("typ", 3);
+
+        WebRequest.POST(GetURL(bl_LoginProDataBase.URLType.DataBase), wf, (result) =>
+        {
+            if (result.isError)
+            {
+                result.PrintError();
+                return;
+            }
+            if (ULoginSettings.FullLogs) result.Print();
+
+            if (result.resultState == ULoginResult.Status.Success)
+            {
+                LocalUser.PlayTime += minutes;
+                TimeSpan t = TimeSpan.FromMinutes((double)LocalUser.PlayTime);
+                string answer = string.Format("{0:D2}h:{1:D2}m", t.Hours, t.Minutes);
+                Debug.Log("Save Time: " + minutes + " Total Play Time: " + answer);
+                FireUpdateData();
+            }
+        });
     }
 
     /// <summary>
     /// 
     /// </summary>
-    void FireUpdateData()
-    {
-        if (OnUpdateData != null)
-            OnUpdateData.Invoke(LocalUser);
-    }
+    void FireUpdateData() => OnUpdateData?.Invoke(LocalUser);
 
     /// <summary>
-    /// 
+    /// Set local data to data base
     /// </summary>
-    /// <returns></returns>
-    IEnumerator CheckBan()
+    [Obsolete("Use 'bl_ULoginMFPS.SaveLocalPlayerKDS' instead")]
+    public Coroutine SaveData(int score, int kills, int deaths)
     {
-        WWWForm wf = new WWWForm();
-        wf.AddField("typ", 1);
-        wf.AddField("name", LocalUser.LoginName);
-
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.BanList), wf))
-        {
-            yield return www.SendWebRequest();
-
-            if (www.error == null && !www.isNetworkError)
-            {
-                if (www.downloadHandler.text.Contains("yes"))
-                {
-                    Debug.Log("You're banned");
-                    bl_DataBaseUtils.LoadLevel(0);
-                }
-            }
-            else
-            {
-                Debug.LogError(www.error);
-                CancelInvoke("BanComprobation");
-            }
-        }
-    }
-
-    public void GetUserInfo(string userName)
-    {
-        StartCoroutine(GetUserNameRequest(userName));
-    }
-
-    IEnumerator GetUserNameRequest(string userName)
-    {
-        WWWForm wf = new WWWForm();
-        wf.AddField("typ", 2);
-        wf.AddField("name", LocalUser.LoginName);
-
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.RequestUser), wf))
-        {
-            yield return www.SendWebRequest();
-
-            if (www.error == null)
-            {
-                if (www.downloadHandler.text.Contains("yes"))
-                {
-                    Debug.Log("You banned");
-                    bl_DataBaseUtils.LoadLevel(0);
-                }
-            }
-            else
-            {
-                Debug.LogError(www.error);
-                CancelInvoke("BanComprobation");
-            }
-        }
-    }
-
-    public void BanLocalUser(string reason)
-    {
-        StartCoroutine(BanUser(reason));
-    }
-
-    IEnumerator BanUser(string reason)
-    {
-        //Used for security check for authorization to modify database
-        string hash = bl_DataBaseUtils.Md5Sum(LocalUser.LoginName + bl_LoginProDataBase.Instance.SecretKey).ToLower();
-        WWWForm wf = new WWWForm();
-        wf.AddField("name", LocalUser.LoginName);
-        wf.AddField("reason", reason);
-        wf.AddField("myIP", LocalUser.IP);
-        wf.AddField("mBy", "Admin");
-        wf.AddField("type", 1);
-        wf.AddField("hash", hash);
-
-        using (UnityWebRequest w = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Ban), wf))
-        {
-            yield return w.SendWebRequest();
-
-            if (w.error == null && !w.isNetworkError)
-            {
-                string result = w.downloadHandler.text;
-                if (result.Contains("success"))
-                {
-                    Debug.Log("Banned");
-                    FireUpdateData();
-                }
-                else
-                {
-                    Debug.Log(result);
-                }
-            }
-            else
-            {
-                Debug.LogError(w.error);
-            }
-        }
-        bl_UtilityHelper.LoadLevel(0);
+        bl_ULoginMFPS.SaveLocalPlayerKDS();
+        return null;
     }
 
     /// <summary>
@@ -524,6 +425,8 @@ public class bl_DataBase : MonoBehaviour
 
     public bool IsRunningTask { get { return TasksRunning > 0; } }
     public string DataBaseURL => bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.DataBase);
+
+    public static bool IsUserLogged => Instance != null && Instance.LocalUser != null && Instance.isLogged && !Instance.isGuest;
 
     private static bl_DataBase _Instance;
     public static bl_DataBase Instance

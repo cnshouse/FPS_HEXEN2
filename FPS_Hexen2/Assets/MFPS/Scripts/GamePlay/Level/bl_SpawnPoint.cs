@@ -3,29 +3,29 @@
 using MFPSEditor;
 #endif
 
-public class bl_SpawnPoint : bl_PhotonHelper {
+public class bl_SpawnPoint : MonoBehaviour {
 
     public Team m_Team = Team.All;
     public float SpawnSpace = 3f;
-    private bl_GameManager Manager;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    void Start()
-    {
-        if (transform.GetComponent<Renderer>() != null)
-        {
-            GetComponent<Renderer>().enabled = false;
-        }
-    }
+    public static implicit operator Transform(bl_SpawnPoint d) => d.transform;
 
     /// <summary>
     /// 
     /// </summary>
     void OnEnable()
     {
-       bl_GameManager.Instance.RegisterSpawnPoint(this);
+        bl_SpawnPointManager.Instance.AddSpawnPoint(this);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void GetSpawnPosition(out Vector3 position, out Quaternion Rotation)
+    {
+        Vector3 s = Random.insideUnitSphere * SpawnSpace;
+        position = transform.position + new Vector3(s.x, 0.55f, s.z);
+        Rotation = transform.rotation;
     }
 
 #if UNITY_EDITOR
@@ -37,13 +37,14 @@ public class bl_SpawnPoint : bl_PhotonHelper {
 
     private void OnDrawGizmos()
     {
-        if (Manager == null) { Manager = bl_GameManager.Instance; }
-        if(Manager != null && Manager.DrawSpawnPoints) { Draw(); }
+        if (bl_SpawnPointManager.Instance == null || !bl_SpawnPointManager.Instance.drawSpawnPoints) return;
+        Draw();
     }
 
     void Draw()
     {
-        if (Manager == null) { Manager = bl_GameManager.Instance; }
+        if (bl_SpawnPointManager.Instance == null) return;
+
         float h = 180;
         if (_gizmo == null || _gizmo.horizon != h)
         {
@@ -54,9 +55,9 @@ public class bl_SpawnPoint : bl_PhotonHelper {
         if (m_Team == Team.All) { c = Color.white; }
         Gizmos.color = c;
         _gizmo.Draw(transform, c, SpawnSpace);
-        if (Manager != null && Manager.SpawnPointPlayerGizmo != null)
+        if (bl_SpawnPointManager.Instance.SpawnPointPlayerGizmo != null)
         {
-            Gizmos.DrawWireMesh(Manager.SpawnPointPlayerGizmo, transform.position, transform.rotation, Vector3.one * 2.75f);
+            Gizmos.DrawWireMesh(bl_SpawnPointManager.Instance.SpawnPointPlayerGizmo, transform.position, transform.rotation, Vector3.one * 2.75f);
         }
         Gizmos.DrawLine(base.transform.position + ((base.transform.forward * this.SpawnSpace)), base.transform.position + (((base.transform.forward * 2f) * this.SpawnSpace)));
     }

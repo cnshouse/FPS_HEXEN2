@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using MFPSEditor;
 using UnityEditor.SceneManagement;
-using MFPS.PlayerSelector;
+using MFPS.Addon.PlayerSelector;
 
 public class PlayerSelectorInitializer : MonoBehaviour
 {

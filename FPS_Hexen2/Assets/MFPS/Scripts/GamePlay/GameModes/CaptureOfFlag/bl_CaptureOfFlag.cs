@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using ExitGames.Client.Photon;
-using Photon.Realtime;
+﻿using Photon.Realtime;
 using UnityEngine;
 using Photon.Pun;
+using MFPS.GameModes.CaptureOfFlag;
 
 public class bl_CaptureOfFlag : bl_PhotonHelper, IGameMode
 {

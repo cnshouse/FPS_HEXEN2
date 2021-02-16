@@ -4,99 +4,82 @@ using System.Collections;
 using UnityEngine.AI;
 using Photon.Pun;
 using Photon.Realtime;
+using NetHashTable = ExitGames.Client.Photon.Hashtable;
+using MFPS.Runtime.AI;
+using MFPSEditor;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
+public class bl_AIShooterAgent : bl_AIShooter
 {
+    #region Public Members
     [Space(5)]
-    [Header("AI Settings")]
-    public AIAgentBehave agentBehave = AIAgentBehave.Agressive;
-    [LovattoToogle]public bool GetRandomTargetOnStart = true;
-    [LovattoToogle] public bool forceFollowAtHalfHealth = true;
+    [ScriptableDrawer] public bl_AIBehaviorSettings behaviorSettings;
+    [ScriptableDrawer] public bl_AISoldierSettings soldierSettings;
 
-    [Header("Speeds")]
-    public float walkSpeed = 4;
-    public float RunSpeed = 8;
-    public float crounchSpeed = 2;
-    public float RotationLerp = 6.0f;
 
-    [Header("Cover")]
-    public float maxCoverTime = 10;
-
-    [Space(5)]
     [Header("AutoTargets")]
-    public float UpdatePlayerEach = 5f;
-    public List<Transform> PlayersInRoom = new List<Transform>();//All Players in room
-
-    [Header("Ranges")]
-    public float FollowRange = 10.0f;       //when the AI starts to chase the player
-    public float LookRange = 25.0f;   //when the AI starts to look at the player
-    public float PatrolRadius = 20f; //Radius for get the random point
-    public float LosseRange = 50f;
+    public float updatePlayersEach = 5f;
 
     [Header("Others")]
     public LayerMask ObstaclesLayer;
     public bool DebugStates = false;
 
     [Header("References")]
-    public Transform AimTarget;
-    [SerializeField] private AudioSource FootStepSource;
-    [SerializeField] private AudioClip[] FootSteps;
+    public Transform aimTarget;
+    #endregion
 
-    public AIAgentState AgentState { get; set; } = AIAgentState.Idle;
-    public Team AITeam { get; set; } = Team.None;
-
-    //Privates
-    private Vector3 correctPlayerPos = Vector3.zero; // We lerp towards this
-    private Quaternion correctPlayerRot = Quaternion.identity; // We lerp towards this
+    #region Public Properties
+    public override Transform AimTarget
+    {
+        get => aimTarget;
+    }
+    public bl_Footstep footstep;
     public NavMeshAgent Agent { get; set; }
-    public bool death { get; set; }
     public bool personal { get; set; }
-
-    private Animator Anim;
     public bool playerInFront { get; set; }
+    public bool ObstacleBetweenTarget { get; set; }
+    public bl_AIShooterWeapon AIWeapon { get; set; }
+    public bl_AIShooterHealth AIHealth { get; set; }
+    public float CachedTargetDistance { get; set; } = 0;
+    public string DebugLine { get; set; }//last ID 34
+    public List<Transform> PlayersInRoom { get; set; } = new List<Transform>();//All Players in room
+    public AILookAt LookingAt { get; private set; } = AILookAt.Path;
+    public bool IsCrouch { get; set; } = false;
+    #endregion
+
+    #region Private members
+    private Animator Anim;
     private Vector3 finalPosition;
     private float lastPathTime = 0;
     private bl_AIAnimation AIAnim;
-    private float stepTime;
-  
-    [HideInInspector] public Vector3 vel;
     private bl_AICovertPointManager CoverManager;
     private bl_AIMananger AIManager;
     private bl_AICoverPoint CoverPoint = null;
     private bool ForceCoverFire = false;
-    public bool ObstacleBetweenTarget { get; set; }
     private float CoverTime = 0;
-    private bool lookToDirection = false;
     private Vector3 LastHitDirection;
     private int SwitchCoverTimes = 0;
     private float lookTime = 0;
     private bool randomOnStartTake = false;
     private bool AllOrNothing = false;
     private bl_MatchTimeManager TimeManager;
-    public bl_AIShooterWeapon AIWeapon { get; set; }
-    public bl_AIShooterHealth AIHealth { get; set; }
-    public float CachedTargetDistance { get; set; } = 0;
     private bl_NamePlateDrawer DrawName;
     private GameMode m_GameMode;
     private float time = 0;
     private float delta = 0;
     private Transform m_Transform;
     private float nextEnemysCheck = 0;
-    private bl_AIMananger.BotsStats BotStat = null;
     private bool isGameStarted = false;
-    private bool firstPackage = false;
-    public string DebugLine { get; set; }//last ID 34
-
-    private Transform m_Target;
-    public Transform Target
-    {
-        get { return m_Target; }
-        set
-        {
-            m_Target = value;
-        }
-    }
+    private Vector3 targetDirection = Vector3.zero;
+    RaycastHit obsRay;
+    private float lastDestinationTime = 0;
+    private float velocityMagnitud = 0;
+    private bool forceUpdateRotation = false;
+    private Vector3 localRotation = Vector3.zero;
+    private int[] animationHash = new int[] { 0 };
+    private bool wasTargetInSight = false;
+    public const string RPC_NAME = "RPCShooterBot";
+    #endregion
 
     /// <summary>
     /// 
@@ -106,146 +89,29 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         base.Awake();
         m_Transform = transform;
         bl_PhotonCallbacks.PlayerEnteredRoom += OnPhotonPlayerConnected;
-        bl_AIMananger.OnMaterStatsReceived += OnMasterStatsReceived;
-        bl_AIMananger.OnBotStatUpdate += OnBotStatUpdate;
-        Agent = this.GetComponent<NavMeshAgent>();
-        AIAnim = GetComponentInChildren<bl_AIAnimation>();
-        AIHealth = GetComponent<bl_AIShooterHealth>();
-        AIWeapon = GetComponent<bl_AIShooterWeapon>();
+        Agent = References.Agent;
+        AIAnim = References.aiAnimation;
+        AIHealth = References.shooterHealth;
+        AIWeapon = References.shooterWeapon;
         Anim = GetComponentInChildren<Animator>();
         ObstacleBetweenTarget = false;
-        CoverManager = FindObjectOfType<bl_AICovertPointManager>();
-        AIManager = CoverManager.GetComponent<bl_AIMananger>();
+        AIManager = bl_AIMananger.Instance;
+        CoverManager = AIManager.GetComponent<bl_AICovertPointManager>();
         TimeManager = bl_MatchTimeManager.Instance;
-        DrawName = GetComponent<bl_NamePlateDrawer>();
+        DrawName = References.namePlateDrawer;
         m_GameMode = GetGameMode;
-
-        GetEssentialData();
+        Agent.updateRotation = false;
+        animationHash[0] = Animator.StringToHash("Crouch");
     }
 
     /// <summary>
     /// 
     /// </summary>
-    public void Init()
+    public override void Init()
     {
         isGameStarted = TimeManager.TimeState == RoomTimeState.Started;
-        InvokeRepeating("UpdateList", 0, UpdatePlayerEach);
-        CheckNamePlate();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    void GetEssentialData()
-    {
-        object[] data = photonView.InstantiationData;
-        AIName = (string)data[0];
-        AITeam = (Team)data[1];
-        gameObject.name = AIName;
-        CheckNamePlate();
-        //since Non master client doesn't update the view ID when bots are created, lets do it on Start
-        if (!PhotonNetwork.IsMasterClient)
-        {
-            AIManager.UpdateBotView(this, photonView.ViewID);
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    void OnMasterStatsReceived(List<bl_AIMananger.BotsStats> stats)
-    {
-        ApplyMasterInfo(stats);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    void ApplyMasterInfo(List<bl_AIMananger.BotsStats> stats)
-    {
-        int viewID = photonView.ViewID;
-        bl_AIMananger.BotsStats bs = stats.Find(x => x.ViewID == viewID);
-        if (bs != null)
-        {
-            AIName = bs.Name;
-            AITeam = bs.Team;
-            gameObject.name = AIName;
-            BotStat = new bl_AIMananger.BotsStats();
-            BotStat.Name = AIName;
-            BotStat.Score = bs.Score;
-            BotStat.Kills = bs.Kills;
-            BotStat.Deaths = bs.Deaths;
-            BotStat.ViewID = bs.ViewID;
-            bl_EventHandler.OnRemoteActorChange(AIName, BuildPlayer(), true);
-            CheckNamePlate();
-        }
-    }
-
-    void OnBotStatUpdate(bl_AIMananger.BotsStats stat)
-    {
-        if (stat.ViewID != photonView.ViewID) return;
-
-        BotStat = stat;
-        AIName = stat.Name;
-        AITeam = BotStat.Team;
-        gameObject.name = AIName;
-        bl_EventHandler.OnRemoteActorChange(AIName, BuildPlayer(), true);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    private MFPSPlayer BuildPlayer(bool isAlive = true)
-    {
-        MFPSPlayer player = new MFPSPlayer()
-        {
-            Name = AIName,
-            ActorView = photonView,
-            isRealPlayer = false,
-            Actor = transform,
-            AimPosition = AimTarget,
-            Team = AITeam,
-            isAlive = isAlive,
-        };
-        return player;
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.IsWriting)
-        {
-            stream.SendNext(m_Transform.localPosition);
-            stream.SendNext(m_Transform.rotation);
-            stream.SendNext(Agent.velocity);
-        }
-        else
-        {
-            correctPlayerPos = (Vector3)stream.ReceiveNext();
-            correctPlayerRot = (Quaternion)stream.ReceiveNext();
-            vel = (Vector3)stream.ReceiveNext();
-
-            //Fix the translation effect on remote clients
-            if (!firstPackage)
-            {
-                m_Transform.localPosition = correctPlayerPos;
-                m_Transform.rotation = correctPlayerRot;
-                firstPackage = true;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public void CheckTargets()
-    {
-        if(Target != null && Target.name.Contains("(die)"))
-        {
-            ResetTarget();
-        }
+        InvokeRepeating(nameof(UpdateList), 0, updatePlayersEach);
+        References.shooterNetwork.CheckNamePlate();
     }
 
     /// <summary>
@@ -255,22 +121,9 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     {
         time = Time.time;
         delta = Time.deltaTime;
-        if (death) return;
+        if (isDeath) return;
         isNewDebug = true;
-        if (!PhotonNetwork.IsMasterClient)//if not master client, then get position from server
-        {
-            m_Transform.localPosition = Vector3.Lerp(m_Transform.localPosition, correctPlayerPos, delta * 7);
-            m_Transform.rotation = Quaternion.Lerp(m_Transform.rotation, correctPlayerRot, delta * 7);
-        }
-        else
-        {
-            vel = Agent.velocity;
-            if (TimeManager.isFinish)
-            {
-                Agent.isStopped = true;
-                return;
-            }
-        }
+
         if (!isGameStarted) return;
         if (Target != null)
         {
@@ -283,6 +136,7 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
                 OnCovering();
             }
         }
+        LookAtControl();
     }
 
     /// <summary>
@@ -290,26 +144,71 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     /// </summary>
     public override void OnSlowUpdate()
     {
-        if (death) return;
+        if (isDeath) return;
         if (TimeManager.isFinish || !isGameStarted)
         {
             return;
         }
 
-        if (Target == null)
+        velocityMagnitud = Agent.velocity.magnitude;
+
+        if (!HasATarget)
         {
             SetDebugState(-1, true);
             //Get the player nearest player
             SearchPlayers();
-            //if target null yet, the patrol         
-             RandomPatrol(!isOneTeamMode);
+            //if target null yet, then patrol         
+            RandomPatrol(!isOneTeamMode);
         }
         else
         {
             CheckEnemysDistances();
-            CalculateAngle();
+            CheckVision();
         }
         FootStep();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void OnAgentStateChanged(AIAgentState from, AIAgentState to)
+    {
+
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void OnTargetChanged(Transform from, Transform to)
+    {
+
+    }
+
+    /// <summary>
+    /// Called when the bot not direct vision to the target -> have direct vision to the target and vice versa
+    /// </summary>
+    /// <param name="from">seeing?</param>
+    /// <param name="to">seeing?</param>
+    private void OnTargetLineOfSightChanged(bool from, bool to)
+    {
+        if(from == true)//the player lost the line of vision with the target
+        {
+            if(HasATarget && TargetDistance > 5)//he lost the target but not cuz it is death.
+            Invoke(nameof(CorrectLookAt), 3);//if after 3 second of loss the target, still now found it -> don't look at it (trough walls for example)
+        }
+        else//player now has direct vision to the target
+        {
+            if(AgentState == AIAgentState.Following)
+            CancelInvoke(nameof(CorrectLookAt));
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void CorrectLookAt()
+    {
+        SetLookAtState(AILookAt.PathToTarget);
     }
 
     /// <summary>
@@ -318,53 +217,21 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     void TargetControll()
     {
         CachedTargetDistance = bl_UtilityHelper.Distance(Target.position, m_Transform.localPosition);
-        if (CachedTargetDistance >= LosseRange)
+        if (CachedTargetDistance >= soldierSettings.limitRange)
         {
-            if (AgentState == AIAgentState.Following || personal)
-            {
-                if (!isOneTeamMode)
-                {
-                    if(!Agent.hasPath || (Time.frameCount % 300) == 0)
-                    SetDestination(TargetPosition, 3);                  
-                }
-                else
-                {
-                    RandomPatrol(true);
-                }
-                SetDebugState(0, true); 
-            }
-            else if (AgentState == AIAgentState.Searching)
-            {
-                SetDebugState(1, true);
-                RandomPatrol(true);
-            }
-            else
-            {
-                SetDebugState(2, true);
-                ResetTarget();
-                RandomPatrol(false);
-                AgentState = AIAgentState.Patroling;
-            }
-            Speed = walkSpeed;
-            if (!AIWeapon.isFiring)
-            {
-                Anim.SetInteger("UpperState", 4);
-            }
+            WhenTargetOutOfRange();
         }
-        else if (CachedTargetDistance > FollowRange && CachedTargetDistance < LookRange)//look range
+        else if (CachedTargetDistance > soldierSettings.closeRange && CachedTargetDistance < soldierSettings.mediumRange)
         {
-            SetDebugState(3, true);
-            OnTargetInSight(false);
+            WhenTargetOnMediumRange();
         }
-        else if (CachedTargetDistance <= FollowRange)
+        else if (CachedTargetDistance <= soldierSettings.closeRange)
         {
-            SetDebugState(4, true);
-            Follow();
+            WhenTargetOnCloseRange();
         }
-        else if (CachedTargetDistance < LosseRange)
+        else if (CachedTargetDistance < soldierSettings.limitRange)
         {
-            SetDebugState(5, true);
-            OnTargetInSight(true);
+            WhenTargetOnLimitRange();
         }
         else
         {
@@ -376,65 +243,144 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     /// <summary>
     /// 
     /// </summary>
+    void WhenTargetOutOfRange()
+    {
+        if (behaviorSettings.targetOutRangeBehave == AITargetOutRangeBehave.SearchNewNearestTarget)
+        {
+            var newTarget = GetNearestPlayer;
+            if (newTarget != Target)
+            {
+                SetTarget(newTarget);
+                return;
+            }
+        }
+
+        if (AgentState == AIAgentState.Following || personal)
+        {
+            if (!isOneTeamMode)
+            {
+                //update the target position each 300 frames
+                if (!Agent.hasPath || (Time.frameCount % 300) == 0)
+                    if (bl_UtilityHelper.Distance(TargetPosition, Agent.destination) > 1)//update the path only if the target has moved substantially
+                        SetDestination(TargetPosition, 3);
+            }
+            else
+            {
+                //in one team mode, when the target is in the limit range
+                //the bot will start to random patrol instead of following the player.
+                RandomPatrol(true);
+            }
+            SetDebugState(0, true);
+        }
+        else if (AgentState == AIAgentState.Searching)
+        {
+            SetDebugState(1, true);
+            RandomPatrol(true);
+        }
+        else
+        {
+            SetDebugState(2, true);
+            SetTarget(null);
+            RandomPatrol(false);
+            SetState(AIAgentState.Patroling);
+        }
+        Speed = soldierSettings.walkSpeed;
+        if (!AIWeapon.isFiring)
+        {
+            Anim.SetInteger("UpperState", 4);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void WhenTargetOnMediumRange()
+    {
+        SetDebugState(3, true);
+        OnTargeContest(false);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void WhenTargetOnCloseRange()
+    {
+        SetDebugState(4, true);
+        Follow();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void WhenTargetOnLimitRange()
+    {
+        SetDebugState(5, true);
+        OnTargeContest(true);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     void OnCovering()
     {
         if (Target != null)
         {
             CachedTargetDistance = TargetDistance;
-            if (CachedTargetDistance <= LookRange && playerInFront)//if in look range and in front, start follow him and shot
+            if (CachedTargetDistance <= soldierSettings.mediumRange && playerInFront)//if in look range and in front, start follow him and shot
             {
-                if (agentBehave == AIAgentBehave.Agressive)
+                if (behaviorSettings.agentBehave == AIAgentBehave.Agressive)
                 {
                     SetDebugState(6, true);
                     if (!Agent.hasPath)
                     {
-                        AgentState = AIAgentState.Following;
+                        SetState(AIAgentState.Following);
                         SetDestination(TargetPosition, 3);
                     }
                 }
                 else //to covert point and looking to it
                 {
                     SetDebugState(7, true);
-                    AgentState = AIAgentState.Covering;
+                    SetState(AIAgentState.Covering);
                     if (!Agent.hasPath)
                     {
                         Cover(false);
                     }
                 }
-                AIWeapon.Fire();
+                TriggerFire();
             }
-            else if (CachedTargetDistance > LosseRange && CanCover(7))// if out of line of sight, start searching him
+            else if (CachedTargetDistance > soldierSettings.limitRange && CanCover(7))// if out of line of sight, start searching him
             {
                 SetDebugState(8, true);
-                AgentState = AIAgentState.Searching;
+                SetState(AIAgentState.Searching);
                 SetCrouch(false);
-                AIWeapon.Fire(bl_AIShooterWeapon.FireReason.OnMove);
+                TriggerFire( bl_AIShooterWeapon.FireReason.OnMove);
             }
             else if (ForceCoverFire && !ObstacleBetweenTarget)//if bot is cover and still get damage, start shoot at the target (panic)
             {
                 SetDebugState(9, true);
-                AIWeapon.Fire(bl_AIShooterWeapon.FireReason.Forced);
-                if (CanCover(maxCoverTime)) { SwichCover(); }
+                TriggerFire(bl_AIShooterWeapon.FireReason.Forced);
+                if (CanCover(behaviorSettings.maxCoverTime)) { SwitchCover(); }
             }
-            else if (CanCover(maxCoverTime) && CachedTargetDistance >= 7)//if has been a time since cover and nothing happen, try a new spot.
+            else if (CanCover(behaviorSettings.maxCoverTime) && CachedTargetDistance >= 7)//if has been a time since cover and nothing happen, try a new spot.
             {
                 SetDebugState(10, true);
-                SwichCover();
-                AIWeapon.Fire(bl_AIShooterWeapon.FireReason.OnMove);
+                SwitchCover();
+                TriggerFire(bl_AIShooterWeapon.FireReason.OnMove);
             }
             else
             {
                 if (playerInFront)
                 {
-                    Speed = walkSpeed;
-                    AIWeapon.Fire(bl_AIShooterWeapon.FireReason.Forced);
+                    Speed = soldierSettings.walkSpeed;
+                    TriggerFire(bl_AIShooterWeapon.FireReason.Forced);
                     SetDebugState(11, true);
                 }
                 else
                 {
                     SetDebugState(12, true);
-                    Speed = RunSpeed;
-                    Look();
+                    Speed = soldierSettings.runSpeed;
+                    CheckConfrontation();
+                    TriggerFire(bl_AIShooterWeapon.FireReason.OnMove);
                     SetCrouch(false);
                 }
             }
@@ -443,25 +389,17 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         {
             if (CoverPoint != null && CoverPoint.Crouch) { SetCrouch(true); }//and the point required crouch -> do crouch
         }
-        if (lookToDirection)
-        {
-            LookToHitDirection();
-        }
-        else
-        {
-            LookAtTarget();
-        }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    bool Cover(bool overridePoint, AIAgentCoverArea coverArea = AIAgentCoverArea.ToPoint)
+    private bool Cover(bool overridePoint, AIAgentCoverArea coverArea = AIAgentCoverArea.ToPoint)
     {
         //if the target if far, there's not point in cover right now
-        if (agentBehave == AIAgentBehave.Agressive && CachedTargetDistance > 20)
+        if (behaviorSettings.agentBehave == AIAgentBehave.Agressive && CachedTargetDistance > 20)
         {
-            AgentState = AIAgentState.Following;
+            SetState(AIAgentState.Following);
             return false;
         }
         Transform t = transform;
@@ -499,12 +437,12 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         if (CoverPoint != null)//if a point was found
         {
             SetDebugState(15);
-            Speed = playerInFront ? walkSpeed : RunSpeed;
+            Speed = playerInFront ? soldierSettings.walkSpeed : soldierSettings.runSpeed;
             SetDestination(CoverPoint.transform.position, 0.1f);
-            AgentState = AIAgentState.Covering;
+            SetState(AIAgentState.Covering);
             CoverTime = time;
-            AIWeapon.Fire(agentBehave == AIAgentBehave.Agressive ? bl_AIShooterWeapon.FireReason.Normal : bl_AIShooterWeapon.FireReason.OnMove);
-            LookAtTarget();
+            TriggerFire(behaviorSettings.agentBehave == AIAgentBehave.Agressive ? bl_AIShooterWeapon.FireReason.Normal : bl_AIShooterWeapon.FireReason.OnMove);
+            //LookAtTarget();
             return true;
         }
         else
@@ -515,9 +453,9 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
                 SetDebugState(16);
                 //follow the target
                 SetDestination(TargetPosition, 3);
-                Speed = CachedTargetDistance < 20 ? walkSpeed : RunSpeed;
+                DetermineSpeedBaseOnRange();
                 personal = true;//and follow not matter the distance
-                AgentState = AIAgentState.Searching;
+                SetState(AIAgentState.Searching);
             }
             else//if don't have a target
             {
@@ -525,7 +463,7 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
                 //Force to get a covert point
                 CoverPoint = CoverManager.GetCloseCoverForced(m_Transform);
                 SetDestination(CoverPoint.transform.position, 0.1f);
-                Speed = Probability(0.5f) ? walkSpeed : RunSpeed;
+                Speed = Probability(0.5f) ? soldierSettings.walkSpeed : soldierSettings.runSpeed;
             }
             return false;
         }
@@ -541,9 +479,9 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         if (AgentState != AIAgentState.Covering)
         {
             //if the AI is following and attacking the target he will not look for cover point
-            if (AgentState == AIAgentState.Following && TargetDistance <= LookRange)
+            if (AgentState == AIAgentState.Following && TargetDistance <= soldierSettings.mediumRange && !ObstacleBetweenTarget)
             {
-                lookToDirection = true;
+                SetLookAtState(AILookAt.Target);
                 return;
             }
             Cover(false);
@@ -553,13 +491,13 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
             //if already in a cover and still get shoots from far away will force the AI to fire.
             if (!playerInFront)
             {
-                lookToDirection = true;
+                SetLookAtState(AILookAt.Target);
                 Cover(true);
             }
             else
             {
                 ForceCoverFire = true;
-                lookToDirection = false;
+                SetLookAtState(AILookAt.HitDirection);
             }
             //if the AI is cover but still get hit, he will search other cover point 
             if (AIHealth.Health <= 50 && Agent.pathStatus == NavMeshPathStatus.PathComplete)
@@ -572,18 +510,7 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     /// <summary>
     /// 
     /// </summary>
-    void LookAtTarget()
-    {
-        if (Target == null) return;
-
-        Quaternion rotation = Quaternion.LookRotation(Target.position - m_Transform.localPosition);
-        m_Transform.rotation = Quaternion.Slerp(m_Transform.rotation, rotation, delta * RotationLerp);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    void SwichCover()
+    void SwitchCover()
     {
         if (Agent.pathStatus != NavMeshPathStatus.PathComplete)
             return;
@@ -595,7 +522,7 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         }
         else
         {
-            AgentState = AIAgentState.Following;
+            SetState(AIAgentState.Following);
             SetDestination(TargetPosition, 3);
             SwitchCoverTimes = 0;
             AllOrNothing = true;//go straight to the target to confront him
@@ -605,11 +532,11 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     /// <summary>
     /// When the target is at look range
     /// </summary>
-    void OnTargetInSight(bool overrideCover)
+    void OnTargeContest(bool overrideCover)
     {
         if (AgentState == AIAgentState.Following || ForceFollowAtHalfHealth)
         {
-            if (!Cover(overrideCover) || CanCover(maxCoverTime) || AllOrNothing)
+            if (!Cover(overrideCover) || CanCover(behaviorSettings.maxCoverTime) || AllOrNothing)
             {
                 if (CachedTargetDistance <= 3)
                 {
@@ -624,10 +551,10 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
             }
             else
             {
-                if(Target != null)
+                if (Target != null)
                 {
                     bl_AIShooterWeapon.FireReason fr = TargetDistance < 12 ? bl_AIShooterWeapon.FireReason.Forced : bl_AIShooterWeapon.FireReason.OnMove;
-                    AIWeapon.Fire(fr);
+                    TriggerFire(fr);
                 }
                 SetDebugState(19);
                 SetCrouch(true);
@@ -648,9 +575,9 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         else
         {
             SetDebugState(23);
-            Look();
+            CheckConfrontation();
             SetCrouch(false);
-            Speed = (Target != null && CachedTargetDistance > 20) ? RunSpeed : walkSpeed;
+            DetermineSpeedBaseOnRange();
         }
     }
 
@@ -666,113 +593,111 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
             if (enemy != null)
             {
                 float Distance = bl_UtilityHelper.Distance(enemy.position, m_Transform.localPosition);//if a player in range, get this
-                bl_AIShooterAgent aisa = enemy.root.GetComponent<bl_AIShooterAgent>();
+                bl_AIShooter aisa = enemy.root.GetComponent<bl_AIShooter>();
                 if (aisa == null || enemy.name.Contains("(die)") || aisa.isDeath) continue;
 
-                if (isOneTeamMode)
+                if (Distance < soldierSettings.mediumRange)//if in range
                 {
-                    if (Distance < LookRange)//if in range
-                    {
-                        GetTarget(PlayersInRoom[i]);//get this player
-                    }
-                }
-                else
-                {
-                    if (Distance < LookRange && aisa.AITeam != AITeam)//if in range
-                    {
-                        GetTarget(PlayersInRoom[i]);//get this player
-                    }
+                    if (!isOneTeamMode && aisa.AITeam == AITeam) continue;
+
+                    //get this player
+                    if (GetTarget(PlayersInRoom[i])) break;
                 }
             }
         }
 
         if (PhotonNetwork.IsMasterClient && !randomOnStartTake && PlayersInRoom.Count > 0)
         {
-            if (GetRandomTargetOnStart)
+            if (behaviorSettings.GetRandomTargetOnStart)
             {
-                Target = PlayersInRoom[Random.Range(0, PlayersInRoom.Count)];
+                SetTarget(PlayersInRoom[Random.Range(0, PlayersInRoom.Count)]);
                 randomOnStartTake = true;
             }
         }
-        if (Target == null)
+        if (!HasATarget)
         {
-            if (AgentState == AIAgentState.Following || AgentState == AIAgentState.Looking) { AgentState = AIAgentState.Searching; }
+            if (AgentState == AIAgentState.Following || AgentState == AIAgentState.Looking) { SetState(AIAgentState.Searching); }
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    void CalculateAngle()
+    void CheckVision()
     {
-        if (Target == null || !PhotonNetwork.IsMasterClient)
+        if (!HasATarget || !PhotonNetwork.IsMasterClient)
         {
             ObstacleBetweenTarget = false;
             return;
         }
 
-        Vector3 relative = m_Transform.InverseTransformPoint(Target.position);
-        if ((relative.x < 2f && relative.x > -2f) || (relative.x > -2f && relative.x < 2f))
-        {
-            //target is in front
-            playerInFront = true;
-        }
-        else
-        {
-            playerInFront = false;
-        }
-        if(Physics.Linecast(AIWeapon.FirePoint.position, TargetPosition,out obsRay, ObstaclesLayer, QueryTriggerInteraction.Ignore))
+        Vector3 relative = m_Transform.InverseTransformPoint(TargetPosition);
+        playerInFront = (relative.x < 2f && relative.x > -2f) || (relative.x > -2f && relative.x < 2f);
+
+        if (Physics.Linecast(AIWeapon.FirePoint.position, TargetPosition, out obsRay, ObstaclesLayer, QueryTriggerInteraction.Ignore))
         {
             ObstacleBetweenTarget = obsRay.transform.root.CompareTag(bl_PlayerSettings.LocalTag) == false;
         }
         else { ObstacleBetweenTarget = false; }
-        Debug.DrawLine(AIWeapon.FirePoint.position, TargetPosition, Color.red);
+
+        if(wasTargetInSight != ObstacleBetweenTarget)
+        {
+            OnTargetLineOfSightChanged(wasTargetInSight, ObstacleBetweenTarget);
+            wasTargetInSight = ObstacleBetweenTarget;
+        }
     }
-    RaycastHit obsRay;
 
     /// <summary>
-    /// If player not in range then the AI patrol in map
+    /// If a enemy is not in range, then make the AI randomly patrol in the map
     /// </summary>
+    /// <param name="precision">Patrol closed to the enemy's area</param>
     void RandomPatrol(bool precision)
     {
-        if (death)
+        if (isDeath)
             return;
 
-        float precisionArea = PatrolRadius;
+        float precisionArea = soldierSettings.farRange;
         if (precision)
         {
-            if (TargetDistance < LookRange)
+            if (TargetDistance < soldierSettings.mediumRange)
             {
                 SetDebugState(24);
-                if (Target == null)
+                if (!HasATarget)
                 {
-                    Target = GetNearestPlayer;
+                    SetTarget(GetNearestPlayer);
                 }
-                AgentState = agentBehave == AIAgentBehave.Protective ? AIAgentState.Covering : AIAgentState.Looking;
+                SetState(behaviorSettings.agentBehave == AIAgentBehave.Protective ? AIAgentState.Covering : AIAgentState.Looking);
                 precisionArea = 5;
             }
             else
             {
                 SetDebugState(25);
-                AgentState = agentBehave == AIAgentBehave.Agressive ? AIAgentState.Following : AIAgentState.Searching;
+                SetState(behaviorSettings.agentBehave == AIAgentBehave.Agressive ? AIAgentState.Following : AIAgentState.Searching);
                 precisionArea = 8;
             }
         }
         else
         {
             SetDebugState(26);
-            AgentState = AIAgentState.Patroling;
+            SetState(AIAgentState.Patroling);
+            if (behaviorSettings.agentBehave == AIAgentBehave.Agressive && !HasATarget)
+            {
+                SetTarget(GetNearestPlayer);
+                SetCrouch(false);
+            }
             ForceCoverFire = false;
         }
-        lookToDirection = false;
+
+        SetLookAtState(AILookAt.Path);
         AIWeapon.isFiring = false;
-        if (!Agent.hasPath || TargetDistance <= 5.2f || (time - lastPathTime) > 5)
+
+        if (!Agent.hasPath || (time - lastPathTime) > 5)
         {
             SetDebugState(27);
-            bool toAnCover = (Random.value <= 0.1f);//probability of get a cover point as random destination (1 of 10)
+            bool toAnCover = (Random.value <= behaviorSettings.randomCoverProbability);//probability of get a cover point as random destination
             Vector3 randomDirection = TargetPosition + (Random.insideUnitSphere * precisionArea);
             if (toAnCover) { randomDirection = CoverManager.GetCoverOnRadius(transform, 20).transform.position; }
-            if (Target == null && m_GameMode == GameMode.FFA)
+            if (!HasATarget && isOneTeamMode)
             {
                 randomDirection += m_Transform.localPosition;
             }
@@ -780,7 +705,7 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
             NavMesh.SamplePosition(randomDirection, out hit, precisionArea, 1);
             finalPosition = hit.position;
             lastPathTime = time + Random.Range(0, 5);
-            Speed = (CachedTargetDistance > LookRange) ? RunSpeed : walkSpeed;
+            DetermineSpeedBaseOnRange();
             SetCrouch(false);
         }
         else
@@ -794,16 +719,202 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
                 SetDebugState(32);
             }
         }
-        SetDestination(finalPosition, 1);
+        SetDestination(finalPosition, 1, true);
     }
 
     /// <summary>
     /// 
     /// </summary>
-    public void SetDestination(Vector3 position, float stopedDistance)
+    public void KillTheTarget()
     {
+        if (!HasATarget) return;
+
+        SetTarget(null);
+        var data = bl_UtilityHelper.CreatePhotonHashTable();
+        data.Add("type", AIRemoteCallType.SyncTarget);
+        data.Add("viewID", -1);
+
+        photonView.RPC(RPC_NAME, RpcTarget.Others, data);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void CheckConfrontation()
+    {
+        if (AgentState != AIAgentState.Covering)
+        {
+            if (lookTime >= 5)
+            {
+                SetState(AIAgentState.Following);
+                lookTime = 0;
+                return;
+            }
+            lookTime += delta;
+            SetState(AIAgentState.Looking);
+        }
+
+        TriggerFire();
+        SetCrouch(playerInFront && !ObstacleBetweenTarget);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void LookAtControl()
+    {
+        if ((Time.frameCount % bl_AIMananger.Instance.updateBotsLookAtEach) == 0 || forceUpdateRotation)
+        {
+            if (LookingAt != AILookAt.Path && !HasATarget)
+            {
+                LookingAt = AILookAt.Path;
+            }
+
+            switch (LookingAt)
+            {
+                case AILookAt.Path:
+                case AILookAt.PathToTarget:
+                    int cID = Agent.path.corners.Length > 1 ? 1 : 0;
+                    var v = Agent.path.corners[cID];
+                    v.y = m_Transform.localPosition.y + 0.2f;
+                    LookAtPosition = v;
+
+                    v = LookAtPosition - m_Transform.localPosition;
+                    LookAtDirection = v;
+                    break;
+                case AILookAt.Target:
+                    v = TargetPosition;
+                    v.y += 0.22f;
+                    LookAtPosition = v;
+                    LookAtDirection = LookAtPosition - m_Transform.localPosition;
+                    break;
+                case AILookAt.HitDirection:
+                    LookAtPosition = LastHitDirection;
+                    LookAtDirection = LookAtPosition - m_Transform.localPosition;
+                    if (LookAtDirection == Vector3.zero) { LookAtDirection = m_Transform.localPosition + (m_Transform.forward * 10); }
+                    break;
+            }
+
+            if (bl_UtilityHelper.Distance(m_Transform.localPosition, LookAtPosition) <= 0.55f)
+            {
+                LookAtPosition = m_Transform.localPosition + (m_Transform.forward * 10);
+                LookAtDirection = LookAtPosition - m_Transform.localPosition;
+            }
+
+            localRotation = m_Transform.localEulerAngles;
+            localRotation.y = Quaternion.LookRotation(LookAtDirection).eulerAngles.y;
+
+            forceUpdateRotation = false;
+        }
+
+        m_Transform.localRotation = Quaternion.Slerp(m_Transform.localRotation, Quaternion.Euler(localRotation), delta * soldierSettings.rotationSmoothing);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void Follow()
+    {
+        if (AgentState == AIAgentState.Covering && Random.value > 0.5f) return;
+
+        SetLookAtState(AILookAt.Target);
+
+        SetCrouch(false);
+        SetDestination(TargetPosition, 3);
+        if (CachedTargetDistance <= 3)
+        {
+            Speed = soldierSettings.walkSpeed;
+            if (Cover(true, AIAgentCoverArea.ToTarget))
+            {
+                SetDebugState(29);
+            }
+            else if (Cover(true, AIAgentCoverArea.ToRandomPoint))
+            {
+                SetDebugState(30);
+            }
+            else
+            {
+                SetDebugState(34);
+                SetDestination(m_Transform.position - (m_Transform.forward * 3), 0.1f);
+            }
+            SetState(AIAgentState.Covering);
+            CheckConfrontation();
+            SetCrouch(false);
+            TriggerFire(bl_AIShooterWeapon.FireReason.Forced);
+        }
+        else
+        {
+            DetermineSpeedBaseOnRange();
+            SetDebugState(33);
+            TriggerFire();
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void TriggerFire(bl_AIShooterWeapon.FireReason reason = bl_AIShooterWeapon.FireReason.Normal)
+    {
+        if (LookingAt == AILookAt.Path) SetLookAtState(AILookAt.Target);
+
+        AIWeapon.Fire(reason);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void DetermineSpeedBaseOnRange()
+    {
+        Speed = (Target != null && CachedTargetDistance > soldierSettings.mediumRange) ? soldierSettings.runSpeed : soldierSettings.walkSpeed;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void SetState(AIAgentState newState)
+    {
+        if (newState == AgentState) return;
+
+        OnAgentStateChanged(AgentState, newState);
+        AgentState = newState;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void SetTarget(Transform newTarget)
+    {
+        if (Target == newTarget) return;
+
+        OnTargetChanged(Target, newTarget);
+        Target = newTarget;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void SetLookAtState(AILookAt newLookAt)
+    {
+        if (LookingAt == newLookAt) return;
+        if(LookingAt == AILookAt.PathToTarget && newLookAt == AILookAt.Target)
+        {
+            if (ObstacleBetweenTarget) return;
+        }
+
+        LookingAt = newLookAt;
+        forceUpdateRotation = true;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void SetDestination(Vector3 position, float stopedDistance, bool checkRate = false)
+    {
+        if (checkRate && (time - lastDestinationTime) < 2) return;
+
         Agent.stoppingDistance = stopedDistance;
         Agent.SetDestination(position);
+        lastDestinationTime = time;
     }
 
     /// <summary>
@@ -815,97 +926,16 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         {
             crouch = false;
         }
-        Anim.SetBool("Crouch", crouch);
-        Speed = crouch ? crounchSpeed : walkSpeed;
-    }
-   
-    /// <summary>
-    /// 
-    /// </summary>
-    public void KillTheTarget()
-    {
-        if (Target == null) return;
-
-        Target = null;
-        photonView.RPC("ResetTarget", RpcTarget.All);
-    }
-
-    /// <summary>
-    /// Force AI to look the target
-    /// </summary>
-    void Look()
-    {
-        if (AgentState != AIAgentState.Covering)
+        Anim.SetBool(animationHash[0], crouch);
+        Speed = crouch ? soldierSettings.crounchSpeed : soldierSettings.walkSpeed;
+        if(IsCrouch != crouch)
         {
-            if (lookTime >= 5)
-            {
-                AgentState = AIAgentState.Following;
-                lookTime = 0;
-                return;
-            }
-            lookTime += delta;
-            AgentState = AIAgentState.Looking;
-        }
-        Quaternion rotation = Quaternion.LookRotation(TargetPosition - m_Transform.localPosition);
-        m_Transform.rotation = Quaternion.Slerp(m_Transform.rotation, rotation, delta * RotationLerp);
-        AIWeapon.Fire();
-        SetCrouch(playerInFront);
-        lookToDirection = false;
-    }
+            var data = bl_UtilityHelper.CreatePhotonHashTable();
+            data.Add("type", AIRemoteCallType.CrouchState);
+            data.Add("state", crouch);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    void LookToHitDirection()
-    {
-        if (LastHitDirection == Vector3.zero || Target == null)
-            return;
-
-        Vector3 rhs = Target.position - LastHitDirection;
-        if(rhs == Vector3.zero) { rhs = m_Transform.forward * 10; }
-
-        Quaternion rotation = Quaternion.LookRotation(rhs);
-        m_Transform.rotation = Quaternion.Slerp(m_Transform.rotation, rotation, delta * RotationLerp);
-        SetCrouch(playerInFront);
-        Speed = playerInFront ? walkSpeed : RunSpeed;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    void Follow()
-    {
-        if (AgentState == AIAgentState.Covering && Random.value > 0.5f) return;
-
-        lookToDirection = false;
-        SetCrouch(false);
-        SetDestination(TargetPosition, 3);
-        if (CachedTargetDistance <= 3)
-        {
-            Speed = walkSpeed;
-            if (Cover(true, AIAgentCoverArea.ToTarget))
-            {
-                SetDebugState(29);
-            }
-            else if(Cover(true, AIAgentCoverArea.ToRandomPoint))
-            {
-                SetDebugState(30);
-            }
-            else
-            {
-                SetDebugState(34);
-                SetDestination(m_Transform.position - (m_Transform.forward * 3), 0.1f);
-            }
-            AgentState = AIAgentState.Covering;
-            Look();
-            SetCrouch(false);
-            AIWeapon.Fire(bl_AIShooterWeapon.FireReason.Forced);
-        }
-        else
-        {
-            Speed = CachedTargetDistance > 20 ? RunSpeed : walkSpeed;
-            SetDebugState(33);
-            AIWeapon.Fire();
+            photonView.RPC(RPC_NAME, RpcTarget.Others, data);
+            IsCrouch = crouch;
         }
     }
 
@@ -915,7 +945,7 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     /// </summary>
     void CheckEnemysDistances()
     {
-        if (PlayersInRoom.Count <= 0) return;
+        if (!behaviorSettings.checkEnemysWhenHaveATarget || PlayersInRoom.Count <= 0) return;
         if (time < nextEnemysCheck) return;
 
         CachedTargetDistance = bl_UtilityHelper.Distance(m_Transform.localPosition, TargetPosition);
@@ -925,17 +955,17 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
             if (PlayersInRoom[i] == null || PlayersInRoom[i] == Target || PlayersInRoom[i].name.Contains("(die)")) continue;
             //calculate the distance from this other enemy
             float otherDistance = bl_UtilityHelper.Distance(m_Transform.localPosition, PlayersInRoom[i].position);
-            if (otherDistance > LosseRange) continue;//if this enemy is too far away...
+            if (otherDistance > soldierSettings.limitRange) continue;//if this enemy is too far away...
             //and check if it's nearest than the current target (5 meters close at least)
-            if(otherDistance < CachedTargetDistance && (CachedTargetDistance - otherDistance) > 5)
+            if (otherDistance < CachedTargetDistance && (CachedTargetDistance - otherDistance) > 5)
             {
                 //calculate the angle between this bot and the other enemy to check if it's in a "View Angle"
                 Vector3 targetDir = PlayersInRoom[i].position - m_Transform.localPosition;
                 float Angle = Vector3.Angle(targetDir, m_Transform.forward);
-                if(Angle > -55 && Angle < 55)
+                if (Angle > -55 && Angle < 55)
                 {
                     //so then get it as new dangerous target
-                    Target = PlayersInRoom[i];
+                    SetTarget(PlayersInRoom[i]);
                     //prevent to change target in at least the next 3 seconds
                     nextEnemysCheck = time + 3;
                 }
@@ -946,41 +976,26 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     /// <summary>
     /// 
     /// </summary>
-    void GetTarget(Transform t)
+    private bool GetTarget(Transform t)
     {
         if (t == null)
-            return;
+            return false;
 
-        Target = t;
+        SetTarget(t);
         PhotonView view = GetPhotonView(Target.root.gameObject);
         if (view != null)
         {
-            photonView.RPC("SyncTargetAI", RpcTarget.Others, view.ViewID);
+            var data = bl_UtilityHelper.CreatePhotonHashTable();
+            data.Add("type", AIRemoteCallType.SyncTarget);
+            data.Add("viewID", view.ViewID);
+            photonView.RPC(RPC_NAME, RpcTarget.Others, data);
+            return true;
         }
         else
         {
             Debug.Log("This Target " + Target.name + "no have photonview");
+            return false;
         }
-    }
-
-
-    [PunRPC]
-    void SyncTargetAI(int view)
-    {
-        GameObject pr = FindPlayerRoot(view);
-        if (pr == null) return;
-
-        Transform t = pr.transform;
-        if (t != null)
-        {
-            Target = t;
-        }
-    }
-
-    [PunRPC]
-    void ResetTarget()
-    {
-        Target = null;
     }
 
     /// <summary>
@@ -995,24 +1010,21 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     /// <summary>
     /// 
     /// </summary>
+    public override void CheckTargets()
+    {
+        if (Target != null && Target.name.Contains("(die)"))
+        {
+            SetTarget(null);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public void FootStep()
     {
-        float vel = Agent.velocity.magnitude;
-        if (vel < 1)
-            return;
-
-        float lenght = 0.6f;
-        if (vel > 5)
-        {
-            lenght = 0.45f;
-        }
-
-        if ((time - stepTime) > lenght)
-        {
-            stepTime = time;
-            FootStepSource.clip = FootSteps[Random.Range(0, FootSteps.Length)];
-            FootStepSource.Play();
-        }
+        if(velocityMagnitud > 0.2f)
+        footstep?.UpdateStep(Agent.speed);
     }
 
     /// <summary>
@@ -1053,28 +1065,12 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         }
     }
 
-    void CheckNamePlate()
-    {
-        DrawName.SetName(AIName);
-        if (!isOneTeamMode && bl_GameManager.Instance.LocalPlayer != null && !death)
-        {
-            DrawName.enabled = bl_GameManager.Instance.LocalPlayerTeam == AITeam;
-        }
-        else
-        {
-            DrawName.enabled = false;
-        }
-    }
-
     private float Speed
     {
-        get
-        {
-            return Agent.speed;
-        }
+        get => Agent.speed;
         set
         {
-            bool cr = Anim.GetBool("Crouch");
+            bool cr = Anim.GetBool(animationHash[0]);
             if (cr)
             {
                 Agent.speed = 2;
@@ -1087,7 +1083,27 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     }
 
     [PunRPC]
-    public void BotDestroyRpc(ExitGames.Client.Photon.Hashtable data, PhotonMessageInfo info)
+    public void RPCShooterBot(NetHashTable data, PhotonMessageInfo info)
+    {
+        var callType = (AIRemoteCallType)data["type"];
+        switch(callType)
+        {
+            case AIRemoteCallType.DestroyBot:
+                DestroyBot(data, info);
+                break;
+            case AIRemoteCallType.SyncTarget:
+                SyncTargetAI(data);
+                break;
+            case AIRemoteCallType.CrouchState:
+                Anim.SetBool(animationHash[0], (bool)data["state"]);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void DestroyBot(NetHashTable data, PhotonMessageInfo info)
     {
         if (data.ContainsKey("instant"))
         {
@@ -1099,6 +1115,28 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         }
         Vector3 position = (Vector3)data["direction"];
         StartCoroutine(DestroyNetwork(position, data.ContainsKey("explosion"), info));
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void SyncTargetAI(NetHashTable data)
+    {
+        var view = (int)data["viewID"];
+        if(view == -1)
+        {
+            SetTarget(null);
+            return;
+        }
+
+        GameObject pr = FindPlayerRoot(view);
+        if (pr == null) return;
+
+        Transform t = pr.transform;
+        if (t != null)
+        {
+            SetTarget(t);
+        }
     }
 
     IEnumerator DestroyNetwork(Vector3 position, bool isExplosion, PhotonMessageInfo info)
@@ -1113,7 +1151,7 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         if (!PhotonNetwork.IsMasterClient)
         {
             Destroy(this.gameObject);
-            yield return 0; // if you allow 1 frame to pass, the object's OnDestroy() method gets called and cleans up references.
+            yield return 0; // if you allow 1 frame to pass, the object's OnDestroy() method gets called and cleans up References.
         }
     }
 
@@ -1133,30 +1171,9 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         }
     }
 
-#if UNITY_EDITOR
-    private void OnDrawGizmosSelected()
-    {
-        if (!DebugStates) return;
-        if(m_Transform == null) { m_Transform = transform; }
-        Gizmos.color = Color.yellow;
-        bl_UtilityHelper.DrawWireArc(m_Transform.position, LosseRange, 360, 12, Quaternion.identity);
-        Gizmos.color = Color.white;
-        bl_UtilityHelper.DrawWireArc(m_Transform.position, PatrolRadius, 360, 12, Quaternion.identity);
-        Gizmos.color = Color.yellow;
-        bl_UtilityHelper.DrawWireArc(m_Transform.position, LookRange, 360, 12, Quaternion.identity);
-        Gizmos.color = Color.white;
-        bl_UtilityHelper.DrawWireArc(m_Transform.position, FollowRange, 360, 12, Quaternion.identity);
-    }
-#endif
     /// <summary>
     /// 
     /// </summary>
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-        bl_EventHandler.OnRemoteActorChange(AIName, BuildPlayer(false), false);
-    }
-
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -1164,19 +1181,21 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         bl_EventHandler.onMatchStart += OnMatchStart;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void OnDisable()
     {
         base.OnDisable();
         bl_EventHandler.onLocalPlayerSpawn -= OnLocalSpawn;
         bl_PhotonCallbacks.PlayerEnteredRoom -= OnPhotonPlayerConnected;
-        bl_AIMananger.OnMaterStatsReceived -= OnMasterStatsReceived;
-        bl_AIMananger.OnBotStatUpdate -= OnBotStatUpdate;
         bl_EventHandler.onMatchStart -= OnMatchStart;
     }
 
     void OnMatchStart() { isGameStarted = true; }
-    public void OnDeath() { CancelInvoke(); }
-    public Vector3 TargetPosition
+    public override void OnDeath() { CancelInvoke(); }
+
+    public override Vector3 TargetPosition
     {
         get
         {
@@ -1198,14 +1217,14 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
     {
         get
         {
-            if(PlayersInRoom.Count > 0)
+            if (PlayersInRoom.Count > 0)
             {
                 Transform t = null;
                 float d = 1000;
                 for (int i = 0; i < PlayersInRoom.Count; i++)
                 {
                     if (PlayersInRoom[i] == null || PlayersInRoom[i].name.Contains("(die)")) continue;
-                    float dis = bl_UtilityHelper.Distance(m_Transform.position, PlayersInRoom[i].position);
+                    float dis = bl_UtilityHelper.Distance(m_Transform.localPosition, PlayersInRoom[i].position);
                     if (dis < d)
                     {
                         d = dis;
@@ -1217,26 +1236,13 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
             else { return null; }
         }
     }
-    private string _ainame = string.Empty;
-    public string AIName
-    {
-        get
-        {
-            return _ainame;
-        }
-        set
-        {
-            _ainame = value;
-            gameObject.name = value;
-        }
-    }
 
     private MFPSPlayer m_MFPSActor;
     public MFPSPlayer BotMFPSActor
     {
         get
         {
-            if(m_MFPSActor == null) { m_MFPSActor = bl_GameManager.Instance.GetMFPSPlayer(AIName); }
+            if (m_MFPSActor == null) { m_MFPSActor = bl_GameManager.Instance.GetMFPSPlayer(AIName); }
             return m_MFPSActor;
         }
     }
@@ -1252,10 +1258,66 @@ public class bl_AIShooterAgent : bl_MonoBehaviour, IPunObservable
         DebugLine += $"&{stateID}";
     }
     public bool Probability(float probability) { return Random.value <= probability; }
-    public bool ForceFollowAtHalfHealth => AIHealth.Health < 50 && forceFollowAtHalfHealth;
+    public bool ForceFollowAtHalfHealth => AIHealth.Health < 50 && behaviorSettings.forceFollowAtHalfHealth;
 
     public float TargetDistance { get { return bl_UtilityHelper.Distance(m_Transform.position, TargetPosition); } }
+    public bool HasATarget { get => Target != null; }
     private bool CanCover(float inTimePassed) { return ((time - CoverTime) >= inTimePassed); }
-    public bool isTeamMate { get { return (AITeam == PhotonNetwork.LocalPlayer.GetPlayerTeam() && !isOneTeamMode); } }
-    public bool isDeath { get { return death; } }
+
+#if UNITY_EDITOR
+    /*
+    private void OnDrawGizmos()
+    {
+        if (isDeath) return;
+        if (Agent != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(Agent.destination, 0.3f);
+            Gizmos.DrawLine(m_Transform.localPosition, Agent.destination);
+
+            if (Agent.path != null && Agent.path.corners != null)
+            {
+                Gizmos.color = Color.yellow;
+                for (int i = 0; i < Agent.path.corners.Length; i++)
+                {
+                    if (i == 0)
+                    {
+                        // Gizmos.DrawSphere(Agent.path.corners[i], 0.05f);
+                        continue;
+                    }
+                    else if (i == 1)
+                    {
+                        Gizmos.DrawSphere(Agent.path.corners[i], 0.2f);
+                    }
+
+                    Gizmos.DrawLine(Agent.path.corners[i - 1], Agent.path.corners[i]);
+                }
+            }
+        }
+        if (Target != null)
+        {
+            Gizmos.color = playerInFront && !ObstacleBetweenTarget ? Color.green : Color.cyan;
+            Gizmos.DrawLine(m_Transform.localPosition, TargetPosition);
+        }
+        if (m_Transform == null) return;
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawLine(m_Transform.localPosition, LookAtPosition);
+        Gizmos.DrawWireCube(LookAtPosition, Vector3.one * 0.3f);
+    }
+    */
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!DebugStates || soldierSettings == null) return;
+        if (m_Transform == null) { m_Transform = transform; }
+        Gizmos.color = Color.yellow;
+        bl_UtilityHelper.DrawWireArc(m_Transform.position, soldierSettings.limitRange, 360, 12, Quaternion.identity);
+        Gizmos.color = Color.white;
+        bl_UtilityHelper.DrawWireArc(m_Transform.position, soldierSettings.farRange, 360, 12, Quaternion.identity);
+        Gizmos.color = Color.yellow;
+        bl_UtilityHelper.DrawWireArc(m_Transform.position, soldierSettings.mediumRange, 360, 12, Quaternion.identity);
+        Gizmos.color = Color.white;
+        bl_UtilityHelper.DrawWireArc(m_Transform.position, soldierSettings.closeRange, 360, 12, Quaternion.identity);
+    }
+#endif
 }

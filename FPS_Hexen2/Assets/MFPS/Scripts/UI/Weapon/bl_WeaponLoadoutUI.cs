@@ -5,13 +5,14 @@ using UnityEngine.UI;
 
 public class bl_WeaponLoadoutUI : MonoBehaviour
 {
-
-    [SerializeField] private RectTransform BackRect;
-    [SerializeField] private RectTransform[] SlotsGroups;
-    private Image[] IconsImg;
-    [SerializeField] private CanvasGroup Alpha;
+    [SerializeField]private LayoutShowMode showMode = LayoutShowMode.AutoHide;
+    [SerializeField] private RectTransform BackRect = null;
+    [SerializeField] private RectTransform[] SlotsGroups = null;
+    private Image[] IconsImg = null;
+    [SerializeField] private CanvasGroup Alpha = null;
 
     private int current = 0;
+    public bool CanShow { get; set; } = true;
 
     /// <summary>
     /// 
@@ -51,7 +52,14 @@ public class bl_WeaponLoadoutUI : MonoBehaviour
     /// </summary>
     public void ReplaceSlot(int slot, bl_Gun newGun)
     {
+        if(IconsImg[slot].sprite == null)
+        {
+            Color c = IconsImg[slot].color;
+            c.a = 1;
+            IconsImg[slot].color = c;
+        }
         IconsImg[slot].sprite = newGun.Info.GunIcon;
+        SlotsGroups[slot].gameObject.SetActive(true);
     }
 
     /// <summary>
@@ -59,10 +67,29 @@ public class bl_WeaponLoadoutUI : MonoBehaviour
     /// </summary>
     public void ChangeWeapon(int nextSlot)
     {
-        if (!bl_GameData.Instance.ShowWeaponLoadout) return;
+        if (!bl_GameData.Instance.ShowWeaponLoadout || !CanShow) return;
 
         StopAllCoroutines();
         StartCoroutine(ChangeSlot(nextSlot));
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void ClearAllIcons(bool playTransition = false)
+    {
+        for (int i = 0; i < IconsImg.Length; i++)
+        {
+            IconsImg[i].sprite = null;
+            Color c = IconsImg[i].color;
+            c.a = 0;
+            IconsImg[i].color = c;
+        }
+        if (playTransition)
+        {
+            StopAllCoroutines();
+            StartCoroutine(ChangeSlot(current));
+        }
     }
 
     /// <summary>
@@ -88,12 +115,57 @@ public class bl_WeaponLoadoutUI : MonoBehaviour
             BackRect.position = Vector3.Lerp(SlotsGroups[cacheActual].position, SlotsGroups[nextSlot].position, d);
             yield return null;
         }
-        yield return new WaitForSeconds(2.5f);
-        while (Alpha.alpha > 0)
+        if (ShowMode == LayoutShowMode.AutoHide)
         {
-            Alpha.alpha -= Time.deltaTime * 4;
-            yield return null;
+            yield return new WaitForSeconds(2.5f);
+            while (Alpha.alpha > 0)
+            {
+                Alpha.alpha -= Time.deltaTime * 4;
+                yield return null;
+            }
+            Alpha.gameObject.SetActive(false);
         }
-        Alpha.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void SetActive(bool active)
+    {
+        Alpha.gameObject.SetActive(active);
+    }
+
+    public LayoutShowMode ShowMode
+    {
+        get { return showMode; }
+        set
+        {
+            showMode = value;
+            if(showMode == LayoutShowMode.AlwaysShow)
+            {
+                StopAllCoroutines();
+                if(Alpha.alpha <= 0)
+                {
+                    StartCoroutine(ChangeSlot(current));
+                }
+            }
+        }
+    }
+
+    [System.Serializable]
+    public enum LayoutShowMode
+    {
+        AutoHide,
+        AlwaysShow,
+    }
+
+    private static bl_WeaponLoadoutUI _instance;
+    public static bl_WeaponLoadoutUI Instance
+    {
+        get
+        {
+            if (_instance == null) { _instance = FindObjectOfType<bl_WeaponLoadoutUI>(); }
+            return _instance;
+        }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
-namespace MFPS.PlayerSelector
+namespace MFPS.Addon.PlayerSelector
 {
     [System.Serializable]
     public class bl_PlayerSelectorInfo
     {
         public string Name;
         public int Price;
-        public int Hero; //this will over ride the players class as a hero;
         public Sprite Preview;
         public GameObject Prefab;
 

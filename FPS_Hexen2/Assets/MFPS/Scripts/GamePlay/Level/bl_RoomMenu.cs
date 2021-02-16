@@ -1,48 +1,22 @@
-/////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////bl_RoomMenu.cs///////////////////////////////////
-/////////////////place this in a scene for handling menus of room////////////////
-/////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////Lovatto Studio////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
 
+[DefaultExecutionOrder(-800)]
 public class bl_RoomMenu : bl_MonoBehaviour
 {
-    public bool isPlaying { get; set; }
-    [HideInInspector]
-    public float m_sensitive = 2.0f,SensitivityAim;
-    [HideInInspector]
-    public bool ShowWarningPing = false;
-
-    [HideInInspector]
-    public bool showMenu = true;
-    [HideInInspector]
-    public bool isFinish = false;
-    [HideInInspector]
-    public bool SpectatorMode, WaitForSpectator = false;
-    /// <summary>
-    /// Reference of player class select
-    /// </summary>
-    public static PlayerClass PlayerClass = PlayerClass.Assault;
     [Header("Inputs")]
     public KeyCode ScoreboardKey = KeyCode.N;
     public KeyCode PauseMenuKey = KeyCode.Escape;
     [Header("LeftRoom")]
-    [Range(0.0f,5)]
+    [Range(0.0f, 5)]
     public float DelayLeave = 1.5f;
 
-    private bl_GameManager GM;  
-    private bl_UIReferences UIReferences;
-#if ULSP
-    private bl_DataBase DataBase;
-#endif
     public Action<Team> onWaitUntilRoundFinish; //event called when a player enter but have to wait until current round finish.
     public bool isCursorLocked { get; private set; }
+    public bool isPlaying { get; set; }
+    public bool isFinish { get; set; } = false;
 
     /// <summary>
     /// 
@@ -53,15 +27,9 @@ public class bl_RoomMenu : bl_MonoBehaviour
             return;
 
         base.Awake();
-        GM = FindObjectOfType<bl_GameManager>();
-        UIReferences = FindObjectOfType<bl_UIReferences>();
 #if ULSP
-        DataBase = bl_DataBase.Instance;
-        if (DataBase != null) { DataBase.RecordTime(); }
+        if (bl_DataBase.IsUserLogged) { bl_DataBase.Instance.RecordTime(); }
 #endif
-        ShowWarningPing = false;
-        showMenu = true;
-        GetPrefabs();
         bl_UIReferences.Instance.PlayerUI.PlayerUICanvas.enabled = false;
 
 #if INPUT_MANAGER
@@ -69,34 +37,48 @@ public class bl_RoomMenu : bl_MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void OnEnable()
     {
         bl_EventHandler.onLocalPlayerSpawn += OnPlayerSpawn;
         bl_EventHandler.onLocalPlayerDeath += OnPlayerLocalDeath;
 #if MFPSM
-        bl_TouchHelper.OnPause += OnPause;
+        bl_TouchHelper.OnPause += TogglePause;
 #endif
         bl_PhotonCallbacks.LeftRoom += OnLeftRoom;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void OnDisable()
     {
         bl_EventHandler.onLocalPlayerSpawn -= OnPlayerSpawn;
         bl_EventHandler.onLocalPlayerDeath -= OnPlayerLocalDeath;
 #if MFPSM
-        bl_TouchHelper.OnPause -= OnPause;
+        bl_TouchHelper.OnPause -= TogglePause;
 #endif
         bl_PhotonCallbacks.LeftRoom -= OnLeftRoom;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     void OnPlayerSpawn()
     {
         bl_UIReferences.Instance.PlayerUI.PlayerUICanvas.enabled = true;
+        isPlaying = true;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     void OnPlayerLocalDeath()
     {
         bl_UIReferences.Instance.PlayerUI.PlayerUICanvas.enabled = false;
+        isPlaying = false;
     }
 
     /// <summary>
@@ -106,13 +88,11 @@ public class bl_RoomMenu : bl_MonoBehaviour
     {
         isCursorLocked = bl_UtilityHelper.GetCursorState;
         PauseControll();
-        ScoreboardControll();
-
-        if (SpectatorMode && Input.GetKeyUp(KeyCode.Escape)) { bl_UtilityHelper.LockCursor(false); }
+        ScoreboardInput();
     }
 
     /// <summary>
-    /// 
+    /// Check the input for open/hide the pause menu
     /// </summary>
     void PauseControll()
     {
@@ -123,85 +103,55 @@ public class bl_RoomMenu : bl_MonoBehaviour
             pauseKey = bl_Input.isStartPad;
         }
 #endif
-        if (pauseKey && GM.alreadyEnterInGame && !isFinish && !SpectatorMode)
+        if (pauseKey)
         {
-            bool asb = UIReferences.isMenuActive;
-            asb = !asb;
-            UIReferences.ShowMenu(asb);
-            bl_UtilityHelper.LockCursor(!asb);
-            bl_UCrosshair.Instance.Show(!asb);
+            TogglePause();
         }
     }
 
-    public void OnPause()
+    /// <summary>
+    /// Toggle the current paused state
+    /// </summary>
+    public void TogglePause()
     {
-        if (GM.alreadyEnterInGame && !isFinish && !SpectatorMode)
-        {
-            bool asb = UIReferences.isMenuActive;
-            asb = !asb;
-            UIReferences.ShowMenu(asb);
-            bl_UtilityHelper.LockCursor(!asb);
-            bl_UCrosshair.Instance.Show(!asb);
-        }
-    }
+        if (!bl_GameManager.Instance.FirstSpawnDone || isFinish) return;
 
-    public bool isPaused { get { return UIReferences.isMenuActive; } }
+        bool paused = isPaused;
+        paused = !paused;
+        bl_UIReferences.Instance.ShowMenu(paused);
+        bl_UtilityHelper.LockCursor(!paused);
+        bl_UCrosshair.Instance.Show(!paused);
+        bl_EventHandler.DispatchGamePauseEvent(paused);
+    }
 
     /// <summary>
     /// 
     /// </summary>
-    void ScoreboardControll()
+    void ScoreboardInput()
     {
-        if (!UIReferences.isOnlyMenuActive && !isFinish)
-        {
-            if (Input.GetKeyDown(ScoreboardKey))
-            {
-                bool asb = UIReferences.isScoreboardActive;
-                asb = !asb;
-                UIReferences.ShowScoreboard(asb);
-            }
-            if (Input.GetKeyUp(ScoreboardKey))
-            {
-                bool asb = UIReferences.isScoreboardActive;
-                asb = !asb;
-                UIReferences.ShowScoreboard(asb);
-            }
-        }
-    }
+        if (bl_UIReferences.Instance.isOnlyMenuActive || isFinish) return;
 
-    public void OnSpectator(bool active)
-    {
-        SpectatorMode = active;
-        bl_UtilityHelper.LockCursor(active);
-        if (active)
+        if (Input.GetKeyDown(ScoreboardKey))
         {
-            this.GetComponentInChildren<Camera>().transform.rotation = Quaternion.identity;
+            bool asb = bl_UIReferences.Instance.isScoreboardActive;
+            asb = !asb;
+            bl_UIReferences.Instance.ShowScoreboard(asb);
         }
-        GetComponentInChildren<bl_RoomCamera>().enabled = active;
-    }
-
-    /// <summary>
-    /// Use for change player class for next Re spawn
-    /// </summary>
-    /// <param name="m_class"></param>
-    public void ChangeClass()
-    {
-        if (isPlaying && GM.alreadyEnterInGame)
+        else if (Input.GetKeyUp(ScoreboardKey))
         {
-            bl_UIReferences.Instance.ButtonsClassPlay.SetActive(false);
-            bl_UtilityHelper.LockCursor(true);
+            bool asb = bl_UIReferences.Instance.isScoreboardActive;
+            asb = !asb;
+            bl_UIReferences.Instance.ShowScoreboard(asb);
         }
     }
 
     /// <summary>
-    /// 
+    /// Event called when the player will be automatically assigned to a team
     /// </summary>
     public void OnAutoTeam()
     {
         bl_UtilityHelper.LockCursor(true);
-        showMenu = false;
         isPlaying = true;
-        bl_UIReferences.Instance.ButtonsClassPlay.SetActive(false);
     }
 
     /// <summary>
@@ -225,40 +175,37 @@ public class bl_RoomMenu : bl_MonoBehaviour
             string jt = string.Format("{0} {1}", joinText, tn);
             bl_KillFeed.Instance.SendTeamHighlightMessage(PhotonNetwork.NickName, jt, team);
         }
-        showMenu = false;
 #if !PSELECTOR
         bl_UtilityHelper.LockCursor(true);
-        isPlaying = true;
 #else
-        if (MFPS.PlayerSelector.bl_PlayerSelectorData.Instance.PlayerSelectorMode == MFPS.PlayerSelector.bl_PlayerSelectorData.PSType.InLobby)
+        if (!bl_PlayerSelector.InMatch)
         {
             bl_UtilityHelper.LockCursor(true);
-            isPlaying = true;
         }
 #endif
         //if player only spawn when a new round start
-        if (GetGameMode.GetGameModeInfo().onRoundStartedSpawn == bl_GameData.GameModesEnabled.OnRoundStartedSpawn.WaitUntilRoundFinish && GM.GameMatchState == MatchState.Playing)
+        if (GetGameMode.GetGameModeInfo().onRoundStartedSpawn == GameModeSettings.OnRoundStartedSpawn.WaitUntilRoundFinish && bl_GameManager.Instance.GameMatchState == MatchState.Playing)
         {
             //subscribe to the start round event
-            if(onWaitUntilRoundFinish != null) { onWaitUntilRoundFinish.Invoke(team); }
+            if (onWaitUntilRoundFinish != null) { onWaitUntilRoundFinish.Invoke(team); }
             bl_GameManager.Instance.SetLocalPlayerToTeam(team);//set the player to the selected team but not spawn yet.
             return;
         }
         //set the player to the selected team and spawn the player
-        GM.SpawnPlayer(team);
+         bl_GameManager.Instance.SpawnPlayer(team);
     }
 
     /// <summary>
-    /// 
+    /// Leave the current room (if exist) and return to the lobby
     /// </summary>
     public void LeftOfRoom()
     {
 #if ULSP
-        if (DataBase != null)
+        if (bl_DataBase.IsUserLogged)
         {
             Player p = PhotonNetwork.LocalPlayer;
-            DataBase.SaveData(p.GetPlayerScore(), p.GetKills(), p.GetDeaths());
-            DataBase.StopAndSaveTime();
+            bl_ULoginMFPS.SaveLocalPlayerKDS();
+            bl_DataBase.Instance.StopAndSaveTime();
         }
 #endif
         //Good place to save info before reset statistics
@@ -275,111 +222,25 @@ public class bl_RoomMenu : bl_MonoBehaviour
         }
     }
 
+    public bool isMenuOpen => bl_UIReferences.Instance.State != bl_UIReferences.RoomMenuState.Hidde;
+    public bool isPaused { get { return bl_UIReferences.Instance.isMenuActive; } }
+
+    /// <summary>
+    /// Called from the server when the left room request was retrieved.
+    /// </summary>
+    public void OnLeftRoom()
+    {
+        Debug.Log("Local client left the room");
+        PhotonNetwork.IsMessageQueueRunning = false;
+        bl_MatchTimeManager.Instance.enabled = false;
+        if(bl_UIReferences.Instance != null)
+        StartCoroutine(bl_UIReferences.Instance.FinalFade(true));
+    }
+
     public bool isApplicationQuitting { get; set; } = false;
     void OnApplicationQuit()
     {
         isApplicationQuitting = true;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Suicide()
-    {
-        PhotonView view = PhotonView.Find(bl_GameManager.LocalPlayerViewID);
-        if (view != null)
-        {
-
-            bl_PlayerHealthManager pdm = view.GetComponent<bl_PlayerHealthManager>();
-            pdm.Suicide();
-            bl_UtilityHelper.LockCursor(true);
-            showMenu = false;
-            if (view.IsMine)
-            {
-                bl_GameManager.SuicideCount++;
-                //Debug.Log("Suicide " + bl_GameManager.SuicideCount + " times");
-                //if player is a joker o abuse of suicide, them kick of room
-                if (bl_GameManager.SuicideCount >= 3)//Max number of suicides  = 3, you can change
-                {
-                    isPlaying = false;
-                    bl_GameManager.isLocalAlive = false;
-                    bl_UtilityHelper.LockCursor(false);
-                    LeftOfRoom();
-                }
-            }
-        }
-        else
-        {
-            Debug.LogError("This view " + bl_GameManager.LocalPlayerViewID + " is not found");
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    void GetPrefabs()
-    {
-        PlayerClass = PlayerClass.GetSavePlayerClass();
-#if CLASS_CUSTOMIZER
-        PlayerClass = bl_ClassManager.Instance.m_Class;
-#endif
-        UIReferences.OnChangeClass(PlayerClass);
-    }
-
-    private bool imv = false;
-    public bool SetIMV
-    {
-        get
-        {
-            return imv;
-        }set
-        {
-            imv = value;
-            PlayerPrefs.SetInt(PropertiesKeys.InvertMouseVertical, (value) ? 1 : 0);
-        }
-    }
-
-      private bool imh = false;
-    public bool SetIMH
-    {
-        get
-        {
-            return imh;
-        }
-        set
-        {
-            imh = value;
-            PlayerPrefs.SetInt(PropertiesKeys.InvertMouseHorizontal, (value) ? 1 : 0);
-        }
-    }
-
-    public bool isMenuOpen
-    {
-        get
-        {
-            return UIReferences.State != bl_UIReferences.RoomMenuState.Hidde;
-        }
-    }
-
-   public void OnLeftRoom()
-   {
-       Debug.Log("Local client left the room");
-        PhotonNetwork.IsMessageQueueRunning = false;
-       this.GetComponent<bl_MatchTimeManager>().enabled = false;
-       StartCoroutine(UIReferences.FinalFade(true));
-   }
-    private int _weaponFov = -1;
-    public int WeaponCameraFov
-    {
-        get
-        {
-            if(_weaponFov == -1) { _weaponFov = PlayerPrefs.GetInt(PropertiesKeys.WeaponFov, bl_GameData.Instance.DefaultSettings.DefaultWeaponFoV); }
-            return _weaponFov;
-        }
-        set
-        {
-            _weaponFov = value;
-        }
     }
 
     private static bl_RoomMenu _instance;

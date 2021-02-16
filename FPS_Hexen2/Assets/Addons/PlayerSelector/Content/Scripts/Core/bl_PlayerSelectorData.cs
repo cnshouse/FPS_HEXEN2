@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using MFPS.PlayerSelector;
 using UnityEngine.Serialization;
 
-namespace MFPS.PlayerSelector
+namespace MFPS.Addon.PlayerSelector
 {
     public class bl_PlayerSelectorData : ScriptableObject
     {
@@ -32,7 +31,7 @@ namespace MFPS.PlayerSelector
             }
             else if (team == Team.Team2)
             {
-                return AllPlayers[Team2Players[id]]; 
+                return AllPlayers[Team2Players[id]];
             }
             else
             {

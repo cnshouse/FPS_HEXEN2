@@ -2,6 +2,7 @@
 using MFPSEditor;
 using UnityEngine;
 using UnityEditorInternal;
+using MFPS.Core.Motion;
 
 [CustomEditor(typeof(bl_Gun))]
 public class bl_GunEditor : Editor
@@ -85,7 +86,7 @@ public class bl_GunEditor : Editor
             DrawSeparator("Settings");
             script.BulletName = EditorGUILayout.TextField("Bullet", script.BulletName, EditorStyles.helpBox);
             script.roundsPerBurst = EditorGUILayout.IntSlider("Rounds Per Burst", script.roundsPerBurst, 1, 10);
-            script.lagBetweenShots = EditorGUILayout.Slider("Lag Between Shots", script.lagBetweenShots, 0.01f, 5.0f);
+            script.lagBetweenBurst = EditorGUILayout.Slider("Lag Between Burst", script.lagBetweenBurst, 0.01f, 5.0f);
             script.bulletSpeed = EditorGUILayout.FloatField("Bullet Speed", script.bulletSpeed);
             script.impactForce = EditorGUILayout.IntField("Impact Force", script.impactForce);
             EditorGUILayout.Space();

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7165913720674992992
+--- !u!114 &-7244113382702047156
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -79,7 +79,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _AlphaClip: 0
-    - _Blend: 0
+    - _Blend: 2
     - _BlendOp: 0
     - _BumpScale: 1
     - _CameraFadingEnabled: 0
@@ -106,7 +106,7 @@ Material:
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _SmoothnessTextureChannel: 0
-    - _SoftParticlesEnabled: 0
+    - _SoftParticlesEnabled: 1
     - _SoftParticlesFarFadeDistance: 1
     - _SoftParticlesNearFadeDistance: 0
     - _SpecularHighlights: 1

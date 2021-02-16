@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using UnityEditor;
-[CustomEditor(typeof(bl_GunPickUp))]
+[CustomEditor(typeof(bl_GunPickUp)), DisallowMultipleComponent, CanEditMultipleObjects]
 public class bl_GunPickUpEditor : Editor
 {
     bl_GunPickUp script;
     bl_GunInfo info;
     bool isSetUp = true;
+    SerializedProperty pickEvent;
+
     private void OnEnable()
     {
         script = (bl_GunPickUp)target;
@@ -33,6 +35,7 @@ public class bl_GunPickUpEditor : Editor
             }
             if (sc == null || rb == null || bc == null) { isSetUp = false; }
         }
+        pickEvent = serializedObject.FindProperty("onPickUp");
     }
 
     public override void OnInspectorGUI()
@@ -40,7 +43,8 @@ public class bl_GunPickUpEditor : Editor
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.BeginVertical("box");
-        script.GunID = EditorGUILayout.Popup("Gun ID ", script.GunID, bl_GameData.Instance.AllWeaponStringList(), EditorStyles.toolbarDropDown);
+        if (!serializedObject.isEditingMultipleObjects)
+            script.GunID = EditorGUILayout.Popup("Gun ID ", script.GunID, bl_GameData.Instance.AllWeaponStringList(), EditorStyles.toolbarDropDown);
         if (info != null && info.GunIcon != null)
         {
             GUILayout.Space(5);
@@ -104,6 +108,9 @@ public class bl_GunPickUpEditor : Editor
         }
 
         EditorGUILayout.EndVertical();
+
+        EditorGUILayout.PropertyField(pickEvent);
+
         if (EditorGUI.EndChangeCheck())
         {
             serializedObject.ApplyModifiedProperties();

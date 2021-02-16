@@ -32,6 +32,7 @@ MonoBehaviour:
   ShowWeaponLoadout: 1
   useCountDownOnStart: 1
   showCrosshair: 1
+  showDamageIndicator: 1
   doSpawnHandMeshEffect: 1
   playerCameraWiggle: 1
   LockWeaponsByLevel: 1
@@ -39,6 +40,8 @@ MonoBehaviour:
   killFeedWeaponShowMode: 1
   lobbyJoinMethod: 2
   killCameraType: 1
+  localKillsShowMode: 0
+  switchToPickupWeapon: 1
   ScoreReward:
     ScorePerKill: 100
     ScorePerHeadShot: 25
@@ -47,13 +50,15 @@ MonoBehaviour:
   VirtualCoins:
     InitialCoins: 1000
     CoinScoreValue: 100
-  GameVersion: 1.7.5
+  GameVersion: 1.8.0
+  guestNameFormat: Guest {0}
   SpawnProtectedTime: 5
   CountDownTime: 10
   PlayerRespawnTime: 7
   MaxFriendsAdded: 25
   AFKTimeLimit: 60
   MaxChangeTeamTimes: 3
+  maxSuicideAttempts: 3
   MainMenuScene: MainMenu
   OnDisconnectScene: MainMenu
   highLightColor: {r: 0.44827604, g: 0, b: 1, a: 1}
@@ -68,7 +73,7 @@ MonoBehaviour:
     Preview: {fileID: 21300000, guid: 77ac79c04ba523e4dac6d9bd612e75ef, type: 3}
   - ShowName: Mausoleum
     m_Scene: {fileID: 102900000, guid: 74b93ba6a00b02c4d974089b83ed5a22, type: 3}
-    RealSceneName: 
+    RealSceneName: Temple
     Preview: {fileID: 21300000, guid: e5bb234b3f8904f4bb183ef7253f8092, type: 3}
   AllWeapons:
   - Name: Rifle
@@ -176,7 +181,7 @@ MonoBehaviour:
       type: 3}
     GunIcon: {fileID: 21300000, guid: f22b479294de3414e987ba1cb0e2e81f, type: 3}
   - Name: Dragos
-    Type: 13
+    Type: 4
     Damage: 15
     FireRate: 0.09
     ReloadTime: 2
@@ -214,91 +219,103 @@ MonoBehaviour:
     PickUpPrefab: {fileID: 6093322561488042215, guid: 2a2715a9713a43f40a852144e1a9a391,
       type: 3}
     GunIcon: {fileID: 21300000, guid: 19516943777febc499922c851560f17c, type: 3}
-  DefaultSettings:
-    DefaultSensitivity: 5
-    DefaultSensitivityAim: 2
-    DefaultQualityLevel: 3
-    DefaultAnisoTropic: 2
-    DefaultVolume: 1
-    DefaultWeaponFoV: 55
-    DefaultShowFrameRate: 0
-    DefaultMotionBlur: 1
-    frameRateOptions: 1e0000003c0000007800000090000000c80000000401000000000000
-    defaultFrameRate: 2
+  defaultSettings: {fileID: 11400000, guid: 5fadfa78dabe7f6429f21e8ed3cc747b, type: 2}
   gameModes:
   - ModeName: Team DeathMatch
     gameMode: 0
     isEnabled: 1
+    supportBots: 1
     AutoTeamSelection: 0
     RequiredPlayersToStart: 1
-    GameGoalsOptions: 320000006400000096000000c8000000
-    GoalName: Kills
     onRoundStartedSpawn: 0
     onPlayerDie: 0
+    GoalName: Kills
+    maxPlayers: 06000000020000000400000008000000
+    GameGoalsOptions: 320000006400000096000000c8000000
+    timeLimits: 8403000058020000b00400002c010000
   - ModeName: Free For All
     gameMode: 1
     isEnabled: 1
+    supportBots: 1
     AutoTeamSelection: 0
     RequiredPlayersToStart: 1
-    GameGoalsOptions: 19000000320000004b0000000a000000
-    GoalName: Kills
     onRoundStartedSpawn: 0
     onPlayerDie: 0
+    GoalName: Kills
+    maxPlayers: 06000000020000000400000008000000
+    GameGoalsOptions: 19000000320000004b0000000a000000
+    timeLimits: 8403000058020000b00400002c010000
   - ModeName: Capture Of Flag
     gameMode: 2
     isEnabled: 1
+    supportBots: 1
     AutoTeamSelection: 1
     RequiredPlayersToStart: 2
-    GameGoalsOptions: 05000000070000000b00000003000000
-    GoalName: Captures
     onRoundStartedSpawn: 0
     onPlayerDie: 0
+    GoalName: Captures
+    maxPlayers: 06000000020000000400000008000000
+    GameGoalsOptions: 05000000070000000b00000003000000
+    timeLimits: 8403000058020000b00400002c010000
   - ModeName: Elimination
     gameMode: 7
     isEnabled: 0
+    supportBots: 1
     AutoTeamSelection: 1
     RequiredPlayersToStart: 2
-    GameGoalsOptions: 05000000070000000b00000003000000
-    GoalName: Rounds
     onRoundStartedSpawn: 1
     onPlayerDie: 1
+    GoalName: Rounds
+    maxPlayers: 06000000020000000400000008000000
+    GameGoalsOptions: 05000000070000000b00000003000000
+    timeLimits: 8403000058020000b00400002c010000
   - ModeName: Covert Point
     gameMode: 4
     isEnabled: 0
+    supportBots: 1
     AutoTeamSelection: 1
     RequiredPlayersToStart: 1
-    GameGoalsOptions: f4010000e8030000dc050000d0070000
-    GoalName: Tickets
     onRoundStartedSpawn: 0
     onPlayerDie: 0
+    GoalName: Tickets
+    maxPlayers: 06000000020000000400000008000000
+    GameGoalsOptions: f4010000e8030000dc050000d0070000
+    timeLimits: 8403000058020000b00400002c010000
   - ModeName: Gun Race
     gameMode: 5
     isEnabled: 0
+    supportBots: 0
     AutoTeamSelection: 0
     RequiredPlayersToStart: 1
-    GameGoalsOptions: 00000000
-    GoalName: First Player
     onRoundStartedSpawn: 0
     onPlayerDie: 0
+    GoalName: First Player
+    maxPlayers: 06000000020000000400000008000000
+    GameGoalsOptions: 00000000
+    timeLimits: 8403000058020000b00400002c010000
   - ModeName: Demolition
     gameMode: 8
     isEnabled: 0
+    supportBots: 1
     AutoTeamSelection: 0
     RequiredPlayersToStart: 1
-    GameGoalsOptions: 0500000007000000030000000d000000
-    GoalName: Rounds
     onRoundStartedSpawn: 1
     onPlayerDie: 1
+    GoalName: Rounds
+    maxPlayers: 06000000020000000400000008000000
+    GameGoalsOptions: 0500000007000000030000000d000000
+    timeLimits: 8403000058020000b00400002c010000
   Team1Name: The Wardens
   Team1Color: {r: 0, g: 0.08306635, b: 0.1509434, a: 1}
   Team2Name: Royal Guard
   Team2Color: {r: 0.735849, g: 0.6550499, b: 0, a: 1}
   Player1: {fileID: 114038687236655164, guid: 353d635db0698974b963c4153ac19a5d, type: 3}
   Player2: {fileID: 114797454524261884, guid: 8b43b97c50cac1d43a7c27ca8b6a6cdf, type: 3}
-  BotTeam1: {fileID: 9113025235818439629, guid: 0364f93b9879e3442a3f8f3a8935f8d8,
+  BotTeam1: {fileID: 2050592870008832680, guid: dab28ddcebe1d1643ab30da6d3f5067c,
     type: 3}
-  BotTeam2: {fileID: 9113025235818439629, guid: 0364f93b9879e3442a3f8f3a8935f8d8,
+  BotTeam2: {fileID: 2050592870008832680, guid: dab28ddcebe1d1643ab30da6d3f5067c,
     type: 3}
+  weaponSlotRuler: {fileID: 11400000, guid: 08554bfc9f078a24088357ad2e7b0050, type: 2}
   GameTeam:
   - UserName: 2Axion
     m_Role: 0

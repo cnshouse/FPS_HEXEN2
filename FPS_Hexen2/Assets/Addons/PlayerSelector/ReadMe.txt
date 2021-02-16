@@ -1,10 +1,10 @@
 Thanks for purchase "Player Selector" Add-on for MFPS 2.0 from Lovatto Studio.
-Version 1.5.7
+Version 1.6
 
 Required:--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 - Unity 2018.4++
-- MFPS 2.0 v1.7++
+- MFPS 2.0 v1.8++
 
 Integration:
 
@@ -44,6 +44,10 @@ In order to add a new player as options in your character selection menu you nee
   http://www.lovattostudio.com/forum/index.php
 
   Change Log:
+
+  1.6
+  Fix: InMatch player selector was not interact-able.
+  Change: Core implementation.
 
   1.5.7
   Improve: Add scrollbar to the InLobby player list.

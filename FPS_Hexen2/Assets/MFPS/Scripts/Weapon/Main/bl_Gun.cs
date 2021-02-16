@@ -4,24 +4,14 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using Photon.Pun;
 using UnityEngine.Serialization;
+using MFPS.Core.Motion;
 
 [RequireComponent(typeof(AudioSource))]
 public class bl_Gun : bl_GunBase
 {
+    #region Public members
     public Component WeaponBinding;
-    public IWeapon weaponLogic { get { if (WeaponBinding != null) { return WeaponBinding as IWeapon; } else { return null; } } }
-
     public float CrossHairScale = 8;
-    // basic weapon variables all guns have in common
-    public bool SoundReloadByAnim = false;
-    public AudioClip TakeSound;
-    public AudioClip FireSound;
-    public AudioClip DryFireSound;
-    public AudioClip ReloadSound;
-    public AudioClip ReloadSound2 = null;
-    public AudioClip ReloadSound3 = null;
-    public AudioSource DelaySource = null;
-    // Objects, effects and tracers
     public BulletInstanceMethod bulletInstanceMethod = BulletInstanceMethod.Pooled;
     public string BulletName = "bullet";
     public GameObject bulletPrefab;
@@ -33,32 +23,24 @@ public class bl_Gun : bl_GunBase
     public Vector3 AimPosition; //position of gun when is aimed
     private Vector3 DefaultPos;
     private Vector3 CurrentPos;
-    private bool CanAim;
     public bool useSmooth = true;
     public float AimSmooth;
     public ShakerPresent shakerPresent;
     [Range(0, 179), FormerlySerializedAs("AimFog")]
     public float aimZoom = 50;
-    private float defaultZoom;
-    private float currentZoom;
-    private float DeafultSmoothSway_;
-
     public bool CanAuto = true;
     public bool CanSemi = true;
     public bool CanSingle = true;
-
     //Shotgun Specific Vars
     public int pelletsPerShot = 10;         // number of pellets per round fired for the shotgun
     public float delayForSecondFireSound = 0.45f;
-
     //Burst Specific Vars
     public int roundsPerBurst = 3;          // number of rounds per burst fire
-    public float lagBetweenShots = 0.5f;    // time between each shot in a burst
+    public float lagBetweenBurst = 0.5f;    // time between each shot in a burst
     private bool isBursting = false;
     //Launcher Specific Vars
     public List<GameObject> OnAmmoLauncher = new List<GameObject>();
     public bool ThrowByAnimation = false;
-
     public int impactForce = 50;            // how much force applied to a rigid body
     public float bulletSpeed = 200.0f;      // how fast are your bullets
     public bool AutoReload = true;
@@ -68,7 +50,6 @@ public class bl_Gun : bl_GunBase
     public int numberOfClips = 5;           // number of clips you start with
     public int maxNumberOfClips = 10;       // maximum number of clips you can hold
     public float DelayFire = 0.85f;
-
     public Vector2 spreadMinMax = new Vector2(1, 3);
     public float spreadAimMultiplier = 0.5f;
     public float spreadPerSecond = 0.2f;    // if trigger held down, increase the spread of bullets
@@ -77,15 +58,31 @@ public class bl_Gun : bl_GunBase
 
     public float AimSwayAmount = 0.01f;
     [HideInInspector] public bool isReloading = false;       // am I in the process of reloading
-    // used for tracer rendering
-    public float nextFireTime { get; set; }
     // Recoil
     public float RecoilAmount = 5.0f;
     public float RecoilSpeed = 2;
+    public bool SoundReloadByAnim = false;
+    public AudioClip TakeSound;
+    public AudioClip FireSound;
+    public AudioClip DryFireSound;
+    public AudioClip ReloadSound;
+    public AudioClip ReloadSound2 = null;
+    public AudioClip ReloadSound3 = null;
+    public AudioSource DelaySource = null;
     //cached player components
     public Renderer[] weaponRenders = null;
     public bl_PlayerSettings playerSettings;
+    #endregion
 
+    #region Public properties
+    public IWeapon weaponLogic { get { if (WeaponBinding != null) { return WeaponBinding as IWeapon; } else { return null; } } }
+    public float nextFireTime { get; set; }
+    public Camera PlayerCamera { get; private set; }
+    public bool BlockAimFoV { get; set; }
+    public bool HaveInfinityAmmo { get; private set; }
+    #endregion
+
+    #region Private members
     private bool m_enable = true;
     private bl_WeaponBob GunBob;
     private bl_WeaponSway SwayGun = null;
@@ -98,14 +95,11 @@ public class bl_Gun : bl_GunBase
     public bool canBeTakenWhenIsEmpty = true;
     private bool alreadyKnife = false;
     private AudioSource Source;
-    public bool BlockAimFoV { get; set; }
     private Camera WeaponCamera;
     private Text FireTypeText;
     private bool inReloadMode = false;
     private AmmunitionType AmmoType = AmmunitionType.Bullets;
-    public Camera PlayerCamera { get; private set; }
     private AudioSource FireSource = null;
-    private bool CanFire = false;
     private bl_ObjectPooling Pooling;
     private bool isInitialized = false;
     private Transform m_Transform;
@@ -115,6 +109,14 @@ public class bl_Gun : bl_GunBase
     Quaternion fireRotation = Quaternion.identity;
     private Vector2 defaultSpreadRange;
     public int extraDamage = 0;
+    private Transform defaultMuzzlePoint = null;
+    private bool lastAimState = false;
+    private float currentZoom;
+    private float m_defaultSwayAmount;
+    private bool grenadeFired = false;
+    GameObject instancedBullet = null;
+    RaycastHit hit;
+    #endregion
 
     /// <summary>
     /// 
@@ -133,10 +135,11 @@ public class bl_Gun : bl_GunBase
         if (isInitialized) return;
 
         m_Transform = transform;
-        GunBob = gunManager.GetComponent<bl_WeaponBob>();
-        SwayGun = m_Transform.root.GetComponentInChildren<bl_WeaponSway>();
-        RecoilManager = m_Transform.root.GetComponentInChildren<bl_Recoil>();
-        if (playerSettings == null) { playerSettings = transform.root.GetComponent<bl_PlayerSettings>(); }
+        GunBob = PlayerReferences.weaponBob;
+        SwayGun = PlayerReferences.weaponSway;
+        RecoilManager = PlayerReferences.recoil;
+        playerSettings = PlayerReferences.playerSettings;
+
         Pooling = bl_ObjectPooling.Instance;
         if (FireSource == null) { FireSource = gameObject.AddComponent<AudioSource>(); FireSource.playOnAwake = false; }
         Crosshair = bl_UCrosshair.Instance;
@@ -145,10 +148,10 @@ public class bl_Gun : bl_GunBase
         {
             FireTypeText = bl_UIReferences.Instance.PlayerUI.FireTypeText;
         }
-        PlayerCamera = m_Transform.root.GetComponent<bl_PlayerSettings>().PlayerCamera;
+        PlayerCamera = PlayerReferences.playerCamera;
 #if MFPSM
-         TouchHelper = bl_TouchHelper.Instance;
-         AutoFire = FindObjectOfType<bl_AutoWeaponFire>();
+        TouchHelper = bl_TouchHelper.Instance;
+        AutoFire = FindObjectOfType<bl_AutoWeaponFire>();
 #endif
         defaultSpreadRange = spreadMinMax;
         AmmoType = bl_GameData.Instance.AmmoType;
@@ -163,7 +166,6 @@ public class bl_Gun : bl_GunBase
     /// </summary>
     protected override void OnEnable()
     {
-
 #if MFPSM
         if (bl_UtilityHelper.isMobile)
         {
@@ -182,43 +184,21 @@ public class bl_Gun : bl_GunBase
         if (WeaponAnimation)
         {
             float t = WeaponAnimation.DrawWeapon();
-            Invoke("DrawComplete", t);
+            Invoke(nameof(DrawComplete), t);
         }
         else
         {
             DrawComplete();
         }
-        bl_EventHandler.OnKitAmmo += this.OnPickUpAmmo;
-        bl_EventHandler.OnRoundEnd += this.OnRoundEnd;
-        if (Info.Type == GunType.Shotgun)
-        {
-            Crosshair.Change(2);
-        }
-        else if (Info.Type == GunType.Knife || Info.Type == GunType.TwoHandedMelee)
-        {
-            Crosshair.Change(1);
-        }
-        else if (Info.Type == GunType.Grenade)
-        {
-            Crosshair.Change(3);
-        }
-        else
-        {
-            Crosshair.Change(0);
-        }
+        bl_EventHandler.onAmmoPickUp += this.OnPickUpAmmo;
+        bl_EventHandler.onRoundEnd += this.OnRoundEnd;
+        Crosshair.ActiveCrosshairForWeapon(this);
         SetFireTypeName();
         playerSettings?.DoSpawnWeaponRenderEffect(weaponRenders);
         OnAmmoLauncher.ForEach(x => { x?.SetActive(bulletsLeft > 0); });
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    void DrawComplete()
-    {
-        CanFire = true;
-        CanAim = true;
-        if (inReloadMode) { Reload(0.2f); }
+#if MFPSTPV
+        SetWeaponRendersActive(!bl_CameraViewSettings.IsThirdPerson());
+#endif
     }
 
     /// <summary>
@@ -227,8 +207,8 @@ public class bl_Gun : bl_GunBase
     protected override void OnDisable()
     {
         base.OnDisable();
-        bl_EventHandler.OnKitAmmo -= this.OnPickUpAmmo;
-        bl_EventHandler.OnRoundEnd -= this.OnRoundEnd;
+        bl_EventHandler.onAmmoPickUp -= this.OnPickUpAmmo;
+        bl_EventHandler.onRoundEnd -= this.OnRoundEnd;
 #if MFPSM
         if (bl_UtilityHelper.isMobile)
         {
@@ -238,34 +218,37 @@ public class bl_Gun : bl_GunBase
 #endif
         alreadyKnife = false;
         if (PlayerCamera == null) { PlayerCamera = transform.root.GetComponent<bl_PlayerSettings>().PlayerCamera; }
-        if (isAiming) { PlayerCamera.fieldOfView = defaultZoom; }
         StopAllCoroutines();
         if (isReloading) { inReloadMode = true; isReloading = false; }
         isAiming = false;
         isFiring = false;
+        lastAimState = false;
+        ResetDefaultMuzzlePoint();
     }
 
     /// <summary>
-    /// 
+    /// Called by the weapon manager on all the equipped weapons
+    /// even when they have not been enabled
     /// </summary>
     public void Setup(bool initial = false)
     {
         bulletsLeft = bulletsPerClip; // load gun on startup
         DefaultPos = transform.localPosition;
-        if (PlayerCamera == null) { PlayerCamera = transform.root.GetComponent<bl_PlayerSettings>().PlayerCamera; }
-        WeaponCamera = PlayerCamera.transform.GetChild(0).GetComponent<Camera>();
-        defaultZoom =  WeaponCamera.fieldOfView = bl_RoomMenu.Instance.WeaponCameraFov;
+        if (PlayerCamera == null) { PlayerCamera = PlayerReferences.playerCamera; }
+        WeaponCamera = PlayerReferences.weaponCamera;
+        WeaponCamera.fieldOfView = bl_MFPS.Settings != null ? (float)bl_MFPS.Settings.GetSettingOf("Weapon FOV") : 55;
+
         if (!initial)
         {
-            DeafultSmoothSway_ = SwayGun.Smoothness;
+            m_defaultSwayAmount = SwayGun.Smoothness;
             if (AmmoType == AmmunitionType.Bullets)
             {
                 numberOfClips = bulletsPerClip * numberOfClips;
             }
         }
-        CanAim = true;
+        CanAiming = true;
         Info = bl_GameData.Instance.GetWeapon(GunID);
-        if(Info.Type != GunType.Shotgun && Info.Type != GunType.Sniper) { reloadPer = ReloadPer.Magazine; }
+        if (WeaponType != GunType.Shotgun && WeaponType != GunType.Sniper) { reloadPer = ReloadPer.Magazine; }
     }
 
     /// <summary>
@@ -274,17 +257,12 @@ public class bl_Gun : bl_GunBase
     /// <returns></returns>
     public override void OnUpdate()
     {
-        if (!bl_RoomMenu.Instance.isCursorLocked)
-        {
-            if (WeaponCamera != null) WeaponCamera.fieldOfView = bl_RoomMenu.Instance.WeaponCameraFov;
-            return;
-        }
         if (!m_enable)
             return;
 
         InputUpdate();
         Aim();
-        SyncState();
+        DetermineUpperState();
 
         if (isFiring) // if the gun is firing
         {
@@ -297,30 +275,25 @@ public class bl_Gun : bl_GunBase
         spread = Mathf.Clamp(spread, BaseSpread, spreadMinMax.y);
     }
 
-
     /// <summary>
     /// All Input events 
     /// </summary>
     void InputUpdate()
     {
-        if (bl_GameData.Instance.isChating || !gunManager.isGameStarted) return;
+        if (bl_GameData.Instance.isChating || !gunManager.isGameStarted || !bl_RoomMenu.Instance.isCursorLocked) return;
 
         // Did the user press fire.... and what kind of weapon are they using ?  ===============
         if (bl_UtilityHelper.isMobile)
         {
 #if MFPSM
             if (bl_GameData.Instance.AutoWeaponFire && AutoFire != null)
-            {
                 HandleAutoFire();
-            }
             else
             {
-                if (Info.Type == GunType.Machinegun && TouchHelper != null)
+                if (WeaponType == GunType.Machinegun && TouchHelper != null)
                 {
-                    if (TouchHelper.FireDown && m_CanFire)
-                    {
-                        MachineGunFire();   // fire machine gun                 
-                    }
+                    if (TouchHelper.FireDown && CanFire)
+                        LoopFire();
                 }
             }
 #endif
@@ -333,72 +306,29 @@ public class bl_Gun : bl_GunBase
                 HandleAutoFire();
             }
 #endif
-            if (m_CanFire)
+            if (CanFire)
             {
                 if (FireButtonDown)//is was pressed
                 {
-                    if (weaponLogic != null) { weaponLogic.OnFireDown(); }
-                    else
-                    {
-                        switch (Info.Type)
-                        {
-                            case GunType.Shotgun:
-                                ShotGun_Fire();
-                                break;
-                            case GunType.Burst:
-                                if (!isBursting) { StartCoroutine(Burst_Fire()); }
-                                break;
-                            case GunType.Grenade:
-                                if (!grenadeFired) { GrenadeFire(); }
-                                break;
-                            case GunType.Pistol:
-                                MachineGunFire();
-                                break;
-                            case GunType.Sniper:
-                                SniperFire();
-                                break;
-                            case GunType.Knife:
-                                if (!alreadyKnife) { Knife_Fire(); }
-                                break;
-                        }
-                    }
+                    SingleFire();
                 }
                 if (FireButton)//if keep pressed
                 {
-                    if (weaponLogic != null) { weaponLogic.OnFire(); }
-                    else
-                    {
-                        // Handle Machinegun constant rate of fire
-                        if (Info.Type == GunType.Machinegun)
-                        {
-                            MachineGunFire();
-                        }
-
-                        if(Info.Type == GunType.Vampire)
-						{
-                            Debug.Log("Try to Fire Vampire Beam");
-                            VampireGun_Fire();
-						}
-                        //TODO: Add in constant rate of fire for beam weapons BEAM
-                    }
+                    LoopFire();
                 }
             }
             else
             {
                 if (FireButtonDown && bulletsLeft <= 0 && !isReloading)//if try fire and don't have more bullets
                 {
-                    if (Info.Type != GunType.Knife && DryFireSound != null)
-                    {
-                        Source.clip = DryFireSound;
-                        Source.Play();
-                    }
+                    PlayEmptyFireSound();
                 }
             }
         }
 
         if (FireButtonDown && isReloading)//if try fire while reloading 
         {
-            if (Info.Type == GunType.Sniper || Info.Type == GunType.Shotgun)
+            if (WeaponType == GunType.Sniper || WeaponType == GunType.Shotgun)
             {
                 if (bulletsLeft > 0)//and has at least one bullet
                 {
@@ -407,62 +337,53 @@ public class bl_Gun : bl_GunBase
             }
         }
 
-        if (Info.Type != GunType.Knife && Info.Type != GunType.Grenade)
+        if (bl_UtilityHelper.isMobile)
         {
-            if (bl_UtilityHelper.isMobile)
-            {
 #if MFPSM
-            isAiming = TouchHelper.isAim && m_CamAim;
+            isAiming = TouchHelper.isAim && CanAiming;
 #endif
-            }
-            else
-            {
-                isAiming = AimButton && m_CamAim;
-            }
+        }
+        else
+        {
+            isAiming = AimButton && CanAiming;
         }
 
         if (bl_RoomMenu.Instance.isCursorLocked)
         {
             Crosshair.OnAim(isAiming);
         }
-        bool inputReload = Input.GetKeyDown(KeyCode.R);
-#if INPUT_MANAGER
-        if(bl_Input.isGamePad)
-        {
-            inputReload = bl_Input.isButtonDown("Reload");
-        }
-#endif
-        if (inputReload && m_CanReload)
+
+        if (bl_GameInput.Reload() && CanReload)
         {
             Reload();
         }
-        //TODO add in Beam Weapon to change type of Fire 
-        if (Info.Type == GunType.Machinegun || Info.Type == GunType.Burst || Info.Type == GunType.Pistol || Info.Type == GunType.Vampire)
+
+        if (WeaponType == GunType.Machinegun || WeaponType == GunType.Burst || WeaponType == GunType.Pistol)
         {
             ChangeTypeFire();
         }
+
         //used to decrease weapon accuracy as long as the trigger remains down =====================
-        if (Info.Type != GunType.Grenade && Info.Type != GunType.Knife)
+        if (WeaponType != GunType.Grenade && WeaponType != GunType.Knife)
         {
             if (bl_UtilityHelper.isMobile)
             {
 #if MFPSM
                 if (!bl_GameData.Instance.AutoWeaponFire)
                 {
-                    isFiring = (TouchHelper.FireDown && m_CanFire);
+                    isFiring = (TouchHelper.FireDown && CanFire);
                 }
 #endif
             }
             else
             {
-                // TODO: Add logic for BEAM weapon heres
-                if (Info.Type == GunType.Machinegun || Info.Type == GunType.Vampire)
+                if (WeaponType == GunType.Machinegun)
                 {
-                    isFiring = (FireButton && m_CanFire); // fire is down, gun is firing
+                    isFiring = (FireButton && CanFire); // fire is down, gun is firing
                 }
                 else
                 {
-                    if (FireButtonDown && m_CanFire)
+                    if (FireButtonDown && CanFire)
                     {
                         isFiring = true;
                         CancelInvoke("CancelFiring");
@@ -472,9 +393,6 @@ public class bl_Gun : bl_GunBase
             }
         }
     }
-
-    void CancelFiring() { isFiring = false; }
-    void CancelReloading() { WeaponAnimation.CancelReload(); }
 
     /// <summary>
     /// change the type of gun gust
@@ -487,48 +405,19 @@ public class bl_Gun : bl_GunBase
 #endif 
         if (inp)
         {
-            //TODO add in beam switch as well...
-            switch (Info.Type)
+            switch (WeaponType)
             {
                 case GunType.Machinegun:
-                    if (CanSemi)
-                    {
-                        Info.Type = GunType.Burst;
-                    }
-                    else if (CanSingle)
-                    {
-                        Info.Type = GunType.Pistol;
-                    }
-                    break;
-                case GunType.Vampire:
-					if (CanSemi)
-					{
-                        Info.Type = GunType.Vampire;
-					}
-                    else if (CanSingle)
-					{
-                        Info.Type = GunType.Pistol;
-					}
+                    if (CanSemi) WeaponType = GunType.Burst;
+                    else if (CanSingle) WeaponType = GunType.Pistol;
                     break;
                 case GunType.Burst:
-                    if (CanSingle)
-                    {
-                        Info.Type = GunType.Pistol;
-                    }
-                    else if (CanAuto)
-                    {
-                        Info.Type = GunType.Machinegun;
-                    }
+                    if (CanSingle) WeaponType = GunType.Pistol;
+                    else if (CanAuto) WeaponType = GunType.Machinegun;
                     break;
                 case GunType.Pistol:
-                    if (CanAuto)
-                    {
-                        Info.Type = GunType.Machinegun;
-                    }
-                    else if (CanSemi)
-                    {
-                        Info.Type = GunType.Burst;
-                    }
+                    if (CanAuto) WeaponType = GunType.Machinegun;
+                    else if (CanSemi) WeaponType = GunType.Burst;
                     break;
             }
             SetFireTypeName();
@@ -537,18 +426,7 @@ public class bl_Gun : bl_GunBase
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    void OnReload()
-    {
-        if (m_CanReload)
-        {
-            Reload();
-        }
-    }
-
-    /// <summary>
-    /// 
+    /// Called by mobile button event
     /// </summary>
     void OnFire()
     {
@@ -556,16 +434,12 @@ public class bl_Gun : bl_GunBase
 
         if (bulletsLeft <= 0 && !isReloading)
         {
-            if (Info.Type != GunType.Knife && DryFireSound != null && !isReloading)
-            {
-                Source.clip = DryFireSound;
-                Source.Play();
-            }
+            PlayEmptyFireSound();
         }
 
         if (isReloading)
         {
-            if (Info.Type == GunType.Sniper || Info.Type == GunType.Shotgun)
+            if (WeaponType == GunType.Sniper || WeaponType == GunType.Shotgun)
             {
                 if (bulletsLeft > 0)
                 {
@@ -574,51 +448,15 @@ public class bl_Gun : bl_GunBase
             }
         }
 
-        if (!m_CanFire)
+        if (!CanFire)
             return;
 
-        if (weaponLogic != null) { weaponLogic.OnFireDown(); }
-        else
-        {
-            switch (Info.Type)
-            {
-                case GunType.Shotgun:
-                    ShotGun_Fire();  // fire shotgun
-                    break;
-                case GunType.Burst:
-                    if (!isBursting)
-                    {
-                        StartCoroutine(Burst_Fire()); // fire off a burst of rounds                   
-                    }
-                    break;
-                case GunType.Grenade:
-                    if (!grenadeFired && m_CanFire)
-                    {
-                        GrenadeFire();
-                    }
-                    break;
-                case GunType.Pistol:
-                    MachineGunFire();   // fire Pistol gun                    
-                    break;
-                case GunType.Sniper:
-                    SniperFire();
-                    break;
-                case GunType.Knife:
-                    Knife_Fire();
-                    break;
-                case GunType.Vampire:
-                    VampireGun_Fire();
-                    break;
-                default:
-                    if (Info.Type != GunType.Machinegun)
-                    {
-                        Debug.LogWarning("Unknown gun type");
-                    }
-                    break;
-            }
-        }
+        SingleFire();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     void HandleAutoFire()
     {
 #if MFPSM
@@ -626,87 +464,59 @@ public class bl_Gun : bl_GunBase
         isFiring = fireDown;
         if (fireDown)
         {
-            switch (Info.Type)
-            {
-                case GunType.Shotgun:
-                    if (m_CanFire)
-                    {
-                        ShotGun_Fire();  // fire shotgun
-                    }
-                    break;
-                case GunType.Machinegun:
-                    if (m_CanFire)
-                    {
-                        MachineGunFire();   // fire machine gun                 
-                    }
-                    break;
-                case GunType.Burst:
-                    if (m_CanFire && !isBursting)
-                    {
-                        StartCoroutine(Burst_Fire()); // fire off a burst of rounds                   
-                    }
-                    break;
-
-                case GunType.Grenade:
-                    //grenades should throw manually :)
-                    break;
-                case GunType.Pistol:
-                    if (m_CanFire)
-                    {
-                        MachineGunFire();   // fire Pistol gun     
-                    }
-                    break;
-                case GunType.Sniper:
-                    if (m_CanFire)
-                    {
-                        SniperFire();
-                    }
-                    break;
-                case GunType.Knife:
-                    if (m_CanFire && !alreadyKnife)
-                    {
-                        Knife_Fire();
-                    }
-                    break;
-                default:
-                    Debug.LogWarning("Unknown gun type");
-                    break;
-            }
+            if (WeaponType == GunType.Machinegun)
+                LoopFire();
+            else
+                SingleFire();
         }
 #endif
     }
 
     /// <summary>
-    /// Sync Weapon state for Upper animations
+    /// Fire one time
     /// </summary>
-    void SyncState()
+    void SingleFire()
     {
-        if (PlayerNetwork == null)
-            return;
-
-        if (isFiring && !isReloading)
-        {
-            FPState = (isAiming) ? PlayerFPState.FireAiming : PlayerFPState.Firing;
-        }
-        else if (isAiming && !isFiring && !isReloading)
-        {
-            FPState = PlayerFPState.Aiming;
-        }
-        else if (isReloading)
-        {
-            FPState = PlayerFPState.Reloading;
-        }
-        else if (controller.State == PlayerState.Running && !isReloading && !isFiring && !isAiming)
-        {
-            FPState = PlayerFPState.Running;
-        }
+        if (weaponLogic != null) { weaponLogic.OnFireDown(); }
         else
         {
-            FPState = PlayerFPState.Idle;
+            switch (WeaponType)
+            {
+                case GunType.Shotgun:
+                    ShotgunFire();
+                    break;
+                case GunType.Burst:
+                    if (!isBursting) { StartCoroutine(BurstFire()); }
+                    break;
+                case GunType.Grenade:
+                    if (!grenadeFired) { GrenadeFire(); }
+                    break;
+                case GunType.Pistol:
+                    MachineGunFire();
+                    break;
+                case GunType.Sniper:
+                    SniperFire();
+                    break;
+                case GunType.Knife:
+                    if (!alreadyKnife) { KnifeFire(); }
+                    break;
+            }
         }
-        PlayerNetwork.FPState = FPState;
     }
 
+    /// <summary>
+    /// Fire continuously
+    /// </summary>
+    void LoopFire()
+    {
+        if (WeaponType != GunType.Machinegun) return;
+
+        if (weaponLogic != null) { weaponLogic.OnFire(); }
+        else
+            MachineGunFire();
+    }
+
+    #region Fire Handlers
     /// <summary>
     /// fire the machine gun
     /// </summary>
@@ -732,13 +542,7 @@ public class bl_Gun : bl_GunBase
                     WeaponAnimation.Fire();
                 }
             }
-            PlayFireAudio();
-            bulletsLeft--;
-            UpdateUI();
-            nextFireTime += Info.FireRate;
-            EjectShell();
-            Kick();
-            Shake();
+            OnFireCommons();
             if (!isAiming)
             {
                 if (muzzleFlash) { muzzleFlash.Play(); }
@@ -769,13 +573,8 @@ public class bl_Gun : bl_GunBase
                 WeaponAnimation.Fire();
             }
             StartCoroutine(DelayFireSound());
-            bulletsLeft--;
-            UpdateUI();
-            nextFireTime += Info.FireRate;
-            EjectShell();
-            Kick();
+            OnFireCommons();
             gunManager.HeadAnimator.Play("Sniper", 0, 0);
-            Shake();
             if (!isAiming)
             {
                 if (muzzleFlash) { muzzleFlash.Play(); }
@@ -788,39 +587,10 @@ public class bl_Gun : bl_GunBase
         }
     }
 
-    public void FastKnifeFire(System.Action callBack)
-    {
-        StartCoroutine(IEFastKnife(callBack));
-    }
-
-    IEnumerator IEFastKnife(System.Action callBack)
-    {
-        float tt = Knife_Fire(true);
-        yield return new WaitForSeconds(tt);
-        callBack();
-        gameObject.SetActive(false);
-    }
-
-    public IEnumerator FastGrenadeFire(System.Action callBack)
-    {
-        float tt = WeaponAnimation.GetFirePlusDrawLenght;
-        GrenadeFire(true);
-        yield return new WaitForSeconds(tt);
-        if (numberOfClips > 0)
-        {
-            bulletsLeft++;
-            numberOfClips--;
-            UpdateUI();
-        }
-        callBack();
-        StopAllCoroutines();
-        gameObject.SetActive(false);
-    }
-    
     /// <summary>
-    /// Two Handed Meleee added 
+    /// 
     /// </summary>
-    private float TwoHandedMelee_Fire(bool quickFire = false)
+    private float KnifeFire(bool quickFire = false)
     {
         // If there is more than one shot  between the last and this frame
         // Reset the nextFireTime
@@ -839,16 +609,15 @@ public class bl_Gun : bl_GunBase
             Vector3 direction = PlayerCamera.transform.TransformDirection(Vector3.forward);
 
             RaycastHit hit;
-            if (Physics.Raycast(position, direction, out hit, Info.Range))
+            float range = playerReferences.cameraRay == null ? Info.Range : Info.Range + playerReferences.cameraRay.ExtraRayDistance;
+            if (Physics.Raycast(position, direction, out hit, range))
             {
-                if (hit.transform.CompareTag("BodyPart"))
+                if (hit.transform.CompareTag(bl_MFPS.HITBOX_TAG))
                 {
-                    if (hit.transform.GetComponent<bl_BodyPart>() != null)
-                    {
-                        hit.transform.GetComponent<bl_BodyPart>().GetDamage(Info.Damage, PhotonNetwork.NickName, DamageCause.Player, transform.position, GunID);
-                    }
+                    var bp = hit.transform.GetComponent<bl_BodyPart>();
+                    bp?.GetDamage(Info.Damage, PhotonNetwork.NickName, DamageCause.Player, transform.position, GunID);
                 }
-                else if (hit.transform.CompareTag("AI"))
+                else if (hit.transform.CompareTag(bl_MFPS.AI_TAG))
                 {
                     if (hit.transform.GetComponent<bl_AIShooterHealth>() != null)
                     {
@@ -861,65 +630,22 @@ public class bl_Gun : bl_GunBase
                         bl_ObjectPooling.Instance.Instantiate("blood", hit.point, Quaternion.FromToRotation(Vector3.up, hit.normal));
                     }
                 }
-            }
-
-            if (WeaponAnimation != null)
-            {
-                time = WeaponAnimation.TwoHandedFire(quickFire);
-            }
-            PlayerNetwork.IsFire(GunType.TwoHandedMelee, Vector3.zero);
-            PlayFireAudio();
-            nextFireTime += Info.FireRate;
-            Kick();
-            Shake();
-            Crosshair.OnFire();
-            isFiring = false;
-        }
-        return time;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private float Knife_Fire(bool quickFire = false)
-    {
-        // If there is more than one shot  between the last and this frame
-        // Reset the nextFireTime
-        if (Time.time - Info.FireRate > nextFireTime)
-            nextFireTime = Time.time - Time.deltaTime;
-
-        float time = 0;
-        // Keep firing until we used up the fire time
-        while (nextFireTime < Time.time)
-        {
-            isFiring = true; // fire is down, gun is firing
-            alreadyKnife = true;
-            StartCoroutine(KnifeSendFire());
-
-            Vector3 position = PlayerCamera.transform.position;
-            Vector3 direction = PlayerCamera.transform.TransformDirection(Vector3.forward);
-
-            RaycastHit hit;
-            if (Physics.Raycast(position, direction, out hit, Info.Range))
-            {
-                if (hit.transform.CompareTag("BodyPart"))
+                else
                 {
-                    if (hit.transform.GetComponent<bl_BodyPart>() != null)
+                    var damageable = hit.transform.GetComponent<IMFPSDamageable>();
+                    if (damageable != null)
                     {
-                        hit.transform.GetComponent<bl_BodyPart>().GetDamage(Info.Damage, PhotonNetwork.NickName, DamageCause.Player, transform.position, GunID);
-                    }
-                }
-                else if (hit.transform.CompareTag("AI"))
-                {
-                    if (hit.transform.GetComponent<bl_AIShooterHealth>() != null)
-                    {
-                        hit.transform.GetComponent<bl_AIShooterHealth>().DoDamage(Info.Damage, Info.Name, transform.position, bl_GameManager.LocalPlayerViewID, false, PhotonNetwork.LocalPlayer.GetPlayerTeam(), false,0);
-                        bl_ObjectPooling.Instance.Instantiate("blood", hit.point, Quaternion.FromToRotation(Vector3.up, hit.normal));
-                    }
-                    else if (hit.transform.GetComponent<bl_AIHitBox>() != null)
-                    {
-                        hit.transform.GetComponent<bl_AIHitBox>().DoDamage(Info.Damage, Info.Name, transform.position, bl_GameManager.LocalPlayerViewID, false, PhotonNetwork.LocalPlayer.GetPlayerTeam());
-                        bl_ObjectPooling.Instance.Instantiate("blood", hit.point, Quaternion.FromToRotation(Vector3.up, hit.normal));
+                        DamageData damageData = new DamageData()
+                        {
+                            Damage = (int)Info.Damage,
+                            Direction = m_Transform.position,
+                            MFPSActor = bl_GameManager.Instance.LocalActor,
+                            ActorViewID = bl_GameManager.LocalPlayerViewID,
+                            GunID = GunID,
+                            From = LocalPlayer.NickName,
+                        };
+                        damageData.Cause = DamageCause.Player;
+                        damageable.ReceiveDamage(damageData);
                     }
                 }
             }
@@ -929,12 +655,10 @@ public class bl_Gun : bl_GunBase
                 time = WeaponAnimation.KnifeFire(quickFire);
             }
             PlayerNetwork.IsFire(GunType.Knife, Vector3.zero);
-            PlayFireAudio();
-            nextFireTime += Info.FireRate;
-            Kick();
-            Shake();
+            OnFireCommons();
             Crosshair.OnFire();
             isFiring = false;
+            bl_EventHandler.DispatchLocalPlayerFire(GunID);
         }
         return time;
     }
@@ -943,39 +667,31 @@ public class bl_Gun : bl_GunBase
     /// burst shooting
     /// </summary>
     /// <returns></returns>
-    IEnumerator Burst_Fire()
+    IEnumerator BurstFire()
     {
         int shotCounter = 0;
-
         // If there is more than one bullet between the last and this frame
         // Reset the nextFireTime
-        if (Time.time - Info.FireRate > nextFireTime)
+        if (Time.time - lagBetweenBurst > nextFireTime)
             nextFireTime = Time.time - Time.deltaTime;
 
+        int shots = Mathf.Min(roundsPerBurst, bulletsLeft);
         // Keep firing until we used up the fire time
         while (nextFireTime < Time.time)
         {
-            while (shotCounter < roundsPerBurst)
+            while (shotCounter < shots)
             {
                 isBursting = true;
                 StartCoroutine(FireOneShot());
                 shotCounter++;
-                bulletsLeft--; // subtract a bullet 
-                Kick();
-                EjectShell();
-                UpdateUI();
-                Shake();
+                OnFireCommons();
                 if (muzzleFlash) { muzzleFlash.Play(); }
-                if (WeaponAnimation != null)
-                {
-                    WeaponAnimation.Fire();
-                }
-                PlayFireAudio();
-                yield return new WaitForSeconds(lagBetweenShots);
-                if(bulletsLeft <= 0) { break; }
+                WeaponAnimation?.Fire();
+                yield return new WaitForSeconds(Info.FireRate);
+                if (bulletsLeft <= 0) { break; }
             }
 
-            nextFireTime += Info.FireRate;
+            nextFireTime += lagBetweenBurst;
             //is Auto reload
             if (bulletsLeft <= 0 && numberOfClips > 0 && AutoReload)
             {
@@ -985,62 +701,17 @@ public class bl_Gun : bl_GunBase
         isBursting = false;
     }
 
-    ///<summary>
-    ///fire the Vampire
-    ///</summary>
-    void VampireGun_Fire()
-	{
-        Debug.Log("Fire the Vampire Gun....");
-        // If there is more than one bullet between the last and this frame
-        float time = Time.time;
-        if (time - Info.FireRate > nextFireTime)
-            nextFireTime = time - Time.deltaTime;
-
-        // Keep firing until we used up the fire time
-        while (nextFireTime < time)
-        {
-            StartCoroutine(FireOneShot());
-            if (WeaponAnimation != null)
-            {
-                //if (isAiming)
-                //{
-                //    WeaponAnimation.AimFire();
-                //}
-                //else
-                //{
-                    WeaponAnimation.Fire();
-                //}
-            }
-            PlayFireAudio();
-            bulletsLeft--;
-            UpdateUI();
-            nextFireTime += Info.FireRate;
-            EjectShell();
-            Kick();
-            Shake();
-            if (!isAiming)
-            {
-                if (muzzleFlash) { muzzleFlash.Play(); }
-            }
-            //is Auto reload
-            if (bulletsLeft <= 0 && numberOfClips > 0 && AutoReload)
-            {
-                Reload();
-            }
-        }
-    }
-
     /// <summary>
     /// fire the shotgun
     /// </summary>
-    void ShotGun_Fire()
+    void ShotgunFire()
     {
-        int pelletCounter = 0;  // counter used for pellets per round
         // If there is more than one bullet between the last and this frame
         // Reset the nextFireTime
         if (Time.time - Info.FireRate > nextFireTime)
             nextFireTime = Time.time - Time.deltaTime;
 
+        int pelletCounter = 0;  // counter used for pellets per round
         // Keep firing until we used up the fire time
         while (nextFireTime < Time.time)
         {
@@ -1050,17 +721,13 @@ public class bl_Gun : bl_GunBase
                 pelletCounter++; // add another pellet         
             } while (pelletCounter < pelletsPerShot); // if number of pellets fired is less then pellets per round... fire more pellets
 
-            StartCoroutine(DelayFireSound());
-            if (WeaponAnimation != null)
-            {
-                WeaponAnimation.Fire();
-            }
-            Shake();
-            EjectShell(); // eject 1 shell 
-            nextFireTime += Info.FireRate;  // can fire another shot in "fire rate" number of frames
-            bulletsLeft--; // subtract a bullet
-            UpdateUI();
-            Kick();
+            if (!SoundReloadByAnim)
+                StartCoroutine(DelayFireSound());
+            else
+                PlayFireAudio();
+
+            WeaponAnimation?.Fire();
+            OnFireCommons();
             if (!isAiming)
             {
                 if (muzzleFlash) { muzzleFlash.Play(); }
@@ -1074,25 +741,8 @@ public class bl_Gun : bl_GunBase
     }
 
     /// <summary>
-    /// most shotguns have the sound of shooting and then reloading
+    /// 
     /// </summary>
-    /// <returns></returns>
-    IEnumerator DelayFireSound()
-    {
-        PlayFireAudio();
-        yield return new WaitForSeconds(delayForSecondFireSound);
-        if (DelaySource != null)
-        {
-            DelaySource.clip = ReloadSound3;
-            DelaySource.Play();
-        }
-        else
-        {
-            Source.clip = ReloadSound3;
-            Source.Play();
-        }
-    }
-
     void GrenadeFire(bool fastFire = false)
     {
         if (grenadeFired || (Time.time - nextFireTime) <= Info.FireRate)
@@ -1116,7 +766,6 @@ public class bl_Gun : bl_GunBase
     /// <summary>
     /// fire your launcher
     /// </summary>
-    private bool grenadeFired = false;
     public IEnumerator ThrowGrenade(bool fastFire = false, bool useDelay = true)
     {
         float t = 0;
@@ -1138,7 +787,7 @@ public class bl_Gun : bl_GunBase
         isFiring = false;
 
         //hide the grenade mesh when doesn't have ammo
-        if(bulletsLeft <= 0)
+        if (bulletsLeft <= 0)
         {
             OnAmmoLauncher.ForEach(x =>
            {
@@ -1158,7 +807,7 @@ public class bl_Gun : bl_GunBase
             {
                 Reload(0);
             }
-            else if(bulletsLeft <= 0)
+            else if (bulletsLeft <= 0)
             {
                 gunManager?.OnReturnWeapon();
             }
@@ -1168,36 +817,45 @@ public class bl_Gun : bl_GunBase
     /// <summary>
     /// 
     /// </summary>
-    public void BuildBulletData()
+    public IEnumerator FastGrenadeFire(System.Action callBack)
     {
-        BulletSettings.Damage = Damage;
-        BulletSettings.ImpactForce = impactForce;
-        if (Info.Type == GunType.Sniper && !isAiming)
+        float tt = WeaponAnimation.GetFirePlusDrawLenght;
+        GrenadeFire(true);
+        yield return new WaitForSeconds(tt);
+        if (numberOfClips > 0)
         {
-            BulletSettings.Spread = spread * 3;
-            BulletSettings.MaxSpread = spreadMinMax.y * 3;
+            bulletsLeft++;
+            if (!HaveInfinityAmmo) numberOfClips--;
+            UpdateUI();
         }
-        else
-        {
-            BulletSettings.MaxSpread = spreadMinMax.y;
-            BulletSettings.Spread = spread;
-        }
-        BulletSettings.Speed = bulletSpeed;
-        BulletSettings.WeaponName = Info.Name;
-        BulletSettings.Position = this.transform.root.position;
-        BulletSettings.WeaponID = GunID;
-        BulletSettings.isNetwork = false;
-        BulletSettings.LifeTime = Info.Range;
-        BulletSettings.ActorViewID = bl_GameManager.LocalPlayerViewID;
-        BulletSettings.MFPSActor = bl_GameManager.Instance.LocalActor;
+        callBack();
+        StopAllCoroutines();
+        gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void QuickMelee(System.Action callBack)
+    {
+        StartCoroutine(QuickMeleeSequence(callBack));
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    IEnumerator QuickMeleeSequence(System.Action callBack)
+    {
+        float tt = KnifeFire(true);
+        yield return new WaitForSeconds(tt);
+        callBack();
+        gameObject.SetActive(false);
     }
 
     /// <summary>
     /// Create and fire a bullet
     /// </summary>
     /// <returns></returns>
-    GameObject instancedBullet = null;
-    RaycastHit hit;
     IEnumerator FireOneShot()
     {
         // set the gun's info into an array to send to the bullet
@@ -1207,14 +865,14 @@ public class bl_Gun : bl_GunBase
         instancedBullet = Pooling.Instantiate(BulletName, firePosition, fireRotation); // create a bullet
         instancedBullet.GetComponent<bl_Bullet>().SetUp(BulletSettings);// send the gun's info to the bullet
         Crosshair.OnFire();
-        PlayerNetwork.IsFire(Info.Type, hitPoint);
-        if (Info.Type != GunType.Grenade)
+        PlayerNetwork.IsFire(WeaponType, hitPoint);
+        if (WeaponType != GunType.Grenade)
         {
             Source.clip = FireSound;
             Source.spread = Random.Range(1.0f, 1.5f);
             Source.Play();
         }
-
+        bl_EventHandler.DispatchLocalPlayerFire(GunID);
         if ((bulletsLeft == 0))
         {
             Reload();  // if out of bullets.... reload
@@ -1239,8 +897,26 @@ public class bl_Gun : bl_GunBase
         }
         newNoobTube.GetComponent<bl_Projectile>().SetUp(BulletSettings);// send the gun's info to the grenade    
         grenadeFired = false;
+        bl_EventHandler.DispatchLocalPlayerFire(GunID);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public void OnFireCommons()
+    {
+        PlayFireAudio();
+        bulletsLeft--;
+        UpdateUI();
+        nextFireTime += Info.FireRate;
+        EjectShell();
+        Kick();
+        Shake();
+    }
+
+    /// <summary>
+    /// Get the bullet spawn position
+    /// </summary>
     public Vector3 GetBulletPosition(out Vector3 position, out Quaternion rotation)
     {
         Vector3 HitPoint = PlayerCamera.transform.forward * 100;
@@ -1257,28 +933,37 @@ public class bl_Gun : bl_GunBase
         }
         return HitPoint;
     }
+    #endregion
 
     /// <summary>
     /// 
     /// </summary>
-    void EjectShell()
+    public void BuildBulletData()
     {
-        shell?.Play();
+        BulletSettings.Damage = Damage;
+        BulletSettings.ImpactForce = impactForce;
+        if (WeaponType == GunType.Sniper && !isAiming)
+        {
+            BulletSettings.Spread = spread * 3;
+            BulletSettings.MaxSpread = spreadMinMax.y * 3;
+        }
+        else
+        {
+            BulletSettings.MaxSpread = spreadMinMax.y;
+            BulletSettings.Spread = spread;
+        }
+        BulletSettings.Speed = bulletSpeed;
+        BulletSettings.WeaponName = Info.Name;
+        BulletSettings.Position = this.transform.root.position;
+        BulletSettings.WeaponID = GunID;
+        BulletSettings.isNetwork = false;
+        BulletSettings.Range = Info.Range;
+        BulletSettings.ActorViewID = bl_GameManager.LocalPlayerViewID;
+        BulletSettings.MFPSActor = bl_GameManager.Instance.LocalActor;
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    public void PlayFireAudio()
-    {
-        FireSource.clip = FireSound;
-        FireSource.spread = Random.Range(1.0f, 1.5f);
-        FireSource.pitch = Random.Range(1.0f, 1.075f);
-        FireSource.Play();
-    }
-
-    /// <summary>
-    /// ADS
+    /// Aiming control
     /// </summary>
     void Aim()
     {
@@ -1287,16 +972,16 @@ public class bl_Gun : bl_GunBase
             CurrentPos = AimPosition; //Place in the center ADS
             currentZoom = aimZoom; //create a zoom camera
             GunBob.Intensitity = 0.01f;
-            SwayGun.Smoothness = DeafultSmoothSway_ * 2.5f;
+            SwayGun.Smoothness = m_defaultSwayAmount * 2.5f;
             SwayGun.Amount = AimSwayAmount;
             spreadMinMax = defaultSpreadRange * spreadAimMultiplier;
         }
         else // if not aimed
         {
             CurrentPos = DefaultPos; //return to default gun position       
-            currentZoom = defaultZoom; //return to default fog
+            currentZoom = playerReferences.DefaultCameraFOV; //return to default fog
             GunBob.Intensitity = 1;
-            SwayGun.Smoothness = DeafultSmoothSway_;
+            SwayGun.Smoothness = m_defaultSwayAmount;
             SwayGun.ResetSettings();
             spreadMinMax = defaultSpreadRange;
         }
@@ -1306,24 +991,21 @@ public class bl_Gun : bl_GunBase
         Vector3.MoveTowards(m_Transform.localPosition, CurrentPos, delta * AimSmooth); // with snap effect
         if (PlayerCamera != null && !BlockAimFoV)
         {
-            PlayerCamera.fieldOfView = useSmooth ? Mathf.Lerp(PlayerCamera.fieldOfView, currentZoom + controller.RunFov, delta * (AimSmooth * 3)) :
-             Mathf.Lerp(PlayerCamera.fieldOfView, currentZoom + controller.RunFov, delta * AimSmooth);
+            PlayerCamera.fieldOfView = Mathf.Lerp(PlayerCamera.fieldOfView, currentZoom + controller.RunFov, delta * AimSmooth);
         }
         GunBob.isAim = isAiming;
+        if (lastAimState != isAiming)
+        {
+            bl_EventHandler.DispatchLocalAimEvent(isAiming);
+            lastAimState = isAiming;
+        }
     }
 
-    public void SetToAim()
-    {
-        m_Transform.localPosition = AimPosition;
-    }
     /// <summary>
     /// send kick back to mouse look
     /// when is fire
     /// </summary>
-    public void Kick()
-    {
-        RecoilManager.SetRecoil(RecoilAmount, RecoilSpeed);
-    }
+    public void Kick() => RecoilManager.SetRecoil(RecoilAmount, RecoilSpeed);
 
     /// <summary>
     /// 
@@ -1337,12 +1019,31 @@ public class bl_Gun : bl_GunBase
     /// <summary>
     /// 
     /// </summary>
+    void EjectShell()
+    {
+        if (shell != null)
+            shell?.Play();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public void CheckBullets(float delay = 0)
     {
         if (bulletsLeft <= 0 && numberOfClips > 0 && AutoReload)
         {
             Reload(delay);
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void OnReload()
+    {
+        if (!CanReload) return;
+
+        Reload();
     }
 
     /// <summary>
@@ -1398,10 +1099,10 @@ public class bl_Gun : bl_GunBase
             {
                 if (AmmoType == AmmunitionType.Clips)
                 {
-                    numberOfClips--;
+                   if(!HaveInfinityAmmo) numberOfClips--;
                 }
             }
-            if (Info.Type == GunType.Grenade) { OnAmmoLauncher.ForEach(x => { x?.SetActive(bulletsLeft > 0); }); }
+            if (WeaponType == GunType.Grenade) { OnAmmoLauncher.ForEach(x => { x?.SetActive(true); }); }
             yield return new WaitForSeconds(Info.ReloadTime); // wait for set reload time
             if (AmmoType == AmmunitionType.Clips)
             {
@@ -1412,16 +1113,20 @@ public class bl_Gun : bl_GunBase
                 int need = bulletsPerClip - bulletsLeft;
                 int add = (numberOfClips >= need) ? need : numberOfClips;
                 bulletsLeft += add;
-                numberOfClips -= add;
+                if (!HaveInfinityAmmo) numberOfClips -= add;
             }
         }
         UpdateUI();
         isReloading = false; // done reloading
-        CanAim = true;
+        CanAiming = true;
         CanFire = true;
         inReloadMode = false;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="bullet"></param>
     public void AddBullet(int bullet)
     {
         if (AmmoType == AmmunitionType.Bullets)
@@ -1433,16 +1138,98 @@ public class bl_Gun : bl_GunBase
     }
 
     /// <summary>
+    /// Set unlimited ammo to this weapon
+    /// </summary>
+    /// <param name="infinity"></param>
+    public void SetInifinityAmmo(bool infinity)
+    {
+        HaveInfinityAmmo = infinity;
+        bulletsLeft = bulletsPerClip;
+        numberOfClips = AmmoType == AmmunitionType.Bullets ? bulletsPerClip * numberOfClips : numberOfClips;
+        if (gameObject.activeInHierarchy)
+        UpdateUI();
+    }
+
+    /// <summary>
+    /// Sync Weapon state for Upper animations
+    /// </summary>
+    void DetermineUpperState()
+    {
+        if (PlayerNetwork == null)
+            return;
+
+        if (isFiring && !isReloading)
+        {
+            FPState = (isAiming) ? PlayerFPState.FireAiming : PlayerFPState.Firing;
+        }
+        else if (isAiming && !isFiring && !isReloading)
+        {
+            FPState = PlayerFPState.Aiming;
+        }
+        else if (isReloading)
+        {
+            FPState = PlayerFPState.Reloading;
+        }
+        else if (controller.State == PlayerState.Running && !isReloading && !isFiring && !isAiming)
+        {
+            FPState = PlayerFPState.Running;
+        }
+        else
+        {
+            FPState = PlayerFPState.Idle;
+        }
+        PlayerNetwork.FPState = FPState;
+    }
+
+    /// <summary>
+    /// Set the weapon directly to the aim position.
+    /// </summary>
+    public void SetToAim() => m_Transform.localPosition = AimPosition;
+
+    #region Audio
+    /// <summary>
+    /// 
+    /// </summary>
+    public void PlayFireAudio()
+    {
+        FireSource.clip = FireSound;
+        FireSource.spread = Random.Range(1.0f, 1.5f);
+        FireSource.pitch = Random.Range(1.0f, 1.075f);
+        FireSource.Play();
+    }
+
+
+    /// <summary>
+    /// most shotguns have the sound of shooting and then reloading
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator DelayFireSound()
+    {
+        PlayFireAudio();
+        yield return new WaitForSeconds(delayForSecondFireSound);
+        if (DelaySource != null)
+        {
+            DelaySource.clip = ReloadSound3;
+            DelaySource.Play();
+        }
+        else
+        {
+            Source.clip = ReloadSound3;
+            Source.Play();
+        }
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     public void FinishReload()
     {
         if (AmmoType == AmmunitionType.Clips)
         {
-            numberOfClips--;
+            if (!HaveInfinityAmmo) numberOfClips--;
         }
         isReloading = false; // done reloading
-        CanAim = true;
+        CanAiming = true;
         CanFire = true;
         inReloadMode = false;
     }
@@ -1463,7 +1250,19 @@ public class bl_Gun : bl_GunBase
         }
         else if (part == 2)
         {
-             Source.clip = ReloadSound3;
+            Source.clip = ReloadSound3;
+            Source.Play();
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void PlayEmptyFireSound()
+    {
+        if (WeaponType != GunType.Knife && DryFireSound != null)
+        {
+            Source.clip = DryFireSound;
             Source.Play();
         }
     }
@@ -1485,7 +1284,7 @@ public class bl_Gun : bl_GunBase
         }
         if (ReloadSound2 != null)
         {
-            if (Info.Type == GunType.Shotgun)
+            if (WeaponType == GunType.Shotgun)
             {
                 int t_repeat = bulletsPerClip - bulletsLeft;
                 for (int i = 0; i < t_repeat; i++)
@@ -1512,6 +1311,7 @@ public class bl_Gun : bl_GunBase
         yield return new WaitForSeconds(0.65f);
         gunManager?.HeadAnimation(0, t_time);
     }
+    #endregion
 
     /// <summary>
     /// 
@@ -1530,16 +1330,14 @@ public class bl_Gun : bl_GunBase
     /// </summary>
     public float DisableWeapon(bool isFastKill = false)
     {
-        CanAim = false;
+        CanAiming = false;
         if (isReloading) { inReloadMode = true; isReloading = false; }
         CanFire = false;
         gunManager?.HeadAnimation(0, 1);
-        if (PlayerCamera == null) { PlayerCamera = m_Transform.root.GetComponent<bl_PlayerSettings>().PlayerCamera; }
-        PlayerCamera.fieldOfView = defaultZoom;
+        if (PlayerCamera == null) { PlayerCamera = playerReferences.playerCamera; }
         if (!isFastKill) { StopAllCoroutines(); }
         return WeaponAnimation.HideWeapon();
     }
-
 
     /// <summary>
     /// 
@@ -1547,7 +1345,7 @@ public class bl_Gun : bl_GunBase
     void SetFireTypeName()
     {
         string n = string.Empty;
-        switch (Info.Type)
+        switch (WeaponType)
         {
             case GunType.Machinegun:
                 n = bl_GameTexts.FireTypeAuto;
@@ -1560,9 +1358,6 @@ public class bl_Gun : bl_GunBase
             case GunType.Sniper:
                 n = bl_GameTexts.FireTypeSingle;
                 break;
-            case GunType.Vampire:
-                n = bl_GameTexts.FireTypeBeam;
-                break;
             default:
                 n = "--";
                 break;
@@ -1574,52 +1369,102 @@ public class bl_Gun : bl_GunBase
     }
 
     /// <summary>
-    /// When round is end we can't fire
+    /// 
     /// </summary>
-    void OnRoundEnd()
+    void DrawComplete()
     {
-        m_enable = false;
+        CanFire = true;
+        CanAiming = true;
+        if (inReloadMode) { Reload(0.2f); }
     }
 
-    public void OnPickUpAmmo(int bullets, int t_clips, int projectiles)
+    /// <summary>
+    /// When round is end we can't fire
+    /// </summary>
+    void OnRoundEnd() => m_enable = false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void OnPickUpAmmo(int bullets, int projectiles, int gunID)
     {
-        if (Info.Type == GunType.Knife) return;
+        //if this is not a global ammo but for a specific weapon
+        if (gunID != -1)
+        {
+            //and this is not the weapon that is for
+            if (gunID != GunID) return;
+        }
+
+        if (WeaponType == GunType.Knife) return;
         if (AmmoType == AmmunitionType.Clips)
         {
-            if (numberOfClips < maxNumberOfClips)
+            //max number of clips
+            if (numberOfClips >= maxNumberOfClips) return;
+
+            numberOfClips += Mathf.FloorToInt(bullets / bulletsPerClip);
+            if (numberOfClips > maxNumberOfClips)
             {
-                numberOfClips += t_clips;
-                if (numberOfClips > maxNumberOfClips)
-                {
-                    numberOfClips = maxNumberOfClips;
-                }
+                numberOfClips = maxNumberOfClips;
             }
         }
         else
         {
-            if (Info.Type == GunType.Grenade)
+            if (WeaponType == GunType.Grenade)
             {
                 numberOfClips += projectiles;
-             bl_UIReferences.Instance.AddLeftNotifier(string.Format("+{0} {1}", projectiles.ToString(), Info.Name));
+                bl_UIReferences.Instance.AddLeftNotifier(string.Format("+{0} {1}", projectiles.ToString(), Info.Name));
             }
             else
             {
-                int total = bullets + (bulletsPerClip * t_clips);
-                numberOfClips += total;
-                bl_UIReferences.Instance.AddLeftNotifier(string.Format("+{0} {1} Bullets", total, Info.Name));
+                int oldCount = numberOfClips;
+                numberOfClips += bullets;
+                numberOfClips = Mathf.Clamp(numberOfClips, 0, bulletsPerClip * maxNumberOfClips);
+                bl_UIReferences.Instance.AddLeftNotifier(string.Format("+{0} {1} Bullets", numberOfClips - oldCount, Info.Name));
             }
         }
         UpdateUI();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void UpdateUI()
+    public void OverrideMuzzlePoint(Transform newPoint)
     {
-        bl_UIReferences.Instance.PlayerUI.UpdateWeaponState(this);
+        defaultMuzzlePoint = muzzlePoint;
+        muzzlePoint = newPoint;
     }
 
+    /// <summary>
+    /// Enable/Disable the weapon renders/meshes
+    /// </summary>
+    public void SetWeaponRendersActive(bool active)
+    {
+        if (weaponRenders == null)
+        {
+            weaponRenders = m_Transform.GetComponentsInChildren<Renderer>();
+        }
+
+        foreach (var item in weaponRenders)
+        {
+            if (item == null) continue;
+            item.gameObject.SetActive(active);
+        }
+
+#if CUSTOMIZER
+        var customizerWeapon = GetComponent<bl_CustomizerWeapon>();
+        if(active && customizerWeapon != null && customizerWeapon.ApplyOnStart)
+        {
+            customizerWeapon.LoadAttachments();
+            customizerWeapon.ApplyAttachments();
+        }
+#endif
+    }
+
+    void CancelFiring() { isFiring = false; }
+    void CancelReloading() { WeaponAnimation.CancelReload(); }
+    public void ResetDefaultMuzzlePoint() { if (defaultMuzzlePoint != null) muzzlePoint = defaultMuzzlePoint; }
+    public void UpdateUI() => bl_UIReferences.Instance.PlayerUI.UpdateWeaponState(this);
+    public void SetDefaultWeaponCameraFOV(float fov) => WeaponCamera.fieldOfView = fov;
+
+    #region Getters
+    public GunType WeaponType { get => Info.Type; set => Info.Type = value; }
     private float BaseSpread
     {
         get { return Crosshair.isCrouch ? spreadMinMax.x * 0.5f : spreadMinMax.x; }
@@ -1667,78 +1512,42 @@ public class bl_Gun : bl_GunBase
         set { extraDamage = value; }//don't modify the base damage, only the extra value
     }
 
-    private bl_WeaponAnimation _anim;
-    public bl_WeaponAnimation WeaponAnimation
-    {
-        get
-        {
-            if(_anim == null) { _anim = GetComponentInChildren<bl_WeaponAnimation>(); }
-            return _anim;
-        }
-    }
-    private bl_FirstPersonController _controller;
-    public bl_FirstPersonController controller
-    {
-        get
-        {
-            if (_controller == null) { _controller = transform.root.GetComponent<bl_FirstPersonController>(); }
-            return _controller;
-        }
-    }
-
-    private bl_PlayerNetwork _Sync;
-    public bl_PlayerNetwork PlayerNetwork
-    {
-        get
-        {
-            if (_Sync == null) { _Sync = transform.root.GetComponent<bl_PlayerNetwork>(); }
-            return _Sync;
-        }
-    }
-
     public int GetCompactClips { get { return (numberOfClips / bulletsPerClip); } }
+
     /// <summary>
-    /// determine if we are ready to shoot
-    /// TIP: if you want to have to shoot when running
-    /// just remove "!controller.run" of the condition
+    /// Determine if the player can shoot this weapon.
     /// </summary>
-    public bool m_CanFire
+    private bool m_canFire = false;
+    public bool CanFire
     {
         get
         {
-            bool can = false;
-            if (bulletsLeft > 0 && CanFire && !isReloading && FireWhileRun)
-            {
-                can = true;
-            }
-            return can;
+            return (bulletsLeft > 0 && m_canFire && !isReloading && FireWhileRun);
         }
+        set => m_canFire = value;
     }
 
     public bool FireRatePassed { get { return (Time.time - nextFireTime) > Info.FireRate; } }
     public bool AllowQuickFire() => m_AllowQuickFire && bulletsLeft > 0 && FireRatePassed;
 
     /// <summary>
-    /// determine if we can Aim
+    ///  Determine if the player can aiming with this weapon in the current state
     /// </summary>
-    public bool m_CamAim
+    private bool m_canAim;
+    public bool CanAiming
     {
         get
         {
-            bool can = false;
-            if (CanAim && controller.State != PlayerState.Running)
-            {
-                can = true;
-            }
-            return can;
+            if (WeaponType == GunType.Grenade || WeaponType == GunType.Knife) return false;
+            return (m_canAim && controller.State != PlayerState.Running);
         }
+        set => m_canAim = value;
     }
-    /// <summary>_
-    /// determine is we can reload
-    /// TIP: if you want to have to shoot when running
-    /// just remove "!controller.run" of the condition
+
+    /// <summary>
+    /// Determine if the player can reload this weapon
     /// </summary>
-    bool m_CanReload
+    bool CanReload
     {
         get
         {
@@ -1747,7 +1556,7 @@ public class bl_Gun : bl_GunBase
             {
                 can = true;
             }
-            if (Info.Type == GunType.Knife && nextFireTime < Time.time || Info.Type == GunType.TwoHandedMelee && nextFireTime < Time.time)
+            if (WeaponType == GunType.Knife && nextFireTime < Time.time)
             {
                 can = false;
             }
@@ -1776,6 +1585,31 @@ public class bl_Gun : bl_GunBase
 
     public bool CanBeTaken() { if (canBeTakenWhenIsEmpty) return true; else return (bulletsLeft > 0 || numberOfClips > 0); }
 
+    public bl_FirstPersonController controller => PlayerReferences.firstPersonController;
+    public bl_PlayerNetwork PlayerNetwork => PlayerReferences.playerNetwork;
+    private bl_GunManager gunManager => PlayerReferences.gunManager;
+
+    private bl_PlayerReferences playerReferences;
+    public bl_PlayerReferences PlayerReferences
+    {
+        get
+        {
+            if (playerReferences == null) playerReferences = transform.root.GetComponent<bl_PlayerReferences>();
+            return playerReferences;
+        }
+    }
+
+    private bl_WeaponAnimation _anim;
+    public bl_WeaponAnimation WeaponAnimation
+    {
+        get
+        {
+            if (_anim == null) { _anim = GetComponentInChildren<bl_WeaponAnimation>(); }
+            return _anim;
+        }
+    }
+    #endregion
+
     [System.Serializable]
     public enum BulletInstanceMethod
     {
@@ -1790,25 +1624,14 @@ public class bl_Gun : bl_GunBase
         Magazine,
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private bl_GunManager _gunManager;
-    private bl_GunManager gunManager
-    {
-        get
-        {
-            if(_gunManager == null) { _gunManager = this.transform.root.GetComponentInChildren<bl_GunManager>(); }
-            return _gunManager;
-        }
-    }
+
 #if UNITY_EDITOR
     public bool _aimRecord = false;
     public Vector3 _defaultPosition = new Vector3(-100, 0, 0);
 
     private void OnDrawGizmos()
     {
-        if(muzzlePoint != null)
+        if (muzzlePoint != null)
         {
             Gizmos.color = new Color(0, 1, 0, 0.4f);
             Gizmos.DrawSphere(muzzlePoint.position, 0.022f);

@@ -15,7 +15,7 @@ public class bl_DropCaller : MonoBehaviour
     IEnumerator CallProcess(float delay)
     {
         yield return new WaitForSeconds(delay);
-        bl_EventHandler.KitAirEvent(transform.position, KitID);
+        bl_EventHandler.DispatchDropEvent(transform.position, KitID);
         if(DestroyEffect != null)
         {
             Instantiate(DestroyEffect, transform.position, Quaternion.identity);

@@ -1,5 +1,5 @@
-Thank you for purchasing MFPS 2.0!.
-Version 1.7.5f2
+ï»¿Thank you for purchasing MFPS 2.0!.
+Version 1.8
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 **PLEASE NOTE** 
@@ -49,6 +49,71 @@ Video Tutorials:
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 **Change Log** 
 
+         -1.8
+		   -IMPROVE: Third person player movement animations blend.
+		   -FIX: Error with Player Selector after spawn with the player.
+		   -IMPROVE: Footstep system, now it support terrain layers, now you can play different sounds depending in the terrain texture.
+		   -ADDON: New Third Person View addon: allows switch between first-person and third-person view in-game with a button or set the third-person view as the unique game view, LINK: https://lovattostudio.com/u/mfpstpaa
+		   -IMPROVE: Pick up window pop up.
+		   -IMPROVE: Now the local player rag-doll will appear in a pose based in the state of the player before he dies (idle, running, crouch, etc...)
+		   -FIX: Error when block the weapons and tried to switch weapons with the mouse scroll or quick-fire knife/nade.
+		   -IMPROVE: Now bots are supported in Elimination game mode.
+		   -IMPROVE: Now you can define on the inspector in which game modes bots are supported in GameData -> Game Modes -> *game mode* -> Support Bots, note that bots by default are only supported in FFA, TDM and ELIM game modes.
+		   -FIX: Match time never update for non-master clients when auto team selection is On.
+		   -IMPROVE: Make player scoreboard managed from an independent script in order to make it easier to customize.
+		   -IMPROVE: Add option to always shows the weapon loadout or auto hide (default), this option can be found in UI->PlayerUI->PlayerInfo->Loadout->bl_WeaponLoadoutUI->Show Mode.
+		   -IMPROVE: Weapon pickup system.
+		   -IMPROVE: Reduce the message per player count in OnPhotonSerializeView on more than half.
+		   -IMPROVE: Add text notification in waiting room to let players know when more players are required to start the game.
+		   -ADDON: Vehicle: Car: Multiplayer 4-wheels vehicle system, allowing enter/exit the vehicle as driver or passenger, LINK: https://lovattostudio.com/u/mfpscar
+		   -FIX: Grenade mesh don't shown again (in the FPArms) after throw one of them.
+		   -FIX: Fall damage calculation that causes player dies from falling short distances.
+		   -IMPROVE: Add weapon slot rules (GameData->Weapon Slot Ruler), allows you define what kind of weapons can be assigned in each of the player equipment slots.
+		   -IMPROVE: Add bl_PlayerReferences.cs, this script is attached in each player prefab and mapped all the player prefab attached scripts, use to get any player script instead of GetComponent, GetComponentInChildren, etc...
+		   -ADD: Custom IK Handler, allows you to define custom IK targets for the third person player arms with bl_PlayerIK.CustomArmsIKHandler.
+		   -FIX: Bots ignore the local player in FFA mode.
+		   -IMPROVE: Slightly improved the bots behave and made the bots behave-settings more modular and easier to modify.
+		   -ADDON: Paypal for Shop: Enables to use Paypal checkout (using the official Paypal checkout V2 API) to purchase in-game coins from the Shop addon, LINK: https://lovattostudio.com/u/ppfsaa
+		   -IMPROVE: Ammo and Health kit system.
+		   -ADD: Home window in the MainMenu scene, now it's the default window instead of the server list window.
+		   -IMPROVE: Item pickup ray detection, before, the player has to look directly at the object in order to be able to pick up it, now only need to look near it.
+		   -IMPROVE: The player controller now auto slides in surfaces with angle > to the Character Controller slope limit.
+		   -IMPROVE: ItemManager system.
+		   -FIX: Match time is out of sync for non-master clients when countdown is turn off.
+		   -ADD: MFPS Editor Manager window, an Unity Editor window that allows you have all the MFPS settings + the Addons settings in an single menu, open it with Ctrl + M on Windows or âŒ˜ + M on Mac
+		   -FIX: Photon view error on the start of the match caused by a duplicated bot photonview.
+		   -DOC: Guide to update older MFPS version with new updates, Documentation -> Update MFPS.
+		   -IMPROVE: Now bots are replaced when a new player enter in match in FFA (before only works in TDM)
+		   -FIX: Bots stop working when an old master client re-join in the match.
+		   -IMPROVE: Now bots replace players when they left a game leaving an empty spot in the match.
+		   -ADDON: Authenticators: Facebook and Google: allows sign-in/sign-up in ULogin Pro with Facebook or Google accounts, LINKS: https://lovattostudio.com/u/gglaa and https://lovattostudio.com/u/fblaa
+		   -FIX: Player Selector: InMatch mode.
+		   -FIX: Burst weapons shoot the full round even if the clip doesn't have the required ammo.
+		   -FIX: Crosshair doesn't re-center when change screen resolution.
+		   -IMPROVE: Rewrite the in-game settings with a more robust, modular and easy to use solution.
+		   -IMPROVE: The lobby room creator menu.
+		   -IMPROVE: Input Manager: now you can change input device (keyboard-controller) in-game trough the settings menu.
+		   -IMPROVE: FPWeapon side-walk movement effect.
+		   -FIX: Weird bots upper body rotation when the target is in the opposite direction from where the bot is heading to.
+		   -ADD: MouseLook Frame Smoothing, resulting in a more fluid and precise mouse movement (works for mobile pad too).
+		   -ADD: Room UI Mask, now you can show/hide certain groups of in-game UI with bl_UIReferences.Instance.SetUIMask(RoomUILayers.Loadout | RoomUILayers.WeaponData | RoomUILayers.Scoreboards | RoomUILayers.Time...);
+		   -IMPROVE: Integrate the Friend List with ULogin Pro, now will be verified if the given friend exist before add in the friend list.
+		   -DOC: Add Universal Render Pipeline (URP) tutorial in documentation, which guides in how to convert MFPS to URP/HDRP.
+		   -IMPROVE: Now player won't be able to stand up (when is crouch) if there's an obstacle above him.
+		   -ADD: Infinity Ammo option for weapons, simply attach the script bl_MapMods in any scene object and turn on the Infinity Ammo toggle.
+		   -IMPROVE: Friend list UI in the Lobby scene.
+		   -FIX: Import GAIA and other assets that include the standard First-Person Controller scripts broke the MFPS player references(works in Unity 2019.4++)
+		   -IMPROVE: Player third person left arm IK movement.
+		   -ADD: Player class dropdown selector in Lobby and Room menus.
+		   -IMPROVE: Level Manager: Now the killer player level icon is shown in the kill cam UI.
+		   -IMPROVE: Player scoreboard management, reducing garbage collection caused by the update of the tables.
+		   -IMPROVE: Killfeed list is now pooled, reducing the garbage collection caused by the instantiation-destroy of this in each kill event.
+		   -FIX: Camera zoom jump when player is running and switch weapon.
+		   -IMPROVE: TP weapon switch animation timing.
+		   -FIX: Weapon range was not working, now the Range set in the Weapon Info will be the max range of the bullets from that weapon.
+		   -Along with this MFPS update, all MFPS addons has been updated as well, the last version of each of them is required check the change log here: https://lovattostudio.com/u/mfpsacl
+
+
          -1.7.5
 		   -FIX: Build compilation error when compiled with Unity Cloud Build to iOS.
 		   -IMPROVE: Now when play in offline mode and Player Selector is enable, will use the player prefabs from GameData instead of the last selected.
@@ -74,59 +139,59 @@ Video Tutorials:
 
          -1.7
 		   -CHANGE: Minimum Unity version support raise to 2018.4
-		   -IMPROVE: Now Post-Processing Stack V2 is used, increasing the graphic quality, and now it can be removed through the Unity Package Manager.
-		   -ADD: Slide movement: this mechanic allows players to slide with the crouch key when they are sprinting forward.
-		   -FIX: Errors when enabled Photon Voice.
-		   -IMPROVE: Draw Name position calculation, before the UI was overlapping the player at a certain distance away, now the calculation will try to always show the hud above the player head.
-		   -FIX: Shotgun reload was automatically canceled, causing that only one bullet inserted.
-		   -IMPROVE: Now you can display the 'player nameplate' in the scene view, making easy edit the design since you'll be able to preview without play the scene with multiple players.
-		   -ADD: Grenade/Projectile Launcher, a new weapon type that fires a specially-designed large-caliber projectile.
-		   -IMPROVE: Name Plate Presents, now you can create presents of the Name Plate Style.
-		   -FIX: Overlapping text in some UI Text components in Unity 2018.3++.
-		   -IMPROVE: Added 'AutomaticallyComeBack' option in bl_Recoil.cs, turn off this option and recoil won't return back to the default position.
-		   -FIX: Hit marker randomly shows up for master client when a bot causes damage.
-		   -FIX: Bots were still able to throw grenades seconds after they die.
-		   -ADDON: New Kill Streaks: With this addon, players will be rewarded with some abilities for managing to kill a certain number of enemy players without dying,
-		           this package includes UAV, Air Streak and Helicopter Support. LINK: https://www.lovattostudio.com/en/shop/addons/kill-streaks/
-		   -ADD: Frame Rate selector, a dropdown in the settings menu with which players can select the update frame rate.
-		   -IMPROVE: Rewrite the spawn FPWeapon effect (fade in/out overlay color over weapon and arms materials).
-		   -IMPROVE: Bots cover point selection, now the selection algorithm will try to select nearby points if the selected one is already occupied by another bot to avoid congestion in hot spots.
-		   -IMPROVE: Now player and bots fly away when die by an explosion near them.
-		   -IMPROVE: Added option in GameData to disable the crosshair in-game.
-		   -ADD: Photon Offline Mode support, now you can rapid-test the room scenes in offline mode improving the workflow by playing the room scene directly, useful for test small changes or modifications e.g: test guns, player controller, etc...
-		         Note that this offline mode doesn't mean support for standalone offline gameplay, it's intended to rapid-test only, playing directly the map scene instead of go to the lobby -> connect to the server -> create a room -> load the map -> etc...
-		   -IMPROVE: Now the Third Person Reload animations time (that take play the whole animation) match with the First Person weapons reload time.
-		   -IMPROVE: Added option in GameData to disable the 'Wiggle' player camera effect when walk or run (not the head bob movement).
-		   -FIX: Weapon Camera Field Of View was not be applied on start but until the player opens the settings menu.
-		   -IMPROVE: Made the weapon bob settings managed by presents, that way you can create multiple movements settings and having backups.
-		   -IMPROVE: Added a Counter Strike-like weapon bob settings present (optional).
-		   -FIX: Sometimes pickup guns don't respond to input, it happened when two guns were next to each other and trigger area intersect between.
-		   -IMPROVE: Player animation, walk, run, jump and some weapons animations transitions have been improved for better looking.
-		   -FIX: The game was trying to load the MainMenu scene after Stop the game (in the editor) causing stack the scenes in the Hierarchy scene fields (MainMenu (Loaded))
-		   -IMPROVE: Now players can't select the grenade if they don't have ammo for this.
-		   -ADDON: 'Shop Unity IAP' extension, this addons which are at the same time is an extension of the Shop addon, integrate the MFPS Shop system with the Unity In-App Purchase system, 
-		           which allow process real payments to purchase virtual coins in various platforms like iOS and Android, LINK: https://www.lovattostudio.com/en/shop/addons/unity-iap-for-shop/
-		   -IMPROVE: Now grenade weapons will automatically switch to the previous weapon when players throw the last grenade.
-		   -ADD: 'Weapon Switch Style' options in bl_GunManager.cs, you can select between three options: HideAndDraw, Counter-Strike Like, HideCompletelyAndThenDraw.
-		   -FIX: Player mesh for bots and player prefab get stretched at a certain distance, problem cause by LOD meshes.
-		   -IMPROVE: Added custom skin to the In-Editor tutorials to be more readable in both Unity Pro and the personal versions.
-		   -FIX: Bots were destroyed when Master Client leave the room, now bots data and current state will automatically transfer to the new Master Client.
-		   -FIX: Nameplate and Health Bar was showing for Non-team mate bots in Non-Master Clients.
-		   -IMPROVE: Now the In-Editor tutorials include short clips (GIF images) in some tutorials, making it even easier to understand them.
-		   -FIX: Footstep doesn't play for FPWeapons using Animations for Walk and Run movement.
-		   -ADDON: Shop: Now you can sell weapons camos when using Customizer addon.
-		   -IMPROVE: Now weapon spread factor on ADS can be modified in the inspector bl_Gun -> 'Spread Aim Multiplier', before this value was a fixed value as the half of the base spread.
-		   -FIX: Bots keep firing at dead bodies instead of search for new targets.
-		   -IMPROVE: The overall behave of bots on the battlefield.
-		   -IMPROVE: Now player classes loadout are scriptable objects, that way devs can modify the loadout of each class in the scriptable instance one time instead of modifying in each player prefab,
-		             while keeping the option to use different loadout in each player prefab (by creating a new instance of the scriptable).
-		   -FIX: Error when Network Stats options is enabled in GameData (PUN 2.16++)
-		   -IMPROVE: Now you can control the head bob movement magnitude per player in bl_FirstPersonController -> HeadBobMagnitude.
-		   -FIX: Kick button on the Waiting room was not working.
-		   -ADD: Optional Kill Cam logic "Observed Death", the camera will be statically positioned behind the local player to observe the player ragdoll, you can switch to the previous logic (Follow the killer player) in GameData.
-		   -FIX: Role's names are applied to all players in the room (in builds only) if the dev log-in with an Admin or Moderator account in the Editor. 
-		   -IMPROVE: Now you can select how to reload the shotgun and sniper: Per Bullet or Per Magazine in bl_Gun -> Reload Per.
-		   -FIX: Sometimes changes made in bl_Gun and bl_GunManager in player prefabs were not saved.
+		 Â  -IMPROVE: Now Post-Processing Stack V2 is used, increasing the graphic quality, and now it can be removed through the Unity Package Manager.
+		 Â  -ADD: Slide movement: thisÂ mechanic allows players to slide with the crouch key when they are sprinting forward.
+		 Â  -FIX: Errors when enabled Photon Voice.
+		 Â  -IMPROVE: Draw Name position calculation, before the UI was overlapping the player at a certain distance away, now the calculation will try to always show the hud above the player head.
+		 Â  -FIX: Shotgun reload was automatically canceled, causing that only one bullet inserted.
+		 Â  -IMPROVE: Now you can display the 'player nameplate' in the scene view, making easy edit the design since you'll be able to preview without play the scene with multiple players.
+		 Â  -ADD: Grenade/Projectile Launcher, a new weapon type that fires a specially-designed large-caliber projectile.
+		 Â  -IMPROVE: Name Plate Presents, now you can create presents of the Name Plate Style.
+		 Â  -FIX: Overlapping text in some UI Text components in Unity 2018.3++.
+		 Â  -IMPROVE: Added 'AutomaticallyComeBack' option in bl_Recoil.cs, turn off this option and recoil won't return back to the default position.
+		 Â  -FIX: Hit marker randomly shows up for master client when a bot causes damage.
+		 Â  -FIX: Bots were still able to throw grenades seconds after they die.
+		 Â  -ADDON: New Kill Streaks: With this addon, players will be rewarded with some abilities for managing to kill a certain number of enemy players without dying,
+		 Â  Â  Â  Â  Â  this package includes UAV, Air Streak and Helicopter Support. LINK: https://www.lovattostudio.com/en/shop/addons/kill-streaks/
+		 Â  -ADD: Frame Rate selector, a dropdown in the settings menu with which players can select the update frame rate.
+		 Â  -IMPROVE: Rewrite the spawn FPWeapon effect (fade in/out overlay color over weapon and arms materials).
+		 Â  -IMPROVE: Bots cover point selection, now the selection algorithm will try to select nearby points if the selected one is already occupied by another bot to avoid congestion in hot spots.
+		 Â  -IMPROVE: Now player and bots fly away when die by an explosion near them.
+		 Â  -IMPROVE: Added option in GameData to disable the crosshair in-game.
+		 Â  -ADD: Photon Offline Mode support, now you can rapid-test the room scenes in offline mode improving the workflow by playing the room scene directly, useful for test small changes or modifications e.g: test guns, player controller, etc...
+		 Â  Â  Â  Â  Note that this offline mode doesn't mean support for standalone offline gameplay, it's intended to rapid-test only, playing directly the map scene instead of go to the lobby -> connect to the server -> create a room -> load the map -> etc...
+		 Â  -IMPROVE: Now the Third Person Reload animations time (that take play the whole animation) match with the First Person weapons reload time.
+		 Â  -IMPROVE: Added option in GameData to disable the 'Wiggle' player camera effect when walk or run (not the head bob movement).
+		 Â  -FIX: Weapon Camera Field Of View was not be applied on start but until the player opens the settings menu.
+		 Â  -IMPROVE: Made the weapon bob settings managed by presents, that way you can create multiple movements settings and having backups.
+		 Â  -IMPROVE: Added a Counter Strike-like weapon bob settings present (optional).
+		 Â  -FIX: Sometimes pickup guns don't respond to input, it happened when two guns were next to each other and trigger area intersect between.
+		 Â  -IMPROVE: Player animation, walk, run, jump and some weapons animations transitions have been improved for better looking.
+		 Â  -FIX: The game was trying to load the MainMenu scene after Stop the game (in the editor) causing stack the scenes in the Hierarchy scene fields (MainMenu (Loaded))
+		 Â  -IMPROVE: Now players can't select the grenade if they don't have ammo for this.
+		 Â  -ADDON: 'Shop Unity IAP' extension, this addons which are at the same time is an extension of the Shop addon, integrate the MFPS Shop system with the Unity In-App Purchase system, 
+		 Â  Â  Â  Â  Â  which allow process real payments to purchase virtual coins in various platforms like iOS and Android, LINK: https://www.lovattostudio.com/en/shop/addons/unity-iap-for-shop/
+		 Â  -IMPROVE: Now grenade weapons will automatically switch to the previous weapon when players throw the last grenade.
+		 Â  -ADD: 'Weapon Switch Style' options in bl_GunManager.cs, you can select between three options: HideAndDraw, Counter-Strike Like, HideCompletelyAndThenDraw.
+		 Â  -FIX: Player mesh for bots and player prefab get stretched at a certain distance, problem cause by LOD meshes.
+		 Â  -IMPROVE: Added custom skin to the In-Editor tutorials to be more readable in both Unity Pro and the personal versions.
+		 Â  -FIX: Bots were destroyed when Master Client leave the room, now bots data and current state will automatically transfer to the new Master Client.
+		 Â  -FIX: Nameplate and Health Bar was showing for Non-teamÂ mate bots in Non-Master Clients.
+		 Â  -IMPROVE: Now the In-Editor tutorials include short clips (GIF images) in some tutorials, making it even easier to understand them.
+		 Â  -FIX: Footstep doesn't play for FPWeapons using Animations for Walk and Run movement.
+		 Â  -ADDON: Shop: Now you can sell weapons camos when using Customizer addon.
+		 Â  -IMPROVE: Now weapon spread factor on ADS can be modified in the inspector bl_Gun -> 'Spread Aim Multiplier', before this value was a fixed value as the half of the base spread.
+		 Â  -FIX: Bots keep firing at dead bodies instead of search for new targets.
+		 Â  -IMPROVE: The overall behave of bots on the battlefield.
+		 Â  -IMPROVE: Now player classes loadout are scriptable objects, that way devs can modify the loadout of each class in the scriptable instance one time instead of modifying in each player prefab,
+		 Â  Â  Â  Â  Â  Â  while keeping the option to use different loadout in each player prefab (by creating a new instance of the scriptable).
+		 Â  -FIX: Error when Network Stats options is enabled in GameData (PUN 2.16++)
+		 Â  -IMPROVE: Now you can control the head bob movement magnitude per player in bl_FirstPersonController -> HeadBobMagnitude.
+		 Â  -FIX: Kick button on the Waiting room was not working.
+		 Â  -ADD: Optional Kill Cam logic "Observed Death", the camera will be statically positioned behind the local player to observe the player ragdoll, you can switch to the previous logic (Follow the killer player) in GameData.
+		 Â  -FIX: Role's names are applied to all players in the room (in builds only) if the dev log-in with an Admin or Moderator account in the Editor. 
+		 Â  -IMPROVE: Now you can select how to reload the shotgun and sniper: Per Bullet or Per Magazine in bl_Gun -> Reload Per.
+		 Â  -FIX: Sometimes changes made in bl_Gun and bl_GunManager in player prefabs were not saved.
 		   -FIX: Kick button show up for Non-Master Client players and Master Client itself causing him can kick himself.
 
          -1.6

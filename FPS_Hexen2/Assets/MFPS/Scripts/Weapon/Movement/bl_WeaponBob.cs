@@ -71,9 +71,22 @@ public class bl_WeaponBob : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
+    public void Stop()
+    {
+        bobbingSpeed = tempIdleSpeed;
+        BobbingAmount = settings.WalkOscillationAmount * 0.1f;
+        lerp = settings.WalkLerpSpeed;
+        eulerZ = settings.EulerZAmount;
+        eulerX = settings.EulerXAmount;
+        MoveToDefault();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     void StateControl()
     {
-        if (motor.State == PlayerState.Jumping) return;
+        if (motor.State == PlayerState.Jumping || motor.State == PlayerState.InVehicle) return;
         if (motor.VelocityMagnitude > 0.1f && motor.State != PlayerState.Running)
         {
             bobbingSpeed = tempWalkSpeed;
@@ -142,7 +155,7 @@ public class bl_WeaponBob : bl_MonoBehaviour
             float rotChange = waveslice2 * eulerZ;
             float rotChange2 = waveslice * eulerX;
 
-            if (motor.isGrounded)
+            if (motor.isGrounded && motor.State != PlayerState.InVehicle)
             {
                 //if player is moving
                 if (motor.VelocityMagnitude > 0.1f && motor.State != PlayerState.Idle)
@@ -189,6 +202,8 @@ public class bl_WeaponBob : bl_MonoBehaviour
     /// </summary>
     void UpdateFootStep()
     {
+        if (!motor.isGrounded || motor.State == PlayerState.InVehicle) return;
+
         if (motor.VelocityMagnitude > 0.1f)
         {
             if (waveslice2 >= 0.97f && !rightFoot)

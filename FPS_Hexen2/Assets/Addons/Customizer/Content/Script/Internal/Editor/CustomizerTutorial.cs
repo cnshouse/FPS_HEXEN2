@@ -59,11 +59,10 @@ public class CustomizerTutorial : TutorialWizard
 
     public override void WindowArea(int window)
     {
-        if (window == 0)
+        if(window == 0)
         {
             DrawGetStarted();
-        }
-        else if (window == 1)
+        }else if(window == 1)
         {
             DrawAddWeapon();
         }
@@ -74,8 +73,7 @@ public class CustomizerTutorial : TutorialWizard
         else if (window == 3)
         {
             DrawCamos();
-        }
-        else if (window == 4) { SetupPlayerDoc(); }
+        }else if(window == 4) { SetupPlayerDoc(); }
         else if (window == 5) { MofidiersDoc(); }
     }
 
@@ -182,53 +180,53 @@ public class CustomizerTutorial : TutorialWizard
         {
 
 
-            /*  EditorGUI.BeginChangeCheck();
-              DrawText("After you integrate a weapon in the Customizer scene you also have to set up the weapon in the player prefab <i>(in all the player prefabs that you are using).</i>\n\nBut don't worry, we have done this step automatically, you only have to drag the player prefab in the field below.\n\n<b>IMPORTANT:</b> The customizer scene has to be open.");
-              Space(10);
-              playerPrefab = EditorGUILayout.ObjectField("Player Prefab", playerPrefab, typeof(bl_PlayerNetwork), false) as bl_PlayerNetwork;
+          /*  EditorGUI.BeginChangeCheck();
+            DrawText("After you integrate a weapon in the Customizer scene you also have to set up the weapon in the player prefab <i>(in all the player prefabs that you are using).</i>\n\nBut don't worry, we have done this step automatically, you only have to drag the player prefab in the field below.\n\n<b>IMPORTANT:</b> The customizer scene has to be open.");
+            Space(10);
+            playerPrefab = EditorGUILayout.ObjectField("Player Prefab", playerPrefab, typeof(bl_PlayerNetwork), false) as bl_PlayerNetwork;
 
-              if (EditorGUI.EndChangeCheck())
-              {
-                  CheckPlayerWeapons();
-              }
+            if (EditorGUI.EndChangeCheck())
+            {
+                CheckPlayerWeapons();
+            }
 
-              if (fpWeaponCheck.Count > 0)
-              {
-                  Space(20);
-                  DrawText("Below are listed the weapons available in the player prefab to setup with Customizer.");
-                  Space(20);
-                  wScroll = GUILayout.BeginScrollView(wScroll);
-                  for (int i = 0; i < fpWeaponCheck.Count; i++)
-                  {
-                      var weapon = fpWeaponCheck[i];
-                      if (weapon.State == PlayerWeaponState.NoAvailable)
-                      {
-                          GUI.color = new Color(1, 1, 1, 0.3f);
-                      }
-                      Rect r = EditorGUILayout.BeginHorizontal();
-                      EditorGUI.DrawRect(r, new Color(1, 1, 1, 0.02f));
-                      GUILayout.Space(10);
-                      GUILayout.Label(weapon.GunInfo.Name, GUILayout.Width(120));
-                      if (weapon.State == PlayerWeaponState.New)
-                      {
-                          if (GUILayout.Button("SETUP",EditorStyles.toolbarButton,GUILayout.Width(100)))
-                          {
-                              SetupWeapon(weapon);
-                          }
-                      }
-                      else if (weapon.State == PlayerWeaponState.Refresh)
-                      {
-                          if (GUILayout.Button("UPDATE", EditorStyles.toolbarButton, GUILayout.Width(100)))
-                          {
+            if (fpWeaponCheck.Count > 0)
+            {
+                Space(20);
+                DrawText("Below are listed the weapons available in the player prefab to setup with Customizer.");
+                Space(20);
+                wScroll = GUILayout.BeginScrollView(wScroll);
+                for (int i = 0; i < fpWeaponCheck.Count; i++)
+                {
+                    var weapon = fpWeaponCheck[i];
+                    if (weapon.State == PlayerWeaponState.NoAvailable)
+                    {
+                        GUI.color = new Color(1, 1, 1, 0.3f);
+                    }
+                    Rect r = EditorGUILayout.BeginHorizontal();
+                    EditorGUI.DrawRect(r, new Color(1, 1, 1, 0.02f));
+                    GUILayout.Space(10);
+                    GUILayout.Label(weapon.GunInfo.Name, GUILayout.Width(120));
+                    if (weapon.State == PlayerWeaponState.New)
+                    {
+                        if (GUILayout.Button("SETUP",EditorStyles.toolbarButton,GUILayout.Width(100)))
+                        {
+                            SetupWeapon(weapon);
+                        }
+                    }
+                    else if (weapon.State == PlayerWeaponState.Refresh)
+                    {
+                        if (GUILayout.Button("UPDATE", EditorStyles.toolbarButton, GUILayout.Width(100)))
+                        {
 
-                          }
-                      }
-                      EditorGUILayout.EndHorizontal();
-                      Space(4);
-                      GUI.color = Color.white;
-                  }
-                  GUILayout.EndScrollView();
-              }*/
+                        }
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    Space(4);
+                    GUI.color = Color.white;
+                }
+                GUILayout.EndScrollView();
+            }*/
         }
     }
 
@@ -349,8 +347,7 @@ public class CustomizerTutorial : TutorialWizard
             DrawImage(GetServerImage(12));
             DrawText("Good, you have added an attachment to the customizer weapon, still missing setup in the TP and FP Weapon tho :/,\nYou have to repeat this for each other attachments, is highly recommended that you setup all the attachments for " +
                 "this weapon in the customizer weapon before process with the FP and TP Weapon (next step).");
-        }
-        else if (subStep == 1)
+        }else if(subStep == 1)
         {
             DrawTitleText("Player Weapons");
             DrawText("Now we have to setup the attachment to the <b>First Person Weapon</b> in the Player prefabs for the Local Player perspective, so first drag in the <b>Customizer</b> scene hierarchy the player prefab that have the weapon <i>(or if more than one player have the weapon " +

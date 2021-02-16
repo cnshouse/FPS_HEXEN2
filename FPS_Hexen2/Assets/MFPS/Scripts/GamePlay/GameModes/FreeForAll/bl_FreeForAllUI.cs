@@ -4,37 +4,42 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Realtime;
 
-public class bl_FreeForAllUI : MonoBehaviour
+namespace MFPS.GameModes.FreeForAll
 {
-    public GameObject Content;
-    public Text ScoreText;
-
-    public void SetScores(Player bestPlayer)
+    public class bl_FreeForAllUI : MonoBehaviour
     {
-        string scoreText = string.Format(bl_GameTexts.PlayerStart, bestPlayer.NickName);
-        ScoreText.text = scoreText;
-    }
+        public GameObject Content;
+        public Text ScoreText;
 
-    public void ShowUp()
-    {
-        Content.SetActive(true);
-    }
-
-    public void Hide()
-    {
-        Content.SetActive(false);
-    }
-
-    private static bl_FreeForAllUI _instance;
-    public static bl_FreeForAllUI Instance
-    {
-        get
+        public void SetScores(Player bestPlayer)
         {
-            if (_instance == null)
+            string scoreText = string.Format(bl_GameTexts.PlayerStart, bestPlayer.NickName);
+            ScoreText.text = scoreText;
+        }
+
+        public void ShowUp()
+        {
+            if (!bl_UIReferences.Instance.UIMask.IsEnumFlagPresent(RoomUILayers.TopScoreBoard)) return;
+
+            Content.SetActive(true);
+        }
+
+        public void Hide()
+        {
+            Content.SetActive(false);
+        }
+
+        private static bl_FreeForAllUI _instance;
+        public static bl_FreeForAllUI Instance
+        {
+            get
             {
-                _instance = FindObjectOfType<bl_FreeForAllUI>();
+                if (_instance == null)
+                {
+                    _instance = FindObjectOfType<bl_FreeForAllUI>();
+                }
+                return _instance;
             }
-            return _instance;
         }
     }
 }

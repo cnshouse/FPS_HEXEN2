@@ -20,6 +20,7 @@ public class bl_NetworkGun : MonoBehaviour
     public BulletData m_BulletData = new BulletData();
     Vector3 bulletPosition = Vector3.zero;
     Quaternion bulletRotation = Quaternion.identity;
+    Transform Root;
 
     /// <summary>
     /// 
@@ -28,6 +29,7 @@ public class bl_NetworkGun : MonoBehaviour
     {
         Source = GetComponent<AudioSource>();
         Source.playOnAwake = false;
+        Root = transform.root;
     }
 
     /// <summary>
@@ -56,15 +58,15 @@ public class bl_NetworkGun : MonoBehaviour
         {
             if (MuzzleFlash)
             {
-                MuzzleFlash.Play();
+                PlayMuzzleflash();
                 bulletPosition = MuzzleFlash.transform.position;
-                bulletRotation = Quaternion.LookRotation(hitPoint - bulletPosition);
             }
             else
             {
-                bulletPosition = transform.position;
-                bulletRotation = Quaternion.LookRotation(hitPoint - bulletPosition);
+                bulletPosition = transform.position;      
             }
+
+            bulletRotation = Quaternion.LookRotation(hitPoint - bulletPosition);
             //bullet info is set up in start function
             GameObject newBullet = bl_ObjectPooling.Instance.Instantiate(LocalGun.BulletName, bulletPosition, bulletRotation); // create a bullet
             // set the gun's info into an array to send to the bullet
@@ -73,7 +75,7 @@ public class bl_NetworkGun : MonoBehaviour
             m_BulletData.MaxSpread = 0;
             m_BulletData.Spread = 0;
             m_BulletData.Speed = LocalGun.bulletSpeed;
-            m_BulletData.Position = transform.root.position;
+            m_BulletData.Position = Root.position;
             m_BulletData.isNetwork = true;
 
             newBullet.GetComponent<bl_Bullet>().SetUp(m_BulletData);
@@ -109,7 +111,7 @@ public class bl_NetworkGun : MonoBehaviour
             t_info.MaxSpread = LocalGun.spreadMinMax.y;
             t_info.Spread = s;
             t_info.Speed = LocalGun.bulletSpeed;
-            t_info.Position = transform.root.position;
+            t_info.Position = Root.position;
             t_info.isNetwork = true;
 
             if (newBullet.GetComponent<Rigidbody>() != null)//if grenade have a rigidbody,then apply velocity
@@ -136,16 +138,6 @@ public class bl_NetworkGun : MonoBehaviour
         }
     }
 
-    public void SwingTwoHandedMelee()
-	{
-        if(LocalGun != null)
-		{
-            Source.clip = LocalGun.FireSound;
-            Source.spread = Random.Range(1.0f, 1.5f);
-            Source.Play();
-		}
-	}
-
     /// <summary>
     /// 
     /// </summary>
@@ -163,6 +155,16 @@ public class bl_NetworkGun : MonoBehaviour
         {
             DesactiveOnOffAmmo.SetActive(active);
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void PlayMuzzleflash()
+    {
+        if (MuzzleFlash == null) return;
+
+        MuzzleFlash.Play();
     }
 
     /// <summary>

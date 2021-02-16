@@ -8,24 +8,36 @@ public class bl_GunPickUp : bl_MonoBehaviour
     public DetectMode m_DetectMode = DetectMode.Raycast;
     [HideInInspector]
     public bool PickupOnCollide = true;
-    [HideInInspector]
-    public bool SentPickup = false;
     [Space(5)]
     public bool AutoDestroy = true;
     public float DestroyIn = 15f;
-    //
+
+    public bl_EventHandler.UEvent onPickUp;
+
     private bool Into = false;
-    private bl_GunPickUpManager PUM;
+    private bl_GunPickUpManager pickupManager;
 
     //Cache info
     [System.Serializable]
     public class m_Info
     {
-        public int Clips = 0;
         public int Bullets = 0;
+        public int Clips = 0;
+
+        public int GetBullets
+        {
+            get
+            {
+                int b = Bullets;
+                if (bl_GameData.Instance.AmmoType == AmmunitionType.Bullets)
+                {
+                    b = Bullets * Clips;
+                }
+                return b;
+            }
+        }
     }
     public m_Info Info;
-    private bl_UIReferences UIReferences;
     private bl_GunInfo CacheGun;
     private bool Equiped = false;
     private bool isFocus = false;
@@ -41,8 +53,7 @@ public class bl_GunPickUp : bl_MonoBehaviour
     {
         if (!PhotonNetwork.IsConnected) return;
         base.Awake();
-        PUM = FindObjectOfType<bl_GunPickUpManager>();
-        UIReferences = bl_UIReferences.Instance;
+        pickupManager = FindObjectOfType<bl_GunPickUpManager>();
         CacheGun = bl_GameData.Instance.GetWeapon(GunID);
         uniqueLocal = (byte)Random.Range(0, 9998);
     }
@@ -57,9 +68,12 @@ public class bl_GunPickUp : bl_MonoBehaviour
         {
             Destroy(gameObject, DestroyIn);
         }
-        PickupOnCollide = false;
-        yield return new WaitForSeconds(2f);
-        PickupOnCollide = true;
+        if (m_DetectMode == DetectMode.Trigger)
+        {
+            PickupOnCollide = false;
+            yield return new WaitForSeconds(2f);
+            PickupOnCollide = true;
+        }
     }
 
     /// <summary>
@@ -70,10 +84,7 @@ public class bl_GunPickUp : bl_MonoBehaviour
         base.OnDestroy();
         if (Into)
         {
-            if (UIReferences != null)
-            {
-                UIReferences.SetPickUp(false);
-            }
+            bl_PickUpUI.Instance?.SetPickUp(false);
             if (localPlayerIn != null)
             {
                 if (m_DetectMode == DetectMode.Raycast)
@@ -109,11 +120,12 @@ public class bl_GunPickUp : bl_MonoBehaviour
         if (PickupOnCollide && v != null && v.IsMine && c.CompareTag(bl_PlayerSettings.LocalTag))
         {
             Into = true;
-            PUM.LastTrigger = this;
+            pickupManager.LastTrigger = this;
             localPlayerIn = v;
+            bl_PlayerReferences playerReferences = v.GetComponent<bl_PlayerReferences>();
             if (CacheGun.Type == GunType.Knife)
             {
-                if (v.GetComponentInChildren<bl_GunManager>(true).PlayerEquip.Exists(x => x != null && x.GunID == GunID))
+                if (playerReferences.gunManager.PlayerEquip.Exists(x => x != null && x.GunID == GunID))
                 {
                     Equiped = true;
                 }
@@ -124,18 +136,18 @@ public class bl_GunPickUp : bl_MonoBehaviour
             }
             if (m_DetectMode == DetectMode.Raycast)
             {
-                bl_CameraRay cr = v.GetComponentInChildren<bl_CameraRay>();
-                if (cr != null)
+                if (playerReferences.cameraRay != null)
                 {
-                    cr.SetActiver(true, uniqueLocal);
+                    playerReferences.cameraRay.SetActiver(true, uniqueLocal);
                 }
             }
             else if (m_DetectMode == DetectMode.Trigger)
             {
-                UIReferences.SetPickUp(true, GunID, this, Equiped);
+                bl_PickUpUI.Instance?.SetPickUp(true, GunID,this, Equiped);
             }
         }
     }
+
     /// <summary>
     /// 
     /// </summary>
@@ -144,7 +156,7 @@ public class bl_GunPickUp : bl_MonoBehaviour
         if (c.transform.CompareTag(bl_PlayerSettings.LocalTag) && Into)
         {
             Into = false;
-            UIReferences.SetPickUp(false);
+            bl_PickUpUI.Instance?.SetPickUp(false);
             if (localPlayerIn != null)
             {
                 if (m_DetectMode == DetectMode.Raycast)
@@ -165,36 +177,24 @@ public class bl_GunPickUp : bl_MonoBehaviour
     /// </summary>
     public override void OnUpdate()
     {
+        if (!Into || Equiped) return;
+
         if (m_DetectMode == DetectMode.Trigger)
         {
-            if (!Into || Equiped) return;
-#if !INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.E) && PUM.LastTrigger == this)
+            if (PickUpInputPressed && pickupManager.LastTrigger == this)
             {
                 Pickup();
             }
-#else
-            if (bl_Input.isButtonDown("Interact") && PUM.LastTrigger == this)
-            {
-                Pickup();
-            }
-#endif
         }
         else if (m_DetectMode == DetectMode.Raycast)
         {
-            if (!Into || !isFocus || Equiped) return;
-#if !INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.E))
+            if (!Into || !isFocus) return;
+
+            if (PickUpInputPressed)
             {
                 Pickup();
             }
-#else
-            if (bl_Input.isButtonDown("Interact"))
-            {
-                Pickup();
-            }
-#endif
-        }      
+        }
     }
 
     /// <summary>
@@ -202,25 +202,20 @@ public class bl_GunPickUp : bl_MonoBehaviour
     /// </summary>
     public void Pickup()
     {
-        if (SentPickup)
-            return;
 #if GR
         if (GetGameMode == GameMode.GR)
-        {
             return;
-        }
 #endif
 
-        SentPickup = true;
-        PUM.SendPickUp(gameObject.name, GunID, Info);
-        SentPickup = false;
-        UIReferences.SetPickUp(false);
+        pickupManager.SendPickUp(gameObject.name, GunID, Info);
+        bl_PickUpUI.Instance?.SetPickUp(false);
+        onPickUp?.Invoke();
     }
 
     public void FocusThis(bool focus)
     {
         isFocus = focus;
-        UIReferences.SetPickUp(focus, GunID, this, Equiped);
+        bl_PickUpUI.Instance?.SetPickUp(focus, GunID, this , Equiped);
     }
 
     private SphereCollider SpheCollider;
@@ -234,6 +229,18 @@ public class bl_GunPickUp : bl_MonoBehaviour
         else
         {
             SpheCollider = GetComponent<SphereCollider>();
+        }
+    }
+
+    public bool PickUpInputPressed
+    {
+        get
+        {
+#if !INPUT_MANAGER
+            return Input.GetKeyDown(KeyCode.E);
+#else
+            return bl_Input.isButtonDown("Interact");
+#endif
         }
     }
 

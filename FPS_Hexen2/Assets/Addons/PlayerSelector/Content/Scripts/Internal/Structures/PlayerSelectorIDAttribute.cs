@@ -2,7 +2,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-namespace MFPS.PlayerSelector
+namespace MFPS.Addon.PlayerSelector
 {
     /// <summary>
     /// This attribute can only be applied to fields because its

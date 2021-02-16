@@ -15,6 +15,7 @@
     public static string PickUpAmmoKit = "Pick up Ammo";
     public static string PickUpWeapon = "Press [E] for pick up <color=#70ABFF>{0}</color>";
     public static string PickUpWeaponEquipped = "<color=#70ABFF>{0}</color> is already equipped.";
+    public static string Touch = "Touch";
 
     public static string PlayerStart = "PLAYER STAR:\n<size=9><color=black>{0}</color></size>";
     public static string Killed = "Killed";
@@ -30,6 +31,7 @@
     public static string NoLimit = "No Limit";
     public static string Spectating = "Spectating";
     public static string KillingInAction = "KILLED IN ACTION";
+    public static string KillZoneMessage = "Return to the battlefield in\n<color=red><size=25>{0}</size>s</color>";
 
     public static string ServerMesagge = "[Server]";
     public static string OpenChatStart = "[Server]: Press 'T' or 'Y' for open chat box";
@@ -44,9 +46,11 @@
     public static string WaitingPlayers = "WAITING FOR PLAYERS <b>{0} OF {1}</b>";
     public static string RespawnIn = "RESPAWN IN: {0}";
     public static string LoadingLocalContent = "LOADING LOCAL GAME CONTENT...";
-    public static string ConnectingToGameServer = "CONNECTING TO MFPS SERVER...";
+    public static string ConnectingToGameServer = "CONNECTING TO THE SERVER...";
     public static string DisconnectCause = "<size=25><b>OPPS!</b></size>\nCOULD NOT CONNECT TO THE SERVER.\nCAUSE: {0}";
-    public static string StartingOfflineRoom = "Starting Offline Room";
+    public static string StartingOfflineRoom = "STARTING OFFLINE ROOM...";
+    public static string StartingMatch = "STARTING MATCH...";
+    public static string QuitGameConfirmation = "<b>Quit game?</b>\n\nAre you sure you want to quit the game?";
 
     //CTF
     public static string CaptureTheFlag = "Has capture Flag";
@@ -56,7 +60,6 @@
     public static string FireTypeAuto = "AUTO";
     public static string FireTypeSemi = "SEMI";
     public static string FireTypeSingle = "SINGLE";
-    public static string FireTypeBeam = "BEAM";
 
     public static string[] AntiStropicOptions = new string[] { "Disable", "Enable", "Force Enable" };
 
@@ -79,9 +82,5 @@
     public static string WinMatch = "Win Match: +{0}";
     public static string TotalScore = "Total Score";
 
-    public static readonly string[] RandomNames = new string[] { "John", "William", "Michael", "Jason", "Aaron", "Angie", "Benjamin", "Cody", "Dany", "Gao", "Jacob", "Jeese","Katherin","Lee",
-    "Massimo", "Oliver", "Pride", "Sarah", "Thomas", "Tuan", "Johnson", "Lovo", "Patick", "Derek", "Felix", "Harry", "Ian", "Jani", "Petroske", "Kyler", "Marco", "Rosa", "Santos", "Astrid",
-    "Elvis", "Mueller", "Ryan", "Komatsu", "Vladimir", "Yank", "Albert", "Maxwell", "Daria", "Ethan", "Jake", "Holm", "Tobiass", "Karen", "David", "Moly", "Charlie", "Bruno", "Dayanara", "Blanca",
-    "Juan", "Jose", "Sthepen", "Tim", "Xuan", "Alex", "Jenskin", "Boris", "Morrison", "Blaga", "Umer", "Eva", "Grace", "Park", "Jesper", "Kim", "Karl", "Knut", "Rusell", "Elmer", "Ricardo", "Bertha",
-    "Ferris", "Mateo", "Ronaldo", "Amy", "Ariana", "Marlene", "Alfred", "Andy", "Calvin", "Ron", "Bill",};
+    public static readonly string[] RandomNames = new string[] { "John", "William", "Michael", "Jason", "Aaron", "Angie", "Benjamin", "Cody", "Dany", "Gao", "Jacob", "Jeese","Katherin","Lee","Massimo", "Oliver", "Pride", "Sarah", "Thomas", "Tuan", "Johnson", "Lovo", "Patick", "Derek", "Felix", "Harry", "Ian", "Jani", "Petroske", "Kyler", "Marco", "Rosa", "Santos", "Astrid","Elvis", "Mueller", "Ryan", "Komatsu", "Vladimir", "Yank", "Albert", "Maxwell", "Daria", "Ethan", "Jake", "Holm", "Tobiass", "Karen", "David", "Moly", "Charlie", "Bruno", "Dayanara", "Blanca","Juan", "Jose", "Sthepen", "Tim", "Xuan", "Alex", "Jenskin", "Boris", "Morrison", "Blaga", "Umer", "Eva", "Grace", "Park", "Jesper", "Kim", "Karl", "Knut", "Rusell", "Elmer", "Ricardo", "Bertha","Ferris", "Mateo", "Ronaldo", "Amy", "Ariana", "Marlene", "Alfred", "Andy", "Calvin", "Ron", "Bill",};
 }

@@ -36,7 +36,7 @@ namespace MFPS.Shop
             NameText.text = Info.Name.ToUpper();
             string typeName = _info.Type.ToString();
             typeName = string.Concat(typeName.Select(x => System.Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
-            typeText.text = typeName.ToUpper();
+            typeText.text = typeName.Localized(_info.Type.ToString().ToLower()).ToUpper();
             LayoutRebuilder.ForceRebuildLayoutImmediate(NameText.transform.parent.GetComponent<RectTransform>());
             LayoutRebuilder.ForceRebuildLayoutImmediate(typeText.transform.parent.GetComponent<RectTransform>());
             //that's kinda dirty but it works :)
@@ -61,7 +61,7 @@ namespace MFPS.Shop
                 }
                 else
                 {
-                    PriceText.text = string.Format("${0}", Info.Price);
+                    PriceText.text = string.Format("{0}{1}", bl_ShopData.Instance.PricePrefix, Info.Price);
                     BuyUI.SetActive(true);
                     isOwned = false;
                     BuyButton.gameObject.SetActive(true);

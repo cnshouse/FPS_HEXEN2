@@ -1,32 +1,29 @@
 <?php
 include("bl_Common.php");
-$link = dbConnect();
+Utils::check_session($_POST['sid']);
 
-$name   = safe($_POST['name']);
-$id     = safe($_POST['id']);
-$hash   = safe($_POST['hash']);
-$type   = safe($_POST['type']);
-$line = safe($_POST['line']);
-$coins = safe($_POST['coins']);
+$link = Connection::dbConnect();
 
-$name     = stripslashes($name);
-$name     = mysqli_real_escape_string($link, $name);
-$type     = stripslashes($type);
-$type     = mysqli_real_escape_string($link, $type);
+$sid    = Utils::sanitaze_var($_POST['sid'], $link);
+$name   = Utils::sanitaze_var($_POST['name'], $link, $sid);
+$id     = Utils::sanitaze_var($_POST['id'], $link, $sid);
+$type   = Utils::sanitaze_var($_POST['type'], $link, $sid);
+$hash   = Utils::sanitaze_var($_POST['hash'], $link, $sid);
+$coins  = Utils::sanitaze_var($_POST['coins'], $link, $sid);
+$line   =  Utils::sanitaze_var($_POST['line'], $link, $sid);
 
-$real_hash = md5($name . $secretKey);
+$real_hash = Utils::get_secret_hash($name);
 if ($real_hash == $hash) {
 
-    if($type == 0){//save purchases
-        $query = "UPDATE MyGameDB SET purchases='$line', coins=coins-'$coins' WHERE id='$id'";
-        $result = mysqli_query($link,$query) or die(mysqli_error($link));
-        if($result){
+    if ($type == 0) { //save purchases
+        $query = "UPDATE " . PLAYERS_DB . " SET purchases='$line', coins=coins-'$coins' WHERE id='$id'";
+        $result = mysqli_query($link, $query) or die(mysqli_error($link));
+        if ($result) {
             echo "done";
         }
     }
 } else {
-    echo "you do not have permission to access.";
+    http_response_code(401);
 }
 
 mysqli_close($link);
-?>

@@ -1,25 +1,28 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class bl_CustomizerInfoButton : MonoBehaviour {
-
-	[SerializeField]private Text m_Text;
-    public Image weaponIcon;
-    public Text lockedText;
-    public Button button;
-    public GameObject lockedUI;
-
-    private bl_CustomizerInfoButton[] AllButtons;
-    private bl_Customizer customizerWeapon;
-    public int lockedStatus { get; set; }
-
-    public void Init(bl_Customizer weapon)
+namespace MFPS.Addon.Customizer
+{
+    public class bl_CustomizerInfoButton : MonoBehaviour
     {
-        lockedStatus = 0;
-        customizerWeapon = weapon;
-        bl_GunInfo info = customizerWeapon.GetWeaponInfo();
-        m_Text.text = customizerWeapon.WeaponName;
-        weaponIcon.sprite = info.GunIcon;
+
+        [SerializeField] private Text m_Text;
+        public Image weaponIcon;
+        public Text lockedText;
+        public Button button;
+        public GameObject lockedUI;
+
+        private bl_CustomizerInfoButton[] AllButtons;
+        private bl_Customizer customizerWeapon;
+        public int lockedStatus { get; set; }
+
+        public void Init(bl_Customizer weapon)
+        {
+            lockedStatus = 0;
+            customizerWeapon = weapon;
+            bl_GunInfo info = customizerWeapon.GetWeaponInfo();
+            m_Text.text = customizerWeapon.WeaponName;
+            weaponIcon.sprite = info.GunIcon;
 
 #if SHOP && ULSP
         if (info.Price > 0 && bl_DataBase.Instance != null)
@@ -49,34 +52,35 @@ public class bl_CustomizerInfoButton : MonoBehaviour {
             }
         }
 #endif
-        
-        lockedUI.SetActive(lockedStatus != 0 && lockedStatus != 3);
-    }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void OnSelect()
-    {
-        if (lockedStatus != 0 && lockedStatus != 3) return;
-        if (AllButtons == null || AllButtons.Length <= 0) { AllButtons = transform.parent.GetComponentsInChildren<bl_CustomizerInfoButton>(); }
-
-        bl_CustomizerManager c = FindObjectOfType<bl_CustomizerManager>();
-        c.showCustomizerWeapon(customizerWeapon);
-
-        foreach(bl_CustomizerInfoButton b in AllButtons)
-        {
-            b.Deselect();
+            lockedUI.SetActive(lockedStatus != 0 && lockedStatus != 3);
         }
-        button.interactable = false;
-    }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Deselect()
-    {
-        if (lockedStatus != 0 && lockedStatus != 3) return;
-        button.interactable = true;
+        /// <summary>
+        /// 
+        /// </summary>
+        public void OnSelect()
+        {
+            if (lockedStatus != 0 && lockedStatus != 3) return;
+            if (AllButtons == null || AllButtons.Length <= 0) { AllButtons = transform.parent.GetComponentsInChildren<bl_CustomizerInfoButton>(); }
+
+            bl_CustomizerManager c = FindObjectOfType<bl_CustomizerManager>();
+            c.showCustomizerWeapon(customizerWeapon);
+
+            foreach (bl_CustomizerInfoButton b in AllButtons)
+            {
+                b.Deselect();
+            }
+            button.interactable = false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Deselect()
+        {
+            if (lockedStatus != 0 && lockedStatus != 3) return;
+            button.interactable = true;
+        }
     }
 }

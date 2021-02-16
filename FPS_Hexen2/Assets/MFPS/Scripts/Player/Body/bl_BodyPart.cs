@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System;
 
-public class bl_BodyPart : MonoBehaviour, IMFPSDamageable {
-
+public class bl_BodyPart : MonoBehaviour, IMFPSDamageable
+{
     public int HitBoxIdentifier = 0;
     public bl_PlayerHealthManager HealtScript;
     public bl_BodyPartManager BodyManager;
@@ -14,12 +14,12 @@ public class bl_BodyPart : MonoBehaviour, IMFPSDamageable {
     {
         damageData.Damage = Mathf.FloorToInt(damageData.Damage * HitBox.DamageMultiplier);
         damageData.isHeadShot = HitBox.Bone == HumanBodyBones.Head;
-        if(HealtScript != null)
-        HealtScript?.GetDamage(damageData);
+
+        if (HealtScript != null) HealtScript?.GetDamage(damageData);
     }
 
     // [Obsolete("This method is deprecated use the IMFPSDamageable implementation 'ReceiveDamage' instead.")]
-    public void GetDamage(float damage, string t_from, DamageCause cause, Vector3 direction, int weapon_ID = 0)
+    public void GetDamage(float damage, string from, DamageCause cause, Vector3 direction, int gunID = 0)
     {
         int m_TotalDamage = Mathf.FloorToInt(damage * HitBox.DamageMultiplier);
 
@@ -28,8 +28,8 @@ public class bl_BodyPart : MonoBehaviour, IMFPSDamageable {
         e.Direction = direction;
         e.Cause = cause;
         e.isHeadShot = HitBox.Bone == HumanBodyBones.Head;
-        e.GunID = weapon_ID;
-        e.From = t_from;
+        e.GunID = gunID;
+        e.From = from;
 
         if (HealtScript != null)
         {
@@ -37,13 +37,7 @@ public class bl_BodyPart : MonoBehaviour, IMFPSDamageable {
         }
     }
 
-    public BodyHitBox HitBox
-    {
-        get
-        {
-            return BodyManager.GetHitBox(HitBoxIdentifier);
-        }
-    }
+    public BodyHitBox HitBox => BodyManager.GetHitBox(HitBoxIdentifier);
 }
 
 [System.Serializable]

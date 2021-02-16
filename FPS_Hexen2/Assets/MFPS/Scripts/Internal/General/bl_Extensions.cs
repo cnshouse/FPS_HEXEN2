@@ -14,11 +14,12 @@ using Photon.Realtime;
 using System;
 using UnityEngine.UI;
 using System.Collections;
+using System.Linq;
 
 static class bl_Extensions
 {
     /// <summary>
-    /// 
+    /// Post score to the given player and sync over network
     /// </summary>
     public static void PostScore(this Player player, int ScoreToAdd = 0)
     {
@@ -32,7 +33,7 @@ static class bl_Extensions
     }
 
     /// <summary>
-    /// 
+    /// Get the score of the given player
     /// </summary>
     public static int GetPlayerScore(this Player player)
     {
@@ -103,6 +104,10 @@ static class bl_Extensions
         p.SetCustomProperties(score);  // this locally sets the score and will sync it in-game asap.
     }
 
+    /// <summary>
+    /// Get the score of the given team
+    /// </summary>
+    /// <returns></returns>
     public static int GetRoomScore(this Room room, Team team)
     {
         object teamId;
@@ -123,6 +128,9 @@ static class bl_Extensions
         return 0;
     }
 
+    /// <summary>
+    /// Add the given score to the given team and sync over network
+    /// </summary>
     public static void SetTeamScore(this Room r, Team t, int scoreToAdd = 1)
     {
         if (t == Team.None) return;
@@ -136,6 +144,10 @@ static class bl_Extensions
         r.SetCustomProperties(h);
     }
 
+    /// <summary>
+    /// Get the team in which the given player is affiliated to
+    /// </summary>
+    /// <returns></returns>
     public static Team GetPlayerTeam(this Player p)
     {
         if (p == null) return Team.None;
@@ -159,6 +171,9 @@ static class bl_Extensions
         return Team.None;
     }
 
+    /// <summary>
+    /// Sync the player team in which the given player is affiliated
+    /// </summary>
     public static void SetPlayerTeam(this Player player, Team team)
     {
         Hashtable PlayerTeam = new Hashtable();
@@ -166,6 +181,10 @@ static class bl_Extensions
         player.SetCustomProperties(PlayerTeam);
     }
 
+    /// <summary>
+    /// Get the team name by their identifier
+    /// </summary>
+    /// <returns></returns>
     public static string GetTeamName(this Team t)
     {
         switch (t)
@@ -179,6 +198,10 @@ static class bl_Extensions
         }
     }
 
+    /// <summary>
+    /// Get the team color by their identifier
+    /// </summary>
+    /// <returns></returns>
     public static Color GetTeamColor(this Team t, float alpha = 0)
     {
         Color c = Color.white;//default color
@@ -199,7 +222,12 @@ static class bl_Extensions
         return c;
     }
 
-    public static bl_GameData.GameModesEnabled GetModeInfo(this GameMode mode)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="mode"></param>
+    /// <returns></returns>
+    public static GameModeSettings GetModeInfo(this GameMode mode)
     {
         for (int i = 0; i < bl_GameData.Instance.gameModes.Count; i++)
         {
@@ -208,40 +236,33 @@ static class bl_Extensions
         return null;
     }
 
+    /// <summary>
+    /// Save (locally) the given player class as the default
+    /// </summary>
     private const string PLAYER_CLASS_KEY = "{0}.playerclass";
     public static void SavePlayerClass(this PlayerClass pc)
     {
         string key = string.Format(PLAYER_CLASS_KEY, Application.productName);
-        Debug.Log("Change Player class to :" + pc);
         PlayerPrefs.SetInt(key, (int)pc);
     }
 
+    /// <summary>
+    /// Get the locally saved player class
+    /// </summary>
+    /// <returns></returns>
     public static PlayerClass GetSavePlayerClass(this PlayerClass pc)
     {
         string key = string.Format(PLAYER_CLASS_KEY, Application.productName);
         int id = PlayerPrefs.GetInt(key, 0);
-        PlayerClass pclass = PlayerClass.Assault;
-        switch (id)
-        {
-            case 0:
-                pclass = PlayerClass.Assault;
-                break;
-            case 1:
-                pclass = PlayerClass.Recon;
-                break;
-            case 2:
-                pclass = PlayerClass.Support;
-                break;
-            case 3:
-                pclass = PlayerClass.Engineer;
-                break;
-            case 4:
-                pclass = PlayerClass.Dragos;
-                break;
-        }
+        PlayerClass pclass = (PlayerClass)id;
+
         return pclass;
     }
 
+    /// <summary>
+    /// Get the player name along with their user role (if there's any)
+    /// </summary>
+    /// <returns></returns>
     public static string NickNameAndRole(this Player p)
     {
         object role = "";
@@ -252,17 +273,26 @@ static class bl_Extensions
         return p.NickName;
     }
 
+    /// <summary>
+    /// Get the complete game mode name by their identifier
+    /// </summary>
+    /// <returns></returns>
     public static string GetName(this GameMode mode)
     {
-        bl_GameData.GameModesEnabled info = mode.GetModeInfo();
+        GameModeSettings info = mode.GetModeInfo();
         if(info != null) { return info.ModeName; }
         else { return string.Format("Not define: " + mode.ToString()); }
     }
 
-    public static bl_GameData.GameModesEnabled GetGameModeInfo(this GameMode mode)
+    /// <summary>
+    /// Get the game mode info by their identifier
+    /// </summary>
+    /// <returns></returns>
+    public static GameModeSettings GetGameModeInfo(this GameMode mode)
     {
         return bl_GameData.Instance.gameModes.Find(x => x.gameMode == mode);
     }
+
     /// <summary>
     /// is this player in the same team that local player?
     /// </summary>
@@ -274,6 +304,10 @@ static class bl_Extensions
         return b;
     }
 
+    /// <summary>
+    /// Get the player list of an specific team
+    /// </summary>
+    /// <returns></returns>
     public static Player[] GetPlayersInTeam(this Player[] player, Team team)
     {
         List<Player> list = new List<Player>();
@@ -294,11 +328,19 @@ static class bl_Extensions
         return mode;
     }
 
-    public static RoomProperties GetRoomInfo(this Room room)
+    /// <summary>
+    /// Get the current room info parsed in the custom MFPS class
+    /// </summary>
+    /// <returns></returns>
+    public static MFPSRoomInfo GetRoomInfo(this Room room)
     {
-        return new RoomProperties(room);
+        return new MFPSRoomInfo(room);
     }
 
+    /// <summary>
+    /// Check if the given team is the local player enemy team
+    /// </summary>
+    /// <returns></returns>
     public static Team OppsositeTeam(this Team team)
     {
         if (team == Team.Team1) { return Team.Team2; }
@@ -309,6 +351,9 @@ static class bl_Extensions
         }
     }
 
+    /// <summary>
+    /// Better solution for invoke methods after a certain time
+    /// </summary>
     public static void InvokeAfter(this MonoBehaviour mono, float time, Action callback)
     {
         mono.StartCoroutine(WaitToExecute(time, callback));
@@ -320,6 +365,10 @@ static class bl_Extensions
         if (callback != null) callback.Invoke();
     }
 
+    /// <summary>
+    /// Re-size a rawImage to fit with the parent RectTransform size
+    /// </summary>
+    /// <returns></returns>
     public static Vector2 SizeToParent(this RawImage image, float padding = 0)
     {
         float w = 0, h = 0;
@@ -352,9 +401,53 @@ static class bl_Extensions
         return imageTransform.sizeDelta;
     }
 
+    /// <summary>
+    /// Randomize some Audio Source properties to get a different audio output result
+    /// </summary>
     public static void RandomizeAudioOutput(this AudioSource source)
     {
         source.pitch = UnityEngine.Random.Range(0.92f, 1.1f);
         source.spread = UnityEngine.Random.Range(0.98f, 1.25f);
+    }
+
+    /// <summary>
+    /// Check if the collider is from the local player
+    /// </summary>
+    /// <returns></returns>
+    public static bool isLocalPlayerCollider(this Collider collider)
+    {
+        return collider.transform.CompareTag(bl_PlayerSettings.LocalTag);
+    }
+
+    /// <summary>
+    /// Localization addon helper
+    /// Get the localized text of the given key
+    /// </summary>
+    /// <returns></returns>
+    public static string Localized(this string str, string key, bool plural = false)
+    {
+#if LOCALIZATION
+        if (plural) { return bl_Localization.Instance.GetTextPlural(key); }
+        return bl_Localization.Instance.GetText(key);
+#else
+        return str;
+#endif
+    }
+
+    /// <summary>
+    /// Get an int array as a string array separated by the give char
+    /// </summary>
+    /// <returns></returns>
+    public static string[] AsStringArray(this int[] array, string endoint = "") => array.Select(x => (x.ToString() + endoint)).ToArray();
+
+    /// <summary>
+    /// Check if a flag is selected in the give flag enum property
+    /// </summary>
+    /// <returns></returns>
+    public static bool IsEnumFlagPresent<T>(this T value, T lookingForFlag) where T : Enum
+    {
+        int intValue = (int)(object)value;
+        int intLookingForFlag = (int)(object)lookingForFlag;
+        return ((intValue & intLookingForFlag) == intLookingForFlag);
     }
 }

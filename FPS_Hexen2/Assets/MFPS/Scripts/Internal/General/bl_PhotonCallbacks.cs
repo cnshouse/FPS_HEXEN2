@@ -1,11 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
-using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
-using System;
 
 public class bl_PhotonCallbacks : MonoBehaviourPunCallbacks
 {

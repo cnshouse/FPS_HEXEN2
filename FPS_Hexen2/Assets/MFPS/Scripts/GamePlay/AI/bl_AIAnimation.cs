@@ -23,19 +23,45 @@ public class bl_AIAnimation : bl_MonoBehaviour
     private float lastYRotation;
     private float TurnLerp;
     private float movementSpeed;
-    private bl_AIShooterAgent AI;
     private bl_AIShooterHealth AIHealth;
     private Vector3 headTarget;
+    private Dictionary<string, int> animatorHashes;
+    private bl_AIShooterReferences references;
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void Awake()
     {
         base.Awake();
+        references = transform.root.GetComponent<bl_AIShooterReferences>();
         m_animator = GetComponent<Animator>();
-        AI = transform.parent.GetComponent<bl_AIShooterAgent>();
-        AIHealth = AI.GetComponent<bl_AIShooterHealth>();
+        AIHealth = references.shooterHealth;
         SetKinecmatic();
+        if (animatorHashes == null)
+        {
+            FetchHashes();
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    void FetchHashes()
+    {
+        //cache the hashes in a Array will be more appropriate but to be more readable for other users
+        // I decide to cached them in a Dictionary with the key name indicating the parameter that contain
+        animatorHashes = new Dictionary<string, int>();
+        animatorHashes.Add("Vertical", Animator.StringToHash("Vertical"));
+        animatorHashes.Add("Horizontal", Animator.StringToHash("Horizontal"));
+        animatorHashes.Add("Speed", Animator.StringToHash("Speed"));
+        animatorHashes.Add("Turn", Animator.StringToHash("Turn"));
+        animatorHashes.Add("isGround", Animator.StringToHash("isGround"));
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public override void OnUpdate()
     {
         ControllerInfo();
@@ -47,7 +73,7 @@ public class bl_AIAnimation : bl_MonoBehaviour
     /// </summary>
     void ControllerInfo()
     {
-        velocity = AI.vel;
+        velocity = references.shooterNetwork.Velocity;
         float delta = Time.deltaTime;
         localVelocity = transform.InverseTransformDirection(velocity);
         localVelocity.y = 0;
@@ -64,6 +90,7 @@ public class bl_AIAnimation : bl_MonoBehaviour
         TurnLerp = Mathf.Lerp(TurnLerp, turnSpeed, 7 * delta);
         movementSpeed = velocity.magnitude;
     }
+
     /// <summary>
     /// 
     /// </summary>
@@ -72,23 +99,29 @@ public class bl_AIAnimation : bl_MonoBehaviour
         if (m_animator == null)
             return;
 
-        m_animator.SetFloat("Vertical", vertical);
-        m_animator.SetFloat("Horizontal", horizontal);
-        m_animator.SetFloat("Speed", movementSpeed);
-        m_animator.SetFloat("Turn", TurnLerp);
-        m_animator.SetBool("isGround", true);
+        m_animator.SetFloat(animatorHashes["Vertical"], vertical);
+        m_animator.SetFloat(animatorHashes["Horizontal"], horizontal);
+        m_animator.SetFloat(animatorHashes["Speed"], movementSpeed);
+        m_animator.SetFloat(animatorHashes["Turn"], TurnLerp);
+        m_animator.SetBool(animatorHashes["isGround"], true);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void OnAnimatorIK(int layerIndex)
     {
-        if (AI.Target == null)
-            return;
-
-        m_animator.SetLookAtWeight(Weight, Body, Head, 1, 0.5f);
-        headTarget = Vector3.Slerp(headTarget, AI.Target.position, Time.deltaTime * 7);
-        m_animator.SetLookAtPosition(headTarget);
+        if (layerIndex == 1)
+        {
+            m_animator.SetLookAtWeight(Weight, Body, Head, 1, 0.4f);
+            headTarget = Vector3.Slerp(headTarget, references.aiShooter.LookAtPosition, Time.deltaTime * 3);
+            m_animator.SetLookAtPosition(headTarget);
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void SetKinecmatic()
     {
         for(int i = 0; i< HitBoxes.Count; i++)
@@ -114,6 +147,9 @@ public class bl_AIAnimation : bl_MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void OnGetHit()
     {
         int r = Random.Range(0, 2);

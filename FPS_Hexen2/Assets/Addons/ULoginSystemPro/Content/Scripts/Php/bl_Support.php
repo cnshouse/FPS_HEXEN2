@@ -1,86 +1,80 @@
 <?php
 include("bl_Common.php");
+$link = Connection::dbConnect();
 
-$name    = safe($_POST['name']);
-$title   = safe($_POST['title']);
-$content = safe($_POST['content']);
-$hash    = safe($_POST['hash']);
-$typ     = safe($_POST['type']);
-$reply   = safe($_POST['reply']);
-$id      = safe($_POST['id']);
+$name    = Utils::sanitaze_var($_POST['name'], $link);
+$title   = Utils::sanitaze_var($_POST['title'], $link);
+$content = Utils::sanitaze_var($_POST['content'], $link);
+$hash    = Utils::sanitaze_var($_POST['hash']);
+$typ     = Utils::sanitaze_var($_POST['type']);
+$reply   = Utils::sanitaze_var($_POST['reply'], $link);
+$id      = Utils::sanitaze_var($_POST['id']);
 
-$link = dbConnect();
+const TABLE_NAME = "bl_game_tickets";
 
-$name    = stripslashes($name);
-$name    = mysqli_real_escape_string($link, $name);
-$title   = stripslashes($title);
-$title   = mysqli_real_escape_string($link, $title);
-$content = stripslashes($content);
-$content = mysqli_real_escape_string($link, $content);
-$reply   = stripslashes($reply);
-$reply   = mysqli_real_escape_string($link, $reply);
-
-
-$real_hash = md5($name . $secretKey);
-if ($real_hash == $hash) {
-    if ($typ == "1") {
-        $sql = "INSERT INTO MyGameTickets (name, title, content) VALUES ('$name', '$title', '$content')";
-        if ($check = mysqli_query($link, $sql)) {
+$real_hash = Utils::get_secret_hash($name);
+if ($real_hash != $hash) {
+    http_response_code(401);
+    exit();
+}
+switch ($typ) {
+    case 1:
+        $sql = "INSERT INTO " . TABLE_NAME . "(name, title, content) VALUES ('$name', '$title', '$content')";
+        if (Connection::Query($link, $sql)) {
             echo "success";
-        } else {
-            die(mysqli_error($link));
         }
-    } else if ($typ == "2") {
-        
-        $check = mysqli_query($link, "SELECT * FROM MyGameTickets WHERE name ='$name' AND close !='2' ") or die(mysqli_connect_error());
+        break;
+    case 2:
+        $check = mysqli_query($link, "SELECT * FROM " . TABLE_NAME . " WHERE name ='$name' AND close !='2' ") or die(mysqli_error($link));
         $numrows = mysqli_num_rows($check);
         if ($numrows == 0) {
             echo "none";
         } else {
             while ($row = mysqli_fetch_assoc($check)) {
-                echo "reply";
-                echo "|";
-                echo $row['content'];
-                echo "|";
-                echo $row['reply'];
-                echo "|";
-                echo $row['id'];
-                echo "|";
+                $needArray = array(
+                    "result" => "reply",
+                    "content" => $row['content'],
+                    "reply" => $row['reply'],
+                    "id" => $row['id'],
+                );
+                $plain = implode("|", $needArray);
+                echo $plain;
             }
         }
-        
-    } else if ($typ == "3") {
-        
-        $query = "SELECT * FROM `MyGameTickets` WHERE close ='0'";
-        $result = mysqli_query($link, $query) or die('Query failed: ' . mysqli_connect_error());
+        break;
+    case 3:
+        $query = "SELECT * FROM " . TABLE_NAME . " WHERE close ='0'";
+        $result = mysqli_query($link, $query) or die('Query failed: ' . mysqli_error($link));
         $num_results = mysqli_num_rows($result);
-        
         if ($num_results > 0) {
             for ($i = 0; $i < $num_results; $i++) {
                 $row = mysqli_fetch_array($result);
-                
-                echo $row['title'] . "|" . $row['content'] . "|" . $row['reply'] . "|" . $row['id'] . "|" . $row['name'] . "|\n";
-                
+
+                $needArray = array(
+                    "title" => $row['title'],
+                    "content" => $row['content'],
+                    "reply" => $row['reply'],
+                    "id" => $row['id'],
+                    "name" => $row['name'],
+                );
+                $plain = implode("|", $needArray) . "&&";
+
+                echo $plain;
             }
         }
-    } else if ($typ == "4") {
-        
-        $check = mysqli_query($link, "UPDATE MyGameTickets SET reply='" . $reply . "', close='1' WHERE id='$id'") or die(mysqli_connect_error());
+        break;
+    case 4:
+        $check = mysqli_query($link, "UPDATE " . TABLE_NAME . " SET reply='" . $reply . "', close='1' WHERE id='$id'") or die(mysqli_error($link));
         if ($check) {
             echo "success";
         }
-    } else if ($typ == "5") {
-        
-        $check = mysqli_query($link, "DELETE FROM MyGameTickets  WHERE id='$id'") or die(mysqli_connect_error());
+        break;
+    case 5:
+        $check = mysqli_query($link, "DELETE FROM " . TABLE_NAME . "  WHERE id='$id'") or die(mysqli_error($link));
         if ($check) {
             echo "success";
         }
-    } else {
-        die("Any type are assigned with this id:" . $typ . " for user: " . $name);
-    }
-    
-} else {
-    die("You don't have permission for this! " . $name . " " . $secretKey);
+        break;
 }
 
 mysqli_close($link);

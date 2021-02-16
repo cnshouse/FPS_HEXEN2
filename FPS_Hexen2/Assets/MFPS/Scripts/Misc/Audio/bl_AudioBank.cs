@@ -2,18 +2,41 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Audio Bank", menuName = "MFPS/Audio Bank", order = 301)]
-public class bl_AudioBank : ScriptableObject
+namespace MFPS.Audio
 {
-    public List<AudioInfo> AudioBank = new List<AudioInfo>();
-
-    [System.Serializable]
-    public class AudioInfo
+    [CreateAssetMenu(fileName = "Audio Bank", menuName = "MFPS/Audio/Bank", order = 301)]
+    public class bl_AudioBank : ScriptableObject
     {
-        public string Name;
-        public AudioClip Clip;
-        [Range(0, 1)] public float Volume = 0.9f;
-        public bool SpacialAudio = false;
-        public bool Loop = false;
+        [Reorderable] public List<AudioInfo> AudioBank = new List<AudioInfo>();
+
+        public void PlayAudioInSource(AudioSource source, string bankInfo)
+        {
+            var info = GetInfoOf(bankInfo);
+            if (info == null) return;
+
+            source.volume = info.Volume;
+            source.loop = info.Loop;
+            source.spatialBlend = info.SpacialAudio ? 1 : 0;
+            source.clip = info.Clip;
+            source.Play();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public AudioInfo GetInfoOf(string bankName)
+        {
+            return AudioBank.Find(x => x.Name.ToLower() == bankName.ToLower());
+        }
+
+        [System.Serializable]
+        public class AudioInfo
+        {
+            public string Name;
+            public AudioClip Clip;
+            [Range(0, 1)] public float Volume = 0.9f;
+            public bool SpacialAudio = false;
+            public bool Loop = false;
+        }
     }
 }

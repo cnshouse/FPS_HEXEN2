@@ -56,7 +56,7 @@ public class Teleporter : bl_MonoBehaviour
         {
             if (UIReferences != null)
             {
-                UIReferences.SetPickUp(false);
+                //UIReferences.SetPickUp(false);
             }
             if (localPlayerIn != null)
             {
@@ -103,7 +103,7 @@ public class Teleporter : bl_MonoBehaviour
             {
                 //on Trigger teleport...
                 //Teleport();
-                UIReferences.ShowTeleportPromt(true);
+                //UIReferences.ShowTeleportPromt(true);
             }
         }
     }
@@ -113,7 +113,7 @@ public class Teleporter : bl_MonoBehaviour
         if (c.transform.CompareTag(bl_PlayerSettings.LocalTag) && Into)
         {
             Into = false;
-            UIReferences.SetPickUp(false);
+           // UIReferences.SetPickUp(false);
             if (localPlayerIn != null)
             {
                 if (m_DetectMode == DetectMode.Raycast)
@@ -180,7 +180,7 @@ public class Teleporter : bl_MonoBehaviour
         //Add the Character transform movement here...
         localPlayerIn.GetComponent<bl_FirstPersonController>().OnTeleport(TelePortDestination.transform.position, TelePortDestination.transform.rotation);
         SentTeleport = false;
-        UIReferences.SetPickUp(false);
+        //UIReferences.SetPickUp(false);
     }
 
     public void FocusThis(bool focus)

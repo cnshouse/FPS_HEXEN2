@@ -13,8 +13,6 @@ namespace MFPSEditor
     [CanEditMultipleObjects]
     public class ReorderableArrayInspector : Editor
     {
-        // Set this to true to turn every array in non custom inspectors into reorderable lists
-        private const bool LIST_ALL_ARRAYS = false;
 
         protected static string GetGrandParentPath(SerializedProperty property)
         {

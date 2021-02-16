@@ -1,6 +1,6 @@
 Thanks for purchase Customizer.
 
-Version 1.7.6
+Version 1.8
 
 For full documentation please unzip the "documentation" file out of unity project for avoid errors.
 or see the online documentation:
@@ -38,8 +38,10 @@ Make attachment affect the gun:
 
    Change Log:
 
-   1.7.6
-   -Improve: Documentation now include the tutorial to setup the FPWeapon on player prefabs to work with customizer.
+   1.8
+   -Improve: Exit window UI.
+   -Improve: Attachment Scroll view.
+   -Improve: Rotation input on touch devices.
 
    1.7.4
    -Fix: Randomize feature used non-purchased camos.

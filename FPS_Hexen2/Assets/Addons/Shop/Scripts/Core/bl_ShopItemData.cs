@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 #if PSELECTOR
-using MFPS.PlayerSelector;
+using MFPS.Addon.PlayerSelector;
+#endif
+#if CUSTOMIZER
+using MFPS.Addon.Customizer;
 #endif
 
 [Serializable]

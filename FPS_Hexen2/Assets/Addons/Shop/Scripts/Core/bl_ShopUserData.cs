@@ -16,6 +16,13 @@ public class bl_ShopUserData
         ShopPurchases = bl_ShopData.DecompilePurchases(PurchasesSource);
     }
 
+    public void GetInfo(Dictionary<string,string> data)
+    {
+        PurchasesSource = data["purchases"];
+        //Debug.Log($"Purchases: {data["purchases"]}");
+        ShopPurchases = bl_ShopData.DecompilePurchases(PurchasesSource);
+    }
+
     public bool isItemPurchase(ShopItemType typeID, int ID)
     {
         return ShopPurchases.Exists(x => x.TypeID == (int)typeID && x.ID == ID);

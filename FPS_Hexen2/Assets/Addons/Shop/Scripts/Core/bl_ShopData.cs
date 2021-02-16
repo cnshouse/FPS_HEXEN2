@@ -9,9 +9,10 @@ public class bl_ShopData : ScriptableObject
     public List<ShopCategoryInfo> categorys = new List<ShopCategoryInfo>();
 
     [Header("Settings")]
-    public bool ShowFreeItems = true;
-    public bool randomizeItemsInShop = true;
-    public bool purchaseOverrideLevelLock = true;
+    public string PricePrefix = "$";
+    [LovattoToogle] public bool ShowFreeItems = true;
+    [LovattoToogle] public bool randomizeItemsInShop = true;
+    [LovattoToogle(25)] public bool purchaseOverrideLevelLock = true;
 
     public Action<string, string> onPurchaseComplete;
     public Action onPurchaseFailed;

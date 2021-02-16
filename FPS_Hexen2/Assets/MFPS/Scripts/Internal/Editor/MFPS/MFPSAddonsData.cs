@@ -12,8 +12,8 @@ namespace MFPSEditor.Addons
 {
     public class MFPSAddonsData : ScriptableObject
     {
-        [Reorderable]
-        public List<MFPSAddonsInfo> Addons = new List<MFPSAddonsInfo>();
+
+        [Reorderable] public List<MFPSAddonsInfo> Addons = new List<MFPSAddonsInfo>();
         public bool AutoUpdate = false;
 
         [ContextMenu("Get Version Json")]
@@ -40,13 +40,17 @@ namespace MFPSEditor.Addons
         /// </summary>
         public void UpdateValues()
         {
-            foreach(var info in Addons)
+            foreach (var info in Addons)
             {
                 string cv = info.Info == null ? "--" : info.Info.Version;
                 info.CurrentVersion = cv;
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string GetVersionJson()
         {
             AddonsVersionList avl = new AddonsVersionList();
@@ -61,6 +65,15 @@ namespace MFPSEditor.Addons
             }
             string json = JsonUtility.ToJson(avl, true);
             return json;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public MFPSAddonsInfo GetAddonInfoByKey(string addonKey)
+        {
+            var info = Addons.Find(x => x.KeyName == addonKey);
+            return info;
         }
 
         private static MFPSAddonsData m_Data;
@@ -250,6 +263,7 @@ namespace MFPSEditor.Addons
         public GUISkin mfpsSkin;
         public List<string> addonsWithNewVersions = new List<string>();
         public Texture2D downloadIcon;
+        public Dictionary<string, GUIStyle> styles = new Dictionary<string, GUIStyle>() { { "titleH2", null }, { "borders", null }, { "text", null } };
 
         /// <summary>
         /// 
@@ -264,13 +278,15 @@ namespace MFPSEditor.Addons
             WindowState = 1;
             TextStyleFlat = new GUIStyle(Resources.Load<GUISkin>("content/MFPSEditorSkin").customStyles[1]);
             TextStyleFlat.wordWrap = true;
-           // if (!EditorGUIUtility.isProSkin) { TextStyleFlat.normal.textColor = Color.black; }
+            // if (!EditorGUIUtility.isProSkin) { TextStyleFlat.normal.textColor = Color.black; }
             Data.UpdateValues();
             loadingSpinner = new EditorSpinnerGUI();
             loadingSpinner.Initializated(this);
+            titleContent = new GUIContent("Addons", bl_MFPSManagerWindow.GetUnityIcon("d_PreMatCube"));
             mfpsSkin = Resources.Load<GUISkin>("content/MFPSEditorSkin") as GUISkin;
             /*  if(lsAccount == null)
               lsAccount = new LovattoStudioAccount(this);*/
+            LovattoStats.SetStat("addons_window", 1, LovattoStats.OpType.ADD);
         }
 
         /// <summary>
@@ -278,10 +294,10 @@ namespace MFPSEditor.Addons
         /// </summary>
         public void OpenAddonPage(string addonName)
         {
-            if(Data == null) { Data = MFPSAddonsData.Instance; }
+            if (Data == null) { Data = MFPSAddonsData.Instance; }
             for (int i = 0; i < Data.Addons.Count; i++)
             {
-                if(Data.Addons[i].NiceName.ToLower() == addonName.ToLower())
+                if (Data.Addons[i].NiceName.ToLower() == addonName.ToLower())
                 {
                     addonID = i;
                     break;
@@ -295,7 +311,7 @@ namespace MFPSEditor.Addons
         /// </summary>
         private void OnGUI()
         {
-            MFPSEditorStyles.DrawBackground(new Rect(0, 0, position.width, position.height), backgroundColor);
+            MFPSEditorStyles.DrawBackground(new Rect(0, 0, position.width, position.height), MFPSEditorStyles.GetColorFromHex("#131414"));
             InitGUI();
             if (Data == null) return;
 
@@ -316,7 +332,7 @@ namespace MFPSEditor.Addons
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
 
-            if(WindowState == 1) { Loading(); }
+            if (WindowState == 1) { Loading(); }
         }
 
         /// <summary>
@@ -336,7 +352,7 @@ namespace MFPSEditor.Addons
         /// </summary>
         void Header()
         {
-            GUILayout.BeginHorizontal(EditorStyles.toolbarButton,GUILayout.Height(20));
+            GUILayout.BeginHorizontal(EditorStyles.toolbarButton, GUILayout.Height(20));
             GUILayout.Space(5);
             if (GUILayout.Button("Home", EditorStyles.toolbarButton))
             {
@@ -348,10 +364,10 @@ namespace MFPSEditor.Addons
                 Application.OpenURL("https://www.lovattostudio.com/en/shop/");
             }
             GUILayout.FlexibleSpace();
-         /*   if (GUILayout.Button("Account", EditorStyles.toolbarButton))
-            {
-                contentWindow = CustomWindows.Auth;
-            }*/
+            /*   if (GUILayout.Button("Account", EditorStyles.toolbarButton))
+               {
+                   contentWindow = CustomWindows.Auth;
+               }*/
             if (GUILayout.Button("Help", EditorStyles.toolbarButton))
             {
                 contentWindow = CustomWindows.Help;
@@ -369,15 +385,16 @@ namespace MFPSEditor.Addons
         /// 
         /// </summary>
         void LeftPanel()
-        {            
-            GUILayout.BeginVertical("box", GUILayout.Width(leftPanelWidth));
+        {
+            Rect rect = EditorGUILayout.BeginVertical("box", GUILayout.Width(leftPanelWidth));
+            EditorGUI.DrawRect(rect, MFPSEditorStyles.GetColorFromHex("#0F1011"));
             addonsList = GUILayout.BeginScrollView(addonsList);
-
             for (int i = 0; i < Data.Addons.Count; i++)
             {
                 MFPSAddonsInfo addon = Data.Addons[i];
                 Rect r = GUILayoutUtility.GetRect(205, 18);
-                if (GUI.Button(r, "", EditorStyles.toolbarButton))
+                EditorGUI.DrawRect(r, MFPSEditorStyles.GetColorFromHex("#060707"));
+                if (GUI.Button(r, "", GUIStyle.none))
                 {
                     addonID = i;
                     changeList = Vector2.zero;
@@ -393,20 +410,29 @@ namespace MFPSEditor.Addons
                 }
                 r.x += 5;
                 GUI.Label(r, addon.NiceName, EditorStyles.miniLabel);
-                r.x += 150;
-                string version = addon.isIntegrated ? addon.CurrentVersion + "     <color=green>✓</color>" : addon.CurrentVersion;
-                GUI.Label(r, version, EditorStyles.miniLabel);
+                r.x += 140;
+                Rect rr = r;
+                rr.width = 75;
+                GUI.Label(rr, addon.CurrentVersion, EditorStyles.miniLabel);
+
+                if (addon.isIntegrated)
+                {
+                    rr.x += 34;
+                    rr.width = 40;
+                    GUI.Label(rr, "<color=green>✓</color>", EditorStyles.miniLabel);
+                }
+
                 if (addonsWithNewVersions.Contains(addon.NiceName))
                 {
-                    r.x += 40;
-                    r.y += 1;
-                    GUI.Label(r, downloadIcon);
+                    rr.x += 15;
+                    rr.y += 1;
+                    GUI.Label(rr, downloadIcon);
                 }
                 GUILayout.Space(1);
             }
             GUILayout.EndScrollView();
             GUILayout.FlexibleSpace();
-            GUILayout.EndVertical();
+            EditorGUILayout.EndVertical();
         }
 
         /// <summary>
@@ -424,7 +450,7 @@ namespace MFPSEditor.Addons
                 DrawAddons();
             }
             else if (contentWindow == CustomWindows.Help) { DrawHelp(); }
-          //  else if (contentWindow == CustomWindows.Auth) { DrawAuth(); }
+            //  else if (contentWindow == CustomWindows.Auth) { DrawAuth(); }
 
             if (contentWindow != CustomWindows.Addons)
             {
@@ -444,7 +470,7 @@ namespace MFPSEditor.Addons
                 MFPSAddonsInfo addon = Data.Addons[addonID];
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(string.Format("<size=22><color=white>{0}</color></size> ", addon.NiceName.ToUpper()), EditorStyles.boldLabel);
-                string it = addon.isIntegrated ? "<color=green>INTEGRATED</color>" : "<color=red>NO INTEGRATED</color>";
+                string it = addon.isIntegrated ? "<color=#BAFF00FF>ENABLED</color>" : "<color=red>DISABLED</color>";
                 Color ic = addon.isIntegrated ? Color.green : Color.red;
                 Rect rt = GUILayoutUtility.GetRect(outlineOrange.CalcSize(new GUIContent(it)).x, 20);
                 rt.y += 10;
@@ -465,19 +491,17 @@ namespace MFPSEditor.Addons
                 bool notKnowVersion = false;
                 //check version
                 Version nv;
-                if(!Version.TryParse(addon.LastVersion,out nv))
+                if (!Version.TryParse(addon.LastVersion, out nv))
                 {
                     nv = new Version("1.0");
                     notKnowVersion = true;
                 }
-
                 Version lv;
                 if (!Version.TryParse(currentVersion, out lv))
                 {
                     lv = new Version("1.0");
                     notKnowVersion = true;
                 }
-
                 if (nv.CompareTo(lv) == 1 && !notKnowVersion)
                 {
                     GUILayout.Space(10);
@@ -485,18 +509,33 @@ namespace MFPSEditor.Addons
                     GUILayout.Label($"<size=8>NEW VERSION AVAILABLE</size>", outlineOrange);
                     GUI.color = Color.white;
                 }
-
-                GUILayout.FlexibleSpace();
-                if(addon.Info != null && !string.IsNullOrEmpty(addon.Info.TutorialScript))
+                GUILayout.Space(10);
+                if (addon.Info != null && !string.IsNullOrEmpty(addon.Info.TutorialScript))
                 {
                     GUI.color = new Color(1, 0.6938923f, 0, 1);
-                    if (GUILayout.Button("OPEN TUTORIAL", outlineOrange))
+                    if (GUILayout.Button("DOCUMENTATION", outlineOrange))
                     {
                         EditorWindow.GetWindow(System.Type.GetType(string.Format("{0}, Assembly-CSharp-Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", addon.Info.TutorialScript)));
                     }
                     GUI.color = Color.white;
-                    GUILayout.Space(10);
                 }
+                GUILayout.FlexibleSpace();
+
+                StoreProduct sp = AddonInfo(addon.NiceName);
+                if (!addon.isInProject && sp != null)
+                {
+                    Rect br = GUILayoutUtility.GetRect(50, 20);
+                    br.y -= 20;
+                    br.height += 30;
+                    GUI.color = new Color(0, 0.8256686f, 1, 1);
+                    if (GUI.Button(br, new GUIContent("<b>GET</b>", bl_MFPSManagerWindow.GetUnityIcon("Favorite Icon")), MFPSEditorStyles.OutlineButtonStyle))
+                    {
+                        Application.OpenURL(sp.Url);
+                    }
+                    GUI.color = Color.white;
+                    GUILayout.Space(30);
+                }
+
                 GUILayout.EndHorizontal();
 
                 GUILayout.Space(5);
@@ -510,29 +549,45 @@ namespace MFPSEditor.Addons
                     GUILayout.Label("This Addons is not present in this project.");
                 }
 
-                changeList = GUILayout.BeginScrollView(changeList);
-                StoreProduct sp = AddonInfo(addon.NiceName);
-                if (sp != null)
+                EditorGUILayout.BeginHorizontal();
                 {
-                    GUILayout.Label("<b>Description</b>", TextStyleFlat);
-                    GUILayout.Label(sp.Description, TextStyleFlat);
-                }
-                if (addon.Info != null && !string.IsNullOrEmpty(addon.Info.Instructions))
-                {
-                    DrawSeparator();
-                    GUILayout.Label(addon.Info.Instructions, TextStyleFlat);
-                }
-                if (addon.ChangeLog.Count > 0)
-                {
-                    GUILayout.Label("<size=14>CHANGE LOG:</size>", miniBold);
-                    for (int i = 0; i < addon.ChangeLog.Count; i++)
+                    GUILayout.Space(10);
+                    changeList = GUILayout.BeginScrollView(changeList);
+                    GUILayout.Space(10);
+                    if (sp != null)
                     {
-                        GUILayout.Label(addon.ChangeLog[i].Version, desStyle);
-                        GUILayout.Label(addon.ChangeLog[i].ChangeLog, desStyle);
-                        GUILayout.Space(7);
+                        Rect r = EditorGUILayout.BeginVertical(styles["borders"]);
+                        EditorGUI.DrawRect(r, new Color(1, 1, 1, 0.02f));
+                        GUILayout.Label("<b>Description</b>", TextStyleFlat);
+                        GUILayout.Label(sp.Description, TextStyleFlat);
+                        EditorGUILayout.EndVertical();
+                        GUILayout.Space(20);
                     }
+                    if (addon.Info != null && !string.IsNullOrEmpty(addon.Info.Instructions))
+                    {
+                        //DrawSeparator();
+                        Rect r = EditorGUILayout.BeginVertical(styles["borders"]);
+                        EditorGUI.DrawRect(r, new Color(1, 1, 1, 0.02f));
+                        GUILayout.Label(addon.Info.Instructions, TextStyleFlat);
+                        EditorGUILayout.EndVertical();
+                    }
+                    if (addon.ChangeLog.Count > 0)
+                    {
+                        GUILayout.Label("<size=14>CHANGE LOG:</size>", miniBold);
+                        for (int i = 0; i < addon.ChangeLog.Count; i++)
+                        {
+                            GUILayout.Label(addon.ChangeLog[i].Version, desStyle);
+                            GUILayout.Label(addon.ChangeLog[i].ChangeLog, desStyle);
+                            GUILayout.Space(7);
+                        }
+                    }
+                    GUILayout.Space(10);
+                    GUILayout.EndScrollView();
                 }
-                GUILayout.EndScrollView();
+                GUILayout.Space(25);
+                EditorGUILayout.EndHorizontal();
+
+
                 //footarea
 
                 GUILayout.FlexibleSpace();
@@ -577,7 +632,7 @@ namespace MFPSEditor.Addons
             if (VersionData == null) return;
 
             GUILayout.Space(10);
-             updateScroll = GUILayout.BeginScrollView(updateScroll);
+            updateScroll = GUILayout.BeginScrollView(updateScroll);
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.Space(10);
@@ -594,6 +649,15 @@ namespace MFPSEditor.Addons
                     {
                         GUILayout.Label($"<b>{a.Addon}</b>", textStyle);
                         Rect lr = GUILayoutUtility.GetLastRect();
+                        if (Data != null && Data.Addons != null)
+                        {
+                            if (GUI.Button(lr, GUIContent.none, GUIStyle.none))
+                            {
+                                int aid = Data.Addons.FindIndex(x => x.NiceName == a.Addon);
+                                addonID = aid;
+                                contentWindow = CustomWindows.Addons;
+                            }
+                        }
                         lr.x -= 4; lr.width += 4;
                         lr.y -= 4; lr.height += 4;
                         MFPSEditorStyles.DrawBackground(lr, Color.white);
@@ -613,29 +677,29 @@ namespace MFPSEditor.Addons
             GUILayout.EndScrollView();
         }
 
-       /* public string userName = "";
-        public string userPass = "";
-        void DrawAuth()
-        {
-            userName = EditorGUILayout.TextField("Username", userName);
-            userPass = EditorGUILayout.TextField("userPass", userPass);
-            if (GUILayout.Button("Auth"))
-            {
-                lsAccount.Authenticate(userName, userPass);
-            }
-        }*/
+        /* public string userName = "";
+         public string userPass = "";
+         void DrawAuth()
+         {
+             userName = EditorGUILayout.TextField("Username", userName);
+             userPass = EditorGUILayout.TextField("userPass", userPass);
+             if (GUILayout.Button("Auth"))
+             {
+                 lsAccount.Authenticate(userName, userPass);
+             }
+         }*/
 
         void DrawHelp()
         {
             EditorStyles.foldout.richText = true;
             GUILayout.Space(20);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            questionFoulds[0] = EditorGUILayout.Foldout(questionFoulds[0], "<i>How to report a bug/error with an addon?</i>",EditorStyles.foldout);
+            questionFoulds[0] = EditorGUILayout.Foldout(questionFoulds[0], "<i>How to report a bug/error with an addon?</i>", EditorStyles.foldout);
             if (questionFoulds[0])
             {
                 EditorGUILayout.TextArea("If you have a problem with one of the addons or any relate question, you can get in touch with us in multiple ways:", TextStyleFlat);
                 GUILayout.Space(10);
-                if (GUILayout.Button("<color=yellow>Forum</color>",TextStyleFlat)) { Application.OpenURL("https://www.lovattostudio.com/forum/index.php"); }
+                if (GUILayout.Button("<color=yellow>Forum</color>", TextStyleFlat)) { Application.OpenURL("https://www.lovattostudio.com/forum/index.php"); }
                 if (GUILayout.Button("<color=yellow>Email Form</color>", TextStyleFlat)) { Application.OpenURL("https://www.lovattostudio.com/en/select-support/"); }
                 if (GUILayout.Button("<color=yellow>Direct Email</color>", TextStyleFlat)) { Application.OpenURL("mailto:contact.lovattostudio@gmail.com"); }
             }
@@ -791,40 +855,62 @@ namespace MFPSEditor.Addons
 
         void InitGUI()
         {
-            if (!initGUI)
+            if (initGUI && styles["borders"] != null) return;
+
+            outLineStyle = new GUIStyle("ColorPickerCurrentExposureSwatchBorder");
+            outLineStyle.padding.left -= 10;
+            outLineStyle.padding.right -= 10;
+            initGUI = true;
+            EditorStyles.label.richText = true;
+            changeLogStyle = new GUIStyle(EditorStyles.miniLabel);
+            changeLogStyle.wordWrap = true;
+            changeLogStyle.richText = true;
+            changeLogStyle.fontStyle = FontStyle.Italic;
+            changeLogStyle.normal.textColor = new Color(1, 1, 1, 0.7f);
+
+            textStyle = new GUIStyle(EditorStyles.label);
+            textStyle.normal.textColor = new Color(1, 1, 1, 0.7f);
+
+            miniBold = new GUIStyle(EditorStyles.miniBoldLabel);
+            miniLabel = new GUIStyle(EditorStyles.miniLabel);
+            miniBold.normal.textColor = Color.white;
+            miniLabel.normal.textColor = Color.white;
+
+            rightSideText = new GUIStyle(changeLogStyle);
+            rightSideText.alignment = TextAnchor.MiddleRight;
+
+            outlineOrange = new GUIStyle("grey_border");
+            outlineOrange.normal.textColor = Color.white;
+            outlineOrange.padding.left += 4;
+            outlineOrange.padding.right += 2;
+            outlineOrange.padding.bottom += 2;
+            outlineOrange.padding.top -= 2;
+
+            downloadIcon = (Texture2D)EditorGUIUtility.IconContent("d_RotateTool").image;
+
+            styles["textC"] = GetStyle("textac", (ref GUIStyle style) =>
             {
-                outLineStyle = new GUIStyle("ColorPickerCurrentExposureSwatchBorder");
-                outLineStyle.padding.left -= 10;
-                outLineStyle.padding.right -= 10;
-                initGUI = true;
-                EditorStyles.label.richText = true;
-                changeLogStyle = new GUIStyle(EditorStyles.miniLabel);
-                changeLogStyle.wordWrap = true;
-                changeLogStyle.richText = true;
-                changeLogStyle.fontStyle = FontStyle.Italic;
-                changeLogStyle.normal.textColor = new Color(1, 1, 1, 0.7f);
-
-                textStyle = new GUIStyle(EditorStyles.label);
-                textStyle.normal.textColor = new Color(1, 1, 1, 0.7f);
-
-                miniBold = new GUIStyle(EditorStyles.miniBoldLabel);
-                miniLabel = new GUIStyle(EditorStyles.miniLabel);
-                miniBold.normal.textColor = Color.white;
-                miniLabel.normal.textColor = Color.white;
-
-                rightSideText = new GUIStyle(changeLogStyle);
-                rightSideText.alignment = TextAnchor.MiddleRight;
-
-                outlineOrange = new GUIStyle("grey_border");
-                outlineOrange.normal.textColor = Color.white;
-                outlineOrange.padding.left += 4;
-                outlineOrange.padding.right += 2;
-                outlineOrange.padding.bottom += 2;
-                outlineOrange.padding.top -= 2;
-
-                downloadIcon = (Texture2D)EditorGUIUtility.IconContent("d_RotateTool").image;
-            }
+                style.alignment = TextAnchor.MiddleCenter;
+                style.normal.textColor = new Color(0.399f, 0.399f, 0.399f, 1.00f);
+                style.richText = true;
+            }, "label");
+            styles["titleH2"] = GetStyle("titleH2a", (ref GUIStyle style) =>
+            {
+                style.alignment = TextAnchor.MiddleLeft;
+                style.normal.textColor = Color.white;
+                style.fontStyle = FontStyle.Bold;
+                style.fontSize = 18;
+            }, "label");
+            styles["borders"] = GetStyle("grey_border", (ref GUIStyle style) =>
+            {
+                style.normal.textColor = new Color(0.399f, 0.399f, 0.399f, 1.00f);
+                style.overflow.left = style.overflow.right = style.overflow.top = style.overflow.bottom = 5;
+                style.padding.left = -5; style.padding.right = 5;
+                style.margin.left = style.margin.right = 10;
+            });
         }
+
+        private GUIStyle GetStyle(string name, TutorialWizard.Style.OnCreateStyleOp onCreate, string overlap = "") => TutorialWizard.Style.GetUnityStyle(name, onCreate, overlap);
 
         [MenuItem("MFPS/Addons/Addons Manager", false, -1000)]
         public static void Open()
@@ -862,6 +948,31 @@ namespace MFPSEditor.Addons
         public bool isIntegrated = false;
         [NonSerialized]
         public bool CompatibleWithThisMFPS = false;
+
+        public Dictionary<string, string> GetInfoInDictionary()
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            data.Add("name", Info == null ? NiceName : Info.Name);
+            data.Add("currentVersion", Info == null ? CurrentVersion : Info.Version);
+            data.Add("TutorialScript", Info == null ? "" : Info.TutorialScript);
+            return data;
+        }
+
+        public string GetCurrentVersion
+        {
+            get
+            {
+                if (Info != null)
+                {
+                    return Info.Version;
+                }
+                return CurrentVersion;
+            }
+        }
+
+#if UNITY_EDITOR
+        public bool IsAddonInProject() => AssetDatabase.IsValidFolder("Assets/Addons/" + FolderName);
+#endif
     }
 
     [System.Serializable]
@@ -888,8 +999,8 @@ namespace MFPSEditor.Addons
     [Serializable]
     public class VersionHistory
     {
-        public string Version;    
-        [TextArea(3,10)]
+        public string Version;
+        [TextArea(3, 10)]
         public string ChangeLog;
     }
 

@@ -4942,14 +4942,6 @@ MonoBehaviour:
   GunID: 8
   WeaponBinding: {fileID: 0}
   CrossHairScale: 6
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: 10a5e2a07c3ad0f47b7e6b585527253b, type: 3}
-  FireSound: {fileID: 8300000, guid: c454080b1684cb94cb3c0d8901daeb90, type: 3}
-  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
-  ReloadSound: {fileID: 8300000, guid: fd6770c2da41cbe43bcd5ca39189b017, type: 3}
-  ReloadSound2: {fileID: 8300000, guid: ea70b8ce1050ed442995ea6a60e9e7f6, type: 3}
-  ReloadSound3: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
-  DelaySource: {fileID: 0}
   bulletInstanceMethod: 0
   BulletName: bullet
   bulletPrefab: {fileID: 0}
@@ -4969,7 +4961,7 @@ MonoBehaviour:
   pelletsPerShot: 10
   delayForSecondFireSound: 0.45
   roundsPerBurst: 3
-  lagBetweenShots: 0.5
+  lagBetweenBurst: 0.5
   OnAmmoLauncher: []
   ThrowByAnimation: 0
   impactForce: 7
@@ -4990,6 +4982,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 2
   RecoilSpeed: 5
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: 10a5e2a07c3ad0f47b7e6b585527253b, type: 3}
+  FireSound: {fileID: 8300000, guid: c454080b1684cb94cb3c0d8901daeb90, type: 3}
+  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
+  ReloadSound: {fileID: 8300000, guid: fd6770c2da41cbe43bcd5ca39189b017, type: 3}
+  ReloadSound2: {fileID: 8300000, guid: ea70b8ce1050ed442995ea6a60e9e7f6, type: 3}
+  ReloadSound3: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
+  DelaySource: {fileID: 0}
   weaponRenders:
   - {fileID: 213502340}
   - {fileID: 206297668}
@@ -19630,10 +19630,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CheckFrameRate: 25
+  castMethod: 1
   DistanceCheck: 2
   DetectLayers:
     serializedVersion: 2
     m_Bits: 4609
+  boxDimesion: {x: 0.15, y: 0.15, z: 0.1}
 --- !u!114 &1491069038477958249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33471,14 +33473,6 @@ MonoBehaviour:
   GunID: 7
   WeaponBinding: {fileID: 1175370607528314872}
   CrossHairScale: 25
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: c83dde09243fd824490bda86374ca336, type: 3}
-  FireSound: {fileID: 8300000, guid: 62cb5f416648a11419417edc4a9f76b4, type: 3}
-  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
-  ReloadSound: {fileID: 8300000, guid: 7bdb1633c31cf284e9ca9a4ae56b58e4, type: 3}
-  ReloadSound2: {fileID: 8300000, guid: 6e28555106a46384b85f4c75c6a68614, type: 3}
-  ReloadSound3: {fileID: 8300000, guid: c707bb1d3b39b6348b345760328c1d5b, type: 3}
-  DelaySource: {fileID: 0}
   bulletInstanceMethod: 1
   BulletName: bullet
   bulletPrefab: {fileID: 1338248142525780293, guid: 9f7247cdad860cb46be5b3c83e2b5407,
@@ -33499,7 +33493,7 @@ MonoBehaviour:
   pelletsPerShot: 5
   delayForSecondFireSound: 0.45
   roundsPerBurst: 3
-  lagBetweenShots: 0.5
+  lagBetweenBurst: 0.5
   OnAmmoLauncher: []
   ThrowByAnimation: 0
   impactForce: 10
@@ -33520,6 +33514,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 5
   RecoilSpeed: 7
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: c83dde09243fd824490bda86374ca336, type: 3}
+  FireSound: {fileID: 8300000, guid: 62cb5f416648a11419417edc4a9f76b4, type: 3}
+  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
+  ReloadSound: {fileID: 8300000, guid: 7bdb1633c31cf284e9ca9a4ae56b58e4, type: 3}
+  ReloadSound2: {fileID: 8300000, guid: 6e28555106a46384b85f4c75c6a68614, type: 3}
+  ReloadSound3: {fileID: 8300000, guid: c707bb1d3b39b6348b345760328c1d5b, type: 3}
+  DelaySource: {fileID: 0}
   weaponRenders:
   - {fileID: 1175370607528313562}
   - {fileID: 1175370607528313100}
@@ -50337,7 +50339,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Update: 1
   m_animator: {fileID: 6707658038195406212}
-  FootStepLibrary: {fileID: 11400000, guid: c2038a0a5e023914db2c64e488dccef7, type: 2}
+  dropTiltAngleCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   grounded: 1
   localVelocity: {x: 0, y: 0, z: 0}
   movementSpeed: 0
@@ -60486,12 +60511,10 @@ MonoBehaviour:
   m_EngineerClass: {fileID: 11400000, guid: 98bf65ee47906b248b1ae54e655e53b3, type: 2}
   m_ReconClass: {fileID: 11400000, guid: 8d9543e72ab6d624c9decadfb20a85e5, type: 2}
   m_SupportClass: {fileID: 11400000, guid: fdad84172808cd74ab8f8b8a628442dc, type: 2}
-  m_DragosClass: {fileID: 0}
   currentWeaponIndex: 0
   SwichTime: 0.3
   PickUpTime: 0.25
   changeWeaponStyle: 0
-  CurrentGun: {fileID: 0}
   HeadAnimator: {fileID: 1175370607528313799}
   TrowPoint: {fileID: 1175370607528338407}
   SwitchFireAudioClip: {fileID: 8300000, guid: 5e36f43224d1e5a428a71fbee5a837c9, type: 3}
@@ -60614,6 +60637,7 @@ GameObject:
   - component: {fileID: 1175370607528313642}
   - component: {fileID: -2730065492814962}
   - component: {fileID: -5577564156913260713}
+  - component: {fileID: 1373557462091455248}
   m_Layer: 0
   m_Name: Dragos
   m_TagString: Player
@@ -60698,6 +60722,8 @@ MonoBehaviour:
   slideSpeed: 12
   climbSpeed: 2.2
   jumpSpeed: 7
+  slopeFriction: 3
+  crouchTransitionSpeed: 0.25
   slideTime: 0.7
   slideFriction: 6
   JumpMinRate: 0.82
@@ -60705,37 +60731,40 @@ MonoBehaviour:
   m_StickToGroundForce: 8
   m_GravityMultiplier: 2
   RunFovEffect: 1
+  runFOVAmount: 8
   KeepToCrouch: 1
   FallDamage: 1
   SafeFallDistance: 3.5
   DeathFallDistance: 12
+  dropControlSpeed: 25
+  dropTiltSpeedRange: {x: 20, y: 60}
   mouseLook:
-    XSensitivity: 4
-    YSensitivity: 4
     clampVerticalRotation: 1
     MinimumX: -65
     MaximumX: 70
-    smooth: 0
+    useSmoothing: 1
+    lerpMovement: 0
     smoothTime: 5
+    framesOfSmoothing: 5
   headRoot: {fileID: 1175370607528338128}
   CameraRoot: {fileID: 1175370607528337437}
   headBobMagnitude: 0.9
   m_JumpBob:
     BobDuration: 0.2
     BobAmount: 0.3
-  m_StepInterval: 2.1
-  m_RunStepInterval: 3
-  FootStepVolume: 0.12
-  FootStepLibrary: {fileID: 11400000, guid: c2038a0a5e023914db2c64e488dccef7, type: 2}
+  footstep: {fileID: 0}
   jumpSound: {fileID: 8300000, guid: 3da65563a83b70e4dbc74bf9322d0ebe, type: 3}
   landSound: {fileID: 8300000, guid: 1142e67564ca1704ca527284dbcab8f8, type: 3}
   slideSound: {fileID: 8300000, guid: 0e62cba4936c6004da842fed6f787ae0, type: 3}
-  FootAudioSource: {fileID: 1175370607528344818}
   StandIcon: {fileID: 21300000, guid: 6ef352dfd7bd28d48a26719e9c313e3c, type: 3}
   CrouchIcon: {fileID: 21300002, guid: 6ef352dfd7bd28d48a26719e9c313e3c, type: 3}
-  Velocity: {x: 0, y: 0, z: 0}
-  VelocityMagnitude: 0
-  isControlable: 1
+  _movementExpand: 0
+  _jumpExpand: 0
+  _fallExpand: 0
+  _mouseExpand: 0
+  _bobExpand: 1
+  _soundExpand: 1
+  _miscExpand: 1
 --- !u!114 &1175370607528314387
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60838,11 +60867,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 316adabc5cc1a364eb6e84ad9bf00a60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DamageEnabled: 1
   health: 100
   maxHealth: 100
   StartRegenerateIn: 4
   RegenerationSpeed: 3
+  RegenerateUpTo: 100
   DeathIconShowTime: 5
   DeathIcon: {fileID: 2800000, guid: ca37e507e47f9f148b92dd984e3137f3, type: 3}
   HealthColorGradient:
@@ -60886,8 +60915,6 @@ MonoBehaviour:
   KillCamPrefab: {fileID: 1439181263161366, guid: a53a9978b9769cd479c94328d9a626ad,
     type: 3}
   BodyManager: {fileID: 1175370607528314230}
-  DeathIconPrefab: {fileID: 1304675692033152, guid: fa0fcfe8ebba6cc41b7415678d5e6e61,
-    type: 3}
 --- !u!114 &1175370607528314131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60902,7 +60929,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackDirection: {x: 0, y: 0, z: 0}
   FadeTime: 3
-  target: {fileID: 1175370607528339100}
+  indicatorPivot: {fileID: 0}
+  indicatorAlpha: {fileID: 0}
 --- !u!114 &1175370607528314556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61071,6 +61099,35 @@ MonoBehaviour:
     MinDelaySoft: 200
     MaxDelaySoft: 400
     MaxDelayHard: 1000
+--- !u!114 &1373557462091455248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1175370607528332250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f686dbd1d13703b4292419c1837185eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerNetwork: {fileID: 1175370607528314387}
+  firstPersonController: {fileID: 1175370607528314558}
+  playerHealthManager: {fileID: 1175370607528314234}
+  playerSettings: {fileID: 1175370607528314465}
+  gunManager: {fileID: 1175370607528314564}
+  playerAnimations: {fileID: 1175370607528314170}
+  bodyPartManager: {fileID: 1175370607528314230}
+  recoil: {fileID: 0}
+  cameraShaker: {fileID: 0}
+  cameraRay: {fileID: 0}
+  weaponBob: {fileID: 1175370607528314200}
+  weaponSway: {fileID: 0}
+  characterController: {fileID: 1175370607528313140}
+  photonView: {fileID: 1175370607528314372}
+  playerCamera: {fileID: 1175370607528342911}
+  weaponCamera: {fileID: 1175370607528342907}
+  leftArmTarget: {fileID: 0}
 --- !u!1 &1175370607528332278
 GameObject:
   m_ObjectHideFlags: 0
@@ -61401,7 +61458,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d709a2a9aaa202b4f938f6aae7b035c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MovementAmount: 2
+  delayAmplitude: 2
+  pushAmplutide: 0.2
+  sideAngleAmplitude: 4
   Smoothness: 3
   m_time: 0.2
   m_ReturnSpeed: 7.5
@@ -67002,14 +67061,6 @@ MonoBehaviour:
   GunID: 2
   WeaponBinding: {fileID: 0}
   CrossHairScale: 25
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: c707bb1d3b39b6348b345760328c1d5b, type: 3}
-  FireSound: {fileID: 8300000, guid: 110e780bfe912694b90a55b5f0f17344, type: 3}
-  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
-  ReloadSound: {fileID: 8300000, guid: 7bdb1633c31cf284e9ca9a4ae56b58e4, type: 3}
-  ReloadSound2: {fileID: 8300000, guid: 6e28555106a46384b85f4c75c6a68614, type: 3}
-  ReloadSound3: {fileID: 8300000, guid: c707bb1d3b39b6348b345760328c1d5b, type: 3}
-  DelaySource: {fileID: 1175370607528313649}
   bulletInstanceMethod: 0
   BulletName: bullet
   bulletPrefab: {fileID: 0}
@@ -67029,7 +67080,7 @@ MonoBehaviour:
   pelletsPerShot: 5
   delayForSecondFireSound: 0.45
   roundsPerBurst: 3
-  lagBetweenShots: 0.5
+  lagBetweenBurst: 0.5
   OnAmmoLauncher: []
   ThrowByAnimation: 0
   impactForce: 30
@@ -67050,6 +67101,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 5
   RecoilSpeed: 7
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: c707bb1d3b39b6348b345760328c1d5b, type: 3}
+  FireSound: {fileID: 8300000, guid: 110e780bfe912694b90a55b5f0f17344, type: 3}
+  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
+  ReloadSound: {fileID: 8300000, guid: 7bdb1633c31cf284e9ca9a4ae56b58e4, type: 3}
+  ReloadSound2: {fileID: 8300000, guid: 6e28555106a46384b85f4c75c6a68614, type: 3}
+  ReloadSound3: {fileID: 8300000, guid: c707bb1d3b39b6348b345760328c1d5b, type: 3}
+  DelaySource: {fileID: 1175370607528313649}
   weaponRenders:
   - {fileID: 1175370607528313107}
   - {fileID: 1175370607528344146}
@@ -73947,14 +74006,6 @@ MonoBehaviour:
   GunID: 6
   WeaponBinding: {fileID: 0}
   CrossHairScale: 15
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: c83dde09243fd824490bda86374ca336, type: 3}
-  FireSound: {fileID: 0}
-  DryFireSound: {fileID: 0}
-  ReloadSound: {fileID: 0}
-  ReloadSound2: {fileID: 0}
-  ReloadSound3: {fileID: 0}
-  DelaySource: {fileID: 0}
   bulletInstanceMethod: 0
   BulletName: bullet
   bulletPrefab: {fileID: 0}
@@ -73974,7 +74025,7 @@ MonoBehaviour:
   pelletsPerShot: 10
   delayForSecondFireSound: 0.45
   roundsPerBurst: 3
-  lagBetweenShots: 0.5
+  lagBetweenBurst: 0.5
   OnAmmoLauncher:
   - {fileID: 1175370607528333474}
   ThrowByAnimation: 0
@@ -73996,6 +74047,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 5
   RecoilSpeed: 2
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: c83dde09243fd824490bda86374ca336, type: 3}
+  FireSound: {fileID: 0}
+  DryFireSound: {fileID: 0}
+  ReloadSound: {fileID: 0}
+  ReloadSound2: {fileID: 0}
+  ReloadSound3: {fileID: 0}
+  DelaySource: {fileID: 0}
   weaponRenders:
   - {fileID: 1175370607528313104}
   - {fileID: 1175370607528342699}
@@ -86064,14 +86123,6 @@ MonoBehaviour:
   GunID: 3
   WeaponBinding: {fileID: 0}
   CrossHairScale: 15
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
-  FireSound: {fileID: 0}
-  DryFireSound: {fileID: 0}
-  ReloadSound: {fileID: 0}
-  ReloadSound2: {fileID: 0}
-  ReloadSound3: {fileID: 0}
-  DelaySource: {fileID: 0}
   bulletInstanceMethod: 0
   BulletName: bullet
   bulletPrefab: {fileID: 0}
@@ -86091,7 +86142,7 @@ MonoBehaviour:
   pelletsPerShot: 10
   delayForSecondFireSound: 0.45
   roundsPerBurst: 3
-  lagBetweenShots: 0.5
+  lagBetweenBurst: 0.5
   OnAmmoLauncher:
   - {fileID: 1175370607528335271}
   ThrowByAnimation: 0
@@ -86113,6 +86164,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 5
   RecoilSpeed: 2
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
+  FireSound: {fileID: 0}
+  DryFireSound: {fileID: 0}
+  ReloadSound: {fileID: 0}
+  ReloadSound2: {fileID: 0}
+  ReloadSound3: {fileID: 0}
+  DelaySource: {fileID: 0}
   weaponRenders:
   - {fileID: 1175370607528313565}
   - {fileID: 1175370607528344133}
@@ -98517,14 +98576,6 @@ MonoBehaviour:
   GunID: 0
   WeaponBinding: {fileID: 0}
   CrossHairScale: 10
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: c83dde09243fd824490bda86374ca336, type: 3}
-  FireSound: {fileID: 8300000, guid: 2074940a12c3cd045ab87fcabd0b869f, type: 3}
-  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
-  ReloadSound: {fileID: 8300000, guid: eca27ecb2c59863489b98778aa2d3f29, type: 3}
-  ReloadSound2: {fileID: 8300000, guid: 839d35f4f05fdde409bf7896ef657339, type: 3}
-  ReloadSound3: {fileID: 8300000, guid: c83dde09243fd824490bda86374ca336, type: 3}
-  DelaySource: {fileID: 0}
   bulletInstanceMethod: 0
   BulletName: bullet
   bulletPrefab: {fileID: 0}
@@ -98544,7 +98595,7 @@ MonoBehaviour:
   pelletsPerShot: 10
   delayForSecondFireSound: 0.45
   roundsPerBurst: 3
-  lagBetweenShots: 0.08
+  lagBetweenBurst: 0.5
   OnAmmoLauncher: []
   ThrowByAnimation: 0
   impactForce: 10
@@ -98565,6 +98616,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 1
   RecoilSpeed: 3
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: c83dde09243fd824490bda86374ca336, type: 3}
+  FireSound: {fileID: 8300000, guid: 2074940a12c3cd045ab87fcabd0b869f, type: 3}
+  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
+  ReloadSound: {fileID: 8300000, guid: eca27ecb2c59863489b98778aa2d3f29, type: 3}
+  ReloadSound2: {fileID: 8300000, guid: 839d35f4f05fdde409bf7896ef657339, type: 3}
+  ReloadSound3: {fileID: 8300000, guid: c83dde09243fd824490bda86374ca336, type: 3}
+  DelaySource: {fileID: 0}
   weaponRenders:
   - {fileID: 1175370607528313570}
   - {fileID: 1175370607528312897}
@@ -99413,14 +99472,6 @@ MonoBehaviour:
   GunID: 4
   WeaponBinding: {fileID: 0}
   CrossHairScale: 20
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: a36cff8016ed6394ebf8f14e62204188, type: 3}
-  FireSound: {fileID: 8300000, guid: 2e153bf0ffe3c9b448b51025c79f11d4, type: 3}
-  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
-  ReloadSound: {fileID: 8300000, guid: 00cef0a17774fc74bb882b541a8587b6, type: 3}
-  ReloadSound2: {fileID: 8300000, guid: dee27a9a35247c24389c7d51e6849a06, type: 3}
-  ReloadSound3: {fileID: 8300000, guid: dc952f62783baf048855d68f2a1017fd, type: 3}
-  DelaySource: {fileID: 0}
   bulletInstanceMethod: 0
   BulletName: bullet
   bulletPrefab: {fileID: 0}
@@ -99440,7 +99491,7 @@ MonoBehaviour:
   pelletsPerShot: 10
   delayForSecondFireSound: 0.55
   roundsPerBurst: 3
-  lagBetweenShots: 0.5
+  lagBetweenBurst: 0.5
   OnAmmoLauncher: []
   ThrowByAnimation: 0
   impactForce: 20
@@ -99461,6 +99512,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 5
   RecoilSpeed: 8
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: a36cff8016ed6394ebf8f14e62204188, type: 3}
+  FireSound: {fileID: 8300000, guid: 2e153bf0ffe3c9b448b51025c79f11d4, type: 3}
+  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
+  ReloadSound: {fileID: 8300000, guid: 00cef0a17774fc74bb882b541a8587b6, type: 3}
+  ReloadSound2: {fileID: 8300000, guid: dee27a9a35247c24389c7d51e6849a06, type: 3}
+  ReloadSound3: {fileID: 8300000, guid: dc952f62783baf048855d68f2a1017fd, type: 3}
+  DelaySource: {fileID: 0}
   weaponRenders:
   - {fileID: 1175370607528313101}
   - {fileID: 1175370607528312992}
@@ -99748,14 +99807,6 @@ MonoBehaviour:
   GunID: 1
   WeaponBinding: {fileID: 0}
   CrossHairScale: 6
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: 10a5e2a07c3ad0f47b7e6b585527253b, type: 3}
-  FireSound: {fileID: 8300000, guid: c454080b1684cb94cb3c0d8901daeb90, type: 3}
-  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
-  ReloadSound: {fileID: 8300000, guid: fd6770c2da41cbe43bcd5ca39189b017, type: 3}
-  ReloadSound2: {fileID: 8300000, guid: ea70b8ce1050ed442995ea6a60e9e7f6, type: 3}
-  ReloadSound3: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
-  DelaySource: {fileID: 0}
   bulletInstanceMethod: 0
   BulletName: bullet
   bulletPrefab: {fileID: 0}
@@ -99775,7 +99826,7 @@ MonoBehaviour:
   pelletsPerShot: 10
   delayForSecondFireSound: 0.45
   roundsPerBurst: 3
-  lagBetweenShots: 0.5
+  lagBetweenBurst: 0.5
   OnAmmoLauncher: []
   ThrowByAnimation: 0
   impactForce: 7
@@ -99796,6 +99847,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 2
   RecoilSpeed: 5
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: 10a5e2a07c3ad0f47b7e6b585527253b, type: 3}
+  FireSound: {fileID: 8300000, guid: c454080b1684cb94cb3c0d8901daeb90, type: 3}
+  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
+  ReloadSound: {fileID: 8300000, guid: fd6770c2da41cbe43bcd5ca39189b017, type: 3}
+  ReloadSound2: {fileID: 8300000, guid: ea70b8ce1050ed442995ea6a60e9e7f6, type: 3}
+  ReloadSound3: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
+  DelaySource: {fileID: 0}
   weaponRenders:
   - {fileID: 1175370607528313105}
   - {fileID: 1175370607528344145}
@@ -118874,14 +118933,6 @@ MonoBehaviour:
   GunID: 5
   WeaponBinding: {fileID: 0}
   CrossHairScale: 5
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: 3da0e6bfcc868a34f8544249387d2a37, type: 3}
-  FireSound: {fileID: 8300000, guid: fd0681e20f1c29b48a7b7278b67cc7c2, type: 3}
-  DryFireSound: {fileID: 0}
-  ReloadSound: {fileID: 8300000, guid: fd6770c2da41cbe43bcd5ca39189b017, type: 3}
-  ReloadSound2: {fileID: 8300000, guid: ea70b8ce1050ed442995ea6a60e9e7f6, type: 3}
-  ReloadSound3: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
-  DelaySource: {fileID: 0}
   bulletInstanceMethod: 0
   BulletName: bullet
   bulletPrefab: {fileID: 0}
@@ -118901,7 +118952,7 @@ MonoBehaviour:
   pelletsPerShot: 10
   delayForSecondFireSound: 0.45
   roundsPerBurst: 3
-  lagBetweenShots: 0.5
+  lagBetweenBurst: 0.5
   OnAmmoLauncher: []
   ThrowByAnimation: 0
   impactForce: 7
@@ -118922,6 +118973,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 5
   RecoilSpeed: 2
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: 3da0e6bfcc868a34f8544249387d2a37, type: 3}
+  FireSound: {fileID: 8300000, guid: fd0681e20f1c29b48a7b7278b67cc7c2, type: 3}
+  DryFireSound: {fileID: 0}
+  ReloadSound: {fileID: 8300000, guid: fd6770c2da41cbe43bcd5ca39189b017, type: 3}
+  ReloadSound2: {fileID: 8300000, guid: ea70b8ce1050ed442995ea6a60e9e7f6, type: 3}
+  ReloadSound3: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
+  DelaySource: {fileID: 0}
   weaponRenders:
   - {fileID: 1175370607528313106}
   - {fileID: 1175370607528344144}
@@ -145169,14 +145228,6 @@ MonoBehaviour:
   GunID: 10
   WeaponBinding: {fileID: 0}
   CrossHairScale: 6
-  SoundReloadByAnim: 1
-  TakeSound: {fileID: 8300000, guid: 10a5e2a07c3ad0f47b7e6b585527253b, type: 3}
-  FireSound: {fileID: 8300000, guid: c454080b1684cb94cb3c0d8901daeb90, type: 3}
-  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
-  ReloadSound: {fileID: 8300000, guid: fd6770c2da41cbe43bcd5ca39189b017, type: 3}
-  ReloadSound2: {fileID: 8300000, guid: ea70b8ce1050ed442995ea6a60e9e7f6, type: 3}
-  ReloadSound3: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
-  DelaySource: {fileID: 0}
   bulletInstanceMethod: 0
   BulletName: Angel_Bullet_Effect
   bulletPrefab: {fileID: 0}
@@ -145196,7 +145247,7 @@ MonoBehaviour:
   pelletsPerShot: 10
   delayForSecondFireSound: 0.45
   roundsPerBurst: 3
-  lagBetweenShots: 0.5
+  lagBetweenBurst: 0.5
   OnAmmoLauncher: []
   ThrowByAnimation: 0
   impactForce: 7
@@ -145217,6 +145268,14 @@ MonoBehaviour:
   isReloading: 0
   RecoilAmount: 1
   RecoilSpeed: 5
+  SoundReloadByAnim: 1
+  TakeSound: {fileID: 8300000, guid: 10a5e2a07c3ad0f47b7e6b585527253b, type: 3}
+  FireSound: {fileID: 8300000, guid: c454080b1684cb94cb3c0d8901daeb90, type: 3}
+  DryFireSound: {fileID: 8300000, guid: 2e15ae3987c7a7e42884d73e03e5bad0, type: 3}
+  ReloadSound: {fileID: 8300000, guid: fd6770c2da41cbe43bcd5ca39189b017, type: 3}
+  ReloadSound2: {fileID: 8300000, guid: ea70b8ce1050ed442995ea6a60e9e7f6, type: 3}
+  ReloadSound3: {fileID: 8300000, guid: 95599442132d05d48bb5310bebb0fe8b, type: 3}
+  DelaySource: {fileID: 0}
   weaponRenders:
   - {fileID: 8596197640879068079}
   - {fileID: 8596197640879068073}
@@ -160824,21 +160883,15 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: -5716681864270162303, guid: ab8db19044fbd7a4d988bff310f53275, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: ab8db19044fbd7a4d988bff310f53275, type: 3}
---- !u!137 &206297664 stripped
-SkinnedMeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 13700004, guid: ab8db19044fbd7a4d988bff310f53275,
-    type: 3}
-  m_PrefabInstance: {fileID: 211472868}
-  m_PrefabAsset: {fileID: 0}
 --- !u!137 &206297670 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 13700002, guid: ab8db19044fbd7a4d988bff310f53275,
     type: 3}
   m_PrefabInstance: {fileID: 211472868}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &211507012 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 100000, guid: ab8db19044fbd7a4d988bff310f53275,
+--- !u!137 &206297664 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 13700004, guid: ab8db19044fbd7a4d988bff310f53275,
     type: 3}
   m_PrefabInstance: {fileID: 211472868}
   m_PrefabAsset: {fileID: 0}
@@ -160863,6 +160916,12 @@ Transform:
 --- !u!137 &206297668 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 13700000, guid: ab8db19044fbd7a4d988bff310f53275,
+    type: 3}
+  m_PrefabInstance: {fileID: 211472868}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &211507012 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100000, guid: ab8db19044fbd7a4d988bff310f53275,
     type: 3}
   m_PrefabInstance: {fileID: 211472868}
   m_PrefabAsset: {fileID: 0}
@@ -162155,6 +162214,42 @@ SkinnedMeshRenderer:
     type: 3}
   m_PrefabInstance: {fileID: 4943877765578591510}
   m_PrefabAsset: {fileID: 0}
+--- !u!137 &8596197641868866821 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3735729945073645587, guid: 5aa92d13d59fc514c8543e1b0473b118,
+    type: 3}
+  m_PrefabInstance: {fileID: 4943877765578591510}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8596197640879068077 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3735729946633854651, guid: 5aa92d13d59fc514c8543e1b0473b118,
+    type: 3}
+  m_PrefabInstance: {fileID: 4943877765578591510}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8596197640879068075 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3735729946633854653, guid: 5aa92d13d59fc514c8543e1b0473b118,
+    type: 3}
+  m_PrefabInstance: {fileID: 4943877765578591510}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8596197640879068073 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3735729946633854655, guid: 5aa92d13d59fc514c8543e1b0473b118,
+    type: 3}
+  m_PrefabInstance: {fileID: 4943877765578591510}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8596197640198207582 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3735729945684686152, guid: 5aa92d13d59fc514c8543e1b0473b118,
+    type: 3}
+  m_PrefabInstance: {fileID: 4943877765578591510}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8596197640879068079 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3735729946633854649, guid: 5aa92d13d59fc514c8543e1b0473b118,
+    type: 3}
+  m_PrefabInstance: {fileID: 4943877765578591510}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8596197640876642619 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3735729946631560237, guid: 5aa92d13d59fc514c8543e1b0473b118,
@@ -162170,42 +162265,6 @@ Transform:
 --- !u!1 &8596197640877067475 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3735729946631651781, guid: 5aa92d13d59fc514c8543e1b0473b118,
-    type: 3}
-  m_PrefabInstance: {fileID: 4943877765578591510}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &8596197640879068079 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3735729946633854649, guid: 5aa92d13d59fc514c8543e1b0473b118,
-    type: 3}
-  m_PrefabInstance: {fileID: 4943877765578591510}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &8596197640879068073 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3735729946633854655, guid: 5aa92d13d59fc514c8543e1b0473b118,
-    type: 3}
-  m_PrefabInstance: {fileID: 4943877765578591510}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &8596197640879068075 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3735729946633854653, guid: 5aa92d13d59fc514c8543e1b0473b118,
-    type: 3}
-  m_PrefabInstance: {fileID: 4943877765578591510}
-  m_PrefabAsset: {fileID: 0}
---- !u!137 &8596197641868866821 stripped
-SkinnedMeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3735729945073645587, guid: 5aa92d13d59fc514c8543e1b0473b118,
-    type: 3}
-  m_PrefabInstance: {fileID: 4943877765578591510}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &8596197640879068077 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3735729946633854651, guid: 5aa92d13d59fc514c8543e1b0473b118,
-    type: 3}
-  m_PrefabInstance: {fileID: 4943877765578591510}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &8596197640198207582 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3735729945684686152, guid: 5aa92d13d59fc514c8543e1b0473b118,
     type: 3}
   m_PrefabInstance: {fileID: 4943877765578591510}
   m_PrefabAsset: {fileID: 0}
@@ -162334,15 +162393,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4e0e32fcdff2dc14bbfa1f2336a0548a, type: 3}
---- !u!4 &7046980684239032355 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3618031453008389478, guid: 4e0e32fcdff2dc14bbfa1f2336a0548a,
-    type: 3}
-  m_PrefabInstance: {fileID: 6052332087092589893}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8066047900416236225 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4327510791822667652, guid: 4e0e32fcdff2dc14bbfa1f2336a0548a,
+    type: 3}
+  m_PrefabInstance: {fileID: 6052332087092589893}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7046980684239032355 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3618031453008389478, guid: 4e0e32fcdff2dc14bbfa1f2336a0548a,
     type: 3}
   m_PrefabInstance: {fileID: 6052332087092589893}
   m_PrefabAsset: {fileID: 0}
@@ -162486,6 +162545,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f1b1cba650e31db41a394852ab5f8004, type: 3}
+--- !u!199 &6309049436520981229 stripped
+ParticleSystemRenderer:
+  m_CorrespondingSourceObject: {fileID: 199000010943866522, guid: f1b1cba650e31db41a394852ab5f8004,
+    type: 3}
+  m_PrefabInstance: {fileID: 6146501435806549111}
+  m_PrefabAsset: {fileID: 0}
+--- !u!199 &6309049439989333733 stripped
+ParticleSystemRenderer:
+  m_CorrespondingSourceObject: {fileID: 199000010100931218, guid: f1b1cba650e31db41a394852ab5f8004,
+    type: 3}
+  m_PrefabInstance: {fileID: 6146501435806549111}
+  m_PrefabAsset: {fileID: 0}
 --- !u!199 &6309049435916526173 stripped
 ParticleSystemRenderer:
   m_CorrespondingSourceObject: {fileID: 199000010472515114, guid: f1b1cba650e31db41a394852ab5f8004,
@@ -162501,18 +162572,6 @@ ParticleSystemRenderer:
 --- !u!199 &6309049434204819861 stripped
 ParticleSystemRenderer:
   m_CorrespondingSourceObject: {fileID: 199000012922148322, guid: f1b1cba650e31db41a394852ab5f8004,
-    type: 3}
-  m_PrefabInstance: {fileID: 6146501435806549111}
-  m_PrefabAsset: {fileID: 0}
---- !u!199 &6309049436520981229 stripped
-ParticleSystemRenderer:
-  m_CorrespondingSourceObject: {fileID: 199000010943866522, guid: f1b1cba650e31db41a394852ab5f8004,
-    type: 3}
-  m_PrefabInstance: {fileID: 6146501435806549111}
-  m_PrefabAsset: {fileID: 0}
---- !u!199 &6309049439989333733 stripped
-ParticleSystemRenderer:
-  m_CorrespondingSourceObject: {fileID: 199000010100931218, guid: f1b1cba650e31db41a394852ab5f8004,
     type: 3}
   m_PrefabInstance: {fileID: 6146501435806549111}
   m_PrefabAsset: {fileID: 0}

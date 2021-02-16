@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
+using MFPS.ULogin;
 
 public class bl_RankingPro : MonoBehaviour
 {

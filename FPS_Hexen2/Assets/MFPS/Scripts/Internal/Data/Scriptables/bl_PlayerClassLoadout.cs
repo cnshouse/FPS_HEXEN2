@@ -27,5 +27,9 @@ public class bl_PlayerClassLoadout : ScriptableObject
         Letal = int.Parse(split[3]);
     }
 
+    public bl_GunInfo GetPrimaryGunInfo() => bl_GameData.Instance.GetWeapon(Primary);
+    public bl_GunInfo GetSecondaryGunInfo() => bl_GameData.Instance.GetWeapon(Secondary);
+    public bl_GunInfo GetPerksGunInfo() => bl_GameData.Instance.GetWeapon(Perks);
+    public bl_GunInfo GetLetalGunInfo() => bl_GameData.Instance.GetWeapon(Letal);
     public override string ToString() => $"{Primary}&{Secondary}&{Perks}&{Letal}";
 }

@@ -99,8 +99,8 @@ public class bl_KillCam : bl_MonoBehaviour
 
         if (target != null)
         {
-            x += ((Input.GetAxis("Mouse X") * this.xSpeed) * this.distance) * 0.02f;
-            y -= (Input.GetAxis("Mouse Y") * this.ySpeed) * 0.02f;
+            x += ((bl_GameInput.Horizontal * this.xSpeed) * this.distance) * 0.02f;
+            y -= (bl_GameInput.Vertical * this.ySpeed) * 0.02f;
             y = bl_UtilityHelper.ClampAngle(this.y, this.yMinLimit, this.yMaxLimit);
             Quaternion quaternion = Quaternion.Euler(this.y, this.x, 0f);
             this.distance = Mathf.Clamp(this.distance - (Input.GetAxis("Mouse ScrollWheel") * 5f), distanceMin, distanceMax);
@@ -129,9 +129,14 @@ public class bl_KillCam : bl_MonoBehaviour
         }
         else
         {
-            Transform g = bl_GameManager.Instance.FindActor(view);
-            if (g != null)
-                v = g.gameObject;
+            v = GameObject.Find(killer);
+            if (v == null)
+            {
+                Transform g = bl_GameManager.Instance.FindActor(view);
+                if (g != null)
+                    v = g.gameObject;
+                else Debug.LogFormat("Couldn't found the killer player: {0}", view.NickName);
+            }
         }
         if (v != null && (view.NickName != PhotonNetwork.NickName || cause == DamageCause.Bot))
         {
@@ -140,6 +145,9 @@ public class bl_KillCam : bl_MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void SpectPlayer(Transform player)
     {
         target = player;
@@ -155,13 +163,17 @@ public class bl_KillCam : bl_MonoBehaviour
         Vector3 position = reference.position - new Vector3(0, 0.6f, 0);
         transform.position = position - (reference.forward * distanceFromLocal);
         RaycastHit rayHit;
-        if(Physics.Raycast(reference.position,-reference.forward, out rayHit, distanceFromLocal, layers, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(reference.position, -reference.forward, out rayHit, distanceFromLocal, layers, QueryTriggerInteraction.Ignore))
         {
-            transform.position = rayHit.point;
+            transform.position = Vector3.Lerp(rayHit.point, reference.position, 0.95f);
         }
         transform.LookAt(position);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     IEnumerator ZoomOut()
     {
         float d = 0;

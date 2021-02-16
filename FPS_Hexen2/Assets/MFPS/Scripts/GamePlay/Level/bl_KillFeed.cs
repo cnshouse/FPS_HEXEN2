@@ -1,18 +1,17 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using HashTable = ExitGames.Client.Photon.Hashtable;
+using MFPS.Internal.Structures;
+using MFPS.Runtime.UI;
 
 public class bl_KillFeed : bl_PhotonHelper
 {
-    public LocalKillDisplay m_LocalKillDisplay = LocalKillDisplay.Individual;
     [Range(1, 7)] public float IndividualShowTime = 3;
     public Color SelfColor = Color.green;
     public List<CustomIcons> customIcons = new List<CustomIcons>();
     //private
-    private bl_UIReferences UIReference;
     private List<KillInfo> localKillsQueque = new List<KillInfo>();
 
 #if LOCALIZATION
@@ -24,7 +23,6 @@ public class bl_KillFeed : bl_PhotonHelper
     /// </summary>
     void Awake()
     {
-        UIReference = FindObjectOfType<bl_UIReferences>();
         if (PhotonNetwork.InRoom)
         {
 #if LOCALIZATION
@@ -147,7 +145,7 @@ public class bl_KillFeed : bl_PhotonHelper
         kf.KillerTeam = (Team)data["team"];
         kf.messageType = KillFeedMessageType.WeaponKillEvent;
 
-        UIReference.SetKillFeed(kf);
+        bl_KillFeedUI.Instance.SetKillFeed(kf);
     }
 
     /// <summary>
@@ -163,7 +161,7 @@ public class bl_KillFeed : bl_PhotonHelper
         bl_Localization.Instance.ParseCommad(ref kf.Message);
 #endif
 
-        UIReference.SetKillFeed(kf);
+        bl_KillFeedUI.Instance.SetKillFeed(kf);
     }
 
     /// <summary>
@@ -177,7 +175,7 @@ public class bl_KillFeed : bl_PhotonHelper
         kf.KillerTeam = (Team)data["team"];
         kf.messageType = KillFeedMessageType.TeamHighlightMessage;
 
-        UIReference.SetKillFeed(kf);
+        bl_KillFeedUI.Instance.SetKillFeed(kf);
     }
 
     public void OnPhotonPlayerDisconnected(Player otherPlayer)
@@ -196,7 +194,7 @@ public class bl_KillFeed : bl_PhotonHelper
     {
         if (localKillsQueque.Count <= 0)
         {
-            bl_UIReferences.Instance.SetLocalKillFeed(localKill, m_LocalKillDisplay);
+            bl_UIReferences.Instance.SetLocalKillFeed(localKill, bl_GameData.Instance.localKillsShowMode);
         }
         localKillsQueque.Add(localKill);
     }
@@ -209,7 +207,7 @@ public class bl_KillFeed : bl_PhotonHelper
         localKillsQueque.RemoveAt(0);
         if(localKillsQueque.Count > 0)
         {
-            bl_UIReferences.Instance.SetLocalKillFeed(localKillsQueque[0], m_LocalKillDisplay);
+            bl_UIReferences.Instance.SetLocalKillFeed(localKillsQueque[0], bl_GameData.Instance.localKillsShowMode);
         }
     }
 
@@ -262,8 +260,8 @@ public class bl_KillFeed : bl_PhotonHelper
     [System.Serializable]
     public enum LocalKillDisplay
     {
-        Individual,
-        Multiple,
+        Queqe,
+        List,
     }
 
     [System.Serializable]

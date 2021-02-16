@@ -3,23 +3,24 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 49a6503d360b40246b858d8005726bd6, type: 3}
   m_Name: Machinegun
   m_EditorClassIdentifier: 
-  Duration: 0.25
+  Duration: 0.2
   amplitude: 0.7
-  frequency: 0.188
+  frequency: 0.805
   octaves: 2
-  persistance: 0.06
+  persistance: 1.67
   lacunarity: 17.1
-  burstFrequency: 0.799
+  burstFrequency: 0.787
   burstContrast: 1
-  fadeInTime: 0.2
-  currentTime: -0.006356434
+  fadeInTime: 0.11
+  currentTime: -0.02434043
   influence: 1
   starting: 0

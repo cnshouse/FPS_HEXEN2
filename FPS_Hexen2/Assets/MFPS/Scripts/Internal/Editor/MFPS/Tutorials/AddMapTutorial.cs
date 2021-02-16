@@ -33,10 +33,10 @@ public class AddMapTutorial : TutorialWizard
     private Object m_SceneReference;
     string[] RequiredsPaths = new string[]
     {
-        "Assets/MFPS/Content/Prefabs/Network/GameManager.prefab",
-        "Assets/MFPS/Content/Prefabs/GamePlay/AIManager.prefab",
-        "Assets/MFPS/Content/Prefabs/GamePlay/ItemManager.prefab",
-        "Assets/MFPS/Content/Prefabs/GamePlay/GameModes.prefab",
+        "Assets/MFPS/Content/Prefabs/Network/Managers/GameManager.prefab",
+        "Assets/MFPS/Content/Prefabs/Network/Managers/AIManager.prefab",
+        "Assets/MFPS/Content/Prefabs/Network/Managers/ItemManager.prefab",
+        "Assets/MFPS/Content/Prefabs/GamePlay/GameModes/GameModes.prefab",
         "Assets/MFPS/Content/Prefabs/UI/UI.prefab",
     };
     bool[] RequiredInstanced = new bool[] { false, false, false, false, false,};

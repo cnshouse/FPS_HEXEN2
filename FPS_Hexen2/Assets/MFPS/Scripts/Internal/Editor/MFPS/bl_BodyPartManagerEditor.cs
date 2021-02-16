@@ -59,10 +59,6 @@ public class bl_BodyPartManagerEditor : ReorderableArrayInspector
         EditorGUILayout.BeginVertical("box");
         //ReorderableListUtility.DoLayoutListWithFoldout(hblist, "HitBoxes");
         DrawPropertiesAll();
-        script.PlayerAnimation = EditorGUILayout.ObjectField("Player Animation", script.PlayerAnimation, typeof(bl_PlayerAnimations), true) as bl_PlayerAnimations;
-        script.m_Animator = EditorGUILayout.ObjectField("Animator", script.m_Animator, typeof(Animator), true) as Animator;
-        script.RightHand = EditorGUILayout.ObjectField("Right Hand", script.RightHand, typeof(Transform), true) as Transform;
-        script.PelvisBone = EditorGUILayout.ObjectField("Pelvis Bone", script.PelvisBone, typeof(Transform), true) as Transform;
         EditorGUILayout.BeginHorizontal();
         GUILayout.Space(10);
         //EditorGUILayout.PropertyField(rigids, true);
@@ -72,6 +68,7 @@ public class bl_BodyPartManagerEditor : ReorderableArrayInspector
         if (EditorGUI.EndChangeCheck())
         {
             UpdateMultipliers();
+            serializedObject.ApplyModifiedProperties();
             EditorUtility.SetDirty(target);
         }
     }

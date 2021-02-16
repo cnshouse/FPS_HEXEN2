@@ -1,52 +1,74 @@
-﻿///////////////////////////////////////////////////////////////////////////////////////
-// bl_FrameRate.cs
-//
-// Help us get the current Frame Rate the game
-// place it in the scena and adds the UI Text
-//                           
-//                                 Lovatto Studio
-///////////////////////////////////////////////////////////////////////////////////////
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using System;
 
 public class bl_FrameRate : bl_MonoBehaviour
 {
-    private float accum;
-    private int frames;
+
+    [Range(0.1f, 1)] public float updateInterval = 0.4f;
+    public string textFormat = "<b>FPS:</b> {0}";
     public Text TextUI = null;
-    //Privates
+
     private string framerate;
     private float timeleft;
-    private float updateInterval = 0.5f;
-    float rate = 0;
+    private int rate = 0;
+    private float accum;
+    private int frames;
+    private bool countFPS = true;
 
+    /// <summary>
+    /// 
+    /// </summary>
     void Start()
     {
-        this.timeleft = this.updateInterval;
+        timeleft = updateInterval;
+        OnSettingsChanged();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        bl_EventHandler.onGameSettingsChange += OnSettingsChanged;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        bl_EventHandler.onGameSettingsChange -= OnSettingsChanged;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void OnSettingsChanged()
+    {
+        countFPS = (bool)bl_MFPS.Settings.GetSettingOf("Show Frame Rate");
+        if (TextUI != null) TextUI.gameObject.SetActive(countFPS);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public override void OnUpdate()
     {
+        if (TextUI == null || !countFPS) return;
+
         timeleft -= Time.deltaTime;
         accum += Time.timeScale / Time.deltaTime;
         frames++;
         if (timeleft <= 0)
         {
-            rate = accum / frames;
-            framerate = rate.ToString("000");
+            rate = Mathf.FloorToInt(accum / frames);
+            framerate = rate.ToString();
             timeleft = updateInterval;
             accum = 0;
             frames = 0;
         }
-        if (TextUI != null)
-        {
-            TextUI.text = string.Format("FPS: <color=#FFE300>{0}</color>", framerate);
-        }
-        else
-        {
-            Destroy(this);
-        }
-
+        TextUI.text = string.Format(textFormat, framerate);
     }
 }

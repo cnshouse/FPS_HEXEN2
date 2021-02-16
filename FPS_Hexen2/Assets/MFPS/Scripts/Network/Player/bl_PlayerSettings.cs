@@ -41,18 +41,18 @@ public class bl_PlayerSettings : bl_PhotonHelper
         PlayerTeam = (Team)photonView.InstantiationData[0];
         if (isMine)
         {
-            LocalPlayer();
+            OnLocalPlayer();
         }
         else
         {
-            RemotePlayer();
+            OnRemotePlayer();
         }
     }
 
     /// <summary>
-    /// We call this function only if we are Remote player
+    /// We call this function only if this is a Remote player
     /// </summary>
-    public void RemotePlayer()
+    public void OnRemotePlayer()
     {
         for (int i = 0; i < LocalOnlyScripts.Count; i++)
         {
@@ -83,7 +83,7 @@ public class bl_PlayerSettings : bl_PhotonHelper
     /// <summary>
     /// We call this function only if we are Local player
     /// </summary>
-    public void LocalPlayer()
+    public void OnLocalPlayer()
     {
         gameObject.name = PhotonNetwork.NickName;
         for (int i = 0; i < RemoteOnlyScripts.Count; i++)
@@ -128,8 +128,12 @@ public class bl_PlayerSettings : bl_PhotonHelper
     {
         if(carrierPoint == null)
         {
-            Animator animator = GetComponent<bl_PlayerNetwork>().m_PlayerAnimation.m_animator;
-            if(animator != null) { carrierPoint = animator.GetBoneTransform(HumanBodyBones.UpperChest); }
+            bl_PlayerAnimations pa = GetComponent<bl_PlayerNetwork>().m_PlayerAnimation;
+            if (pa != null)
+            {
+                Animator animator = pa.m_animator;
+                if (animator != null) { carrierPoint = animator.GetBoneTransform(HumanBodyBones.UpperChest); }
+            }
         }
     }
 

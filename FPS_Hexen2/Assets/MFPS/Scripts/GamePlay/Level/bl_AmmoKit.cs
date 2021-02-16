@@ -39,8 +39,8 @@ public class bl_AmmoKit : MonoBehaviour
             this.transform.parent = GameObject.FindWithTag("ItemManager").transform;
             m_manager = GameObject.FindWithTag("ItemManager").GetComponent<bl_ItemManager>();
             typekit = 2;
-            gameObject.name = "Kit" + bl_ItemManager.CurrentCount;
-            bl_ItemManager.CurrentCount++;
+        //    gameObject.name = "Kit" + bl_ItemManager.CurrentCount;
+        //    bl_ItemManager.CurrentCount++;
         }
         else//if any destroy this
         {
@@ -73,11 +73,11 @@ public class bl_AmmoKit : MonoBehaviour
             }
             if (typekit == 1)
             {
-                m_manager.DisableNew(m_id);
+               // m_manager.DisableNew(m_id);
             }
             else if (typekit == 2)
             {
-                m_manager.DestroyGO(this.gameObject.name);
+               // m_manager.DestroyGO(this.gameObject.name);
             }
         }
     }

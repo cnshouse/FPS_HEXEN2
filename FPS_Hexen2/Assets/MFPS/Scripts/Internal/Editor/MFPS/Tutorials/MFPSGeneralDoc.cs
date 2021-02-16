@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using MFPSEditor;
 using UnityEditor;
@@ -8,12 +7,12 @@ public class MFPSGeneralDoc : TutorialWizard
 {
     //required//////////////////////////////////////////////////////
     private const string ImagesFolder = "mfps2/editor/general/";
-    private NetworkImages[] ServerImages = new NetworkImages[]
+    private NetworkImages[] m_ServerImages = new NetworkImages[]
     {
         new NetworkImages{Name = "img-0.jpg", Image = null},
         new NetworkImages{Name = "img-1.jpg", Image = null},
         new NetworkImages{Name = "img-2.jpg", Image = null},
-        new NetworkImages{Name = "img-3.jpg", Image = null},
+        new NetworkImages{Name = "img-3.png", Image = null},
         new NetworkImages{Name = "img-4.jpg", Image = null},
         new NetworkImages{Name = "img-5.jpg", Image = null},
         new NetworkImages{Name = "img-6.jpg", Image = null},
@@ -22,7 +21,7 @@ public class MFPSGeneralDoc : TutorialWizard
         new NetworkImages{Name = "img-9.png", Image = null},
         new NetworkImages{Name = "img-10.png", Image = null},
         new NetworkImages{Name = "img-11.png", Image = null},
-        new NetworkImages{Name = "img-12.jpg", Image = null},
+        new NetworkImages{Name = "img-12.png", Image = null},
         new NetworkImages{Name = "http://lovattostudio.com/documentations/mfps2/assets/images/image_33.png", Image = null, Type = NetworkImages.ImageType.Custom},
         new NetworkImages{Name = "http://lovattostudio.com/documentations/mfps2/assets/images/image_6.png", Image = null, Type = NetworkImages.ImageType.Custom},
         new NetworkImages{Name = "http://lovattostudio.com/documentations/mfps2/assets/images/image_27.png", Image = null, Type = NetworkImages.ImageType.Custom},
@@ -34,8 +33,15 @@ public class MFPSGeneralDoc : TutorialWizard
         new NetworkImages{Name = "http://lovattostudio.com/documentations/mfps2/assets/images/image_29.png", Image = null, Type = NetworkImages.ImageType.Custom},
         new NetworkImages{Name = "https://img.youtube.com/vi/i6qfVKk0TqY/0.jpg", Image = null, Type = NetworkImages.ImageType.Custom},
         new NetworkImages{Name = "http://lovattostudio.com/documentations/mfps2/assets/images/image_23.png", Image = null, Type = NetworkImages.ImageType.Custom},
-        new NetworkImages{Name = "img-13.jpg", Image = null},//24
+        new NetworkImages{Name = "img-13.jpg", Image = null},
         new NetworkImages{Name = "img-14.jpg", Image = null},
+        new NetworkImages{Name = "img-15.png", Image = null},
+        new NetworkImages{Name = "img-16.png", Image = null},
+        new NetworkImages{Name = "img-17.png", Image = null},
+        new NetworkImages{Name = "img-18.png", Image = null},
+        new NetworkImages{Name = "img-19.png", Image = null},
+        new NetworkImages{Name = "img-20.png", Image = null},//31
+        new NetworkImages{Name = "img-21.png", Image = null},
     };
     private readonly GifData[] AnimatedImages = new GifData[]
     {
@@ -43,13 +49,16 @@ public class MFPSGeneralDoc : TutorialWizard
         new GifData{ Path = "addnewwindowfield.gif" },
         new GifData{ Path = "createwindowbutton.gif" },
         new GifData{ Path = "addonintegrateprevw.gif"},
+        new GifData{ Path = "mfps-urpcsps.gif"},
     };
     private Steps[] AllSteps = new Steps[] {
      new Steps { Name = "Resume", StepsLenght = 0, DrawFunctionName = nameof(Resume) },
     new Steps { Name = "GameData", StepsLenght = 0, DrawFunctionName = nameof(GameDataDoc) },
     new Steps { Name = "Photon PUN", StepsLenght = 0, DrawFunctionName = nameof(DrawPhotonPunDoc) },
     new Steps { Name = "Offline", StepsLenght = 0, DrawFunctionName = nameof(OfflineDoc) },
+    new Steps { Name = "Universal RP", StepsLenght = 4, DrawFunctionName = nameof(UniversalRPDoc) },
     new Steps { Name = "Kill Feed", StepsLenght = 2, DrawFunctionName = nameof(KillFeedDoc) },
+    new Steps { Name = "Player Prefabs", StepsLenght = 0, DrawFunctionName = nameof(PlayerPrefabsDoc) },
     new Steps { Name = "Player Classes", StepsLenght = 0, DrawFunctionName = nameof(PlayerClassesDoc) },
     new Steps { Name = "Head Bob", StepsLenght = 0, DrawFunctionName = nameof(HeadBobDoc) },
     new Steps { Name = "AFK", StepsLenght = 0, DrawFunctionName = nameof(AfkDoc) },
@@ -61,15 +70,20 @@ public class MFPSGeneralDoc : TutorialWizard
     new Steps { Name = "Bullets", StepsLenght = 0 , DrawFunctionName = nameof(DrawBullets)},
     new Steps { Name = "Kits", StepsLenght = 0, DrawFunctionName = nameof(DrawKitsSystem) },
     new Steps { Name = "Kill Zones", StepsLenght = 0, DrawFunctionName = nameof(DrawKillZones) },
+    new Steps { Name = "Room Properties", StepsLenght = 0, DrawFunctionName = nameof(RoomPropertiesDoc) },
     new Steps { Name = "Game Settings", StepsLenght = 0, DrawFunctionName = nameof(DrawGameSettings) },
     new Steps { Name = "Object Pooling", StepsLenght = 0, DrawFunctionName = nameof(DrawObjectPooling) },
     new Steps { Name = "Add New Menu", StepsLenght = 0, DrawFunctionName = nameof(AddNewMenu) },
+    new Steps { Name = "Crosshair", StepsLenght = 0, DrawFunctionName = nameof(CrosshairDoc) },
     new Steps { Name = "Game Texts", StepsLenght = 0, DrawFunctionName = nameof(DrawGameTexts) },
     new Steps { Name = "Mobile", StepsLenght = 0, DrawFunctionName = nameof(DrawMobileDoc) },
-     new Steps { Name = "Post Processing", StepsLenght = 0, DrawFunctionName = nameof(PostProcessingDoc) },
+    new Steps { Name = "Post Processing", StepsLenght = 0, DrawFunctionName = nameof(PostProcessingDoc) },
     new Steps { Name = "Friend List", StepsLenght = 0, DrawFunctionName = nameof(DrawFriendListDoc) },
+    new Steps { Name = "FootStep", StepsLenght = 0, DrawFunctionName = nameof(FootStepsDoc) },
     new Steps { Name = "Game Staff", StepsLenght = 0, DrawFunctionName = nameof(GameStaffDoc) },
+    new Steps { Name = "Events", StepsLenght = 0, DrawFunctionName = nameof(MFPSEventsDoc) },
     new Steps { Name = "Addons", StepsLenght = 0, DrawFunctionName = nameof(DrawAddonsDoc) },
+    new Steps { Name = "Update MFPS", StepsLenght = 0, DrawFunctionName = nameof(UpdateMFPSDoc) },
     new Steps { Name = "Common Q/A", StepsLenght = 0, DrawFunctionName = nameof(CommonQADoc) },
     };
 
@@ -82,13 +96,14 @@ public class MFPSGeneralDoc : TutorialWizard
     public override void OnEnable()
     {
         base.OnEnable();
-        base.Initizalized(ServerImages, AllSteps, ImagesFolder, AnimatedImages);
+        base.Initizalized(m_ServerImages, AllSteps, ImagesFolder, AnimatedImages);
         GUISkin gs = Resources.Load<GUISkin>("content/MFPSEditorSkin") as GUISkin;
         if (gs != null)
         {
             base.SetTextStyle(gs.customStyles[2]);
             base.m_GUISkin = gs;
         }
+        FetchWebTutorials("mfps2/tutorials/");
     }
 
     void Resume()
@@ -128,9 +143,8 @@ public class MFPSGeneralDoc : TutorialWizard
     void GameDataDoc()
     {
         DrawTitleText("GameData");
-        DrawText("In this and other MFPS tutorials you will notice that <b>GameData</b> is mentioned or referenced a lot, if you still doesn't understand what it's or which is the function of this 'object', keep reading this.\n \n" +
-            "- In essence, GameData is a scriptable object of bl_GameData.cs script which containing a lot of front-end settings to tweak MFPS as dev's needed, contain from simply settings like show blood in game or not to " +
-            "all weapons and game modes information.\n \nBy default this GameData is located in the <b>Resources</b> folder of MFPS.");
+        DrawText("With MFPS you will notice that <b>GameData</b> is mentioned a lot in the documentation, readMe.txt, and many other comments.\nIf you don't know what <b>GameData</b> is, how it works or where it's located, here is a brief explanation:\n\n<b>GameData</b> is a <i>ScriptableObject</i> that contain many front-end settings of MFPS that you can easily tweak to fit your needs and reskin the game, the options go from simple toggles to show or hide blood in the game up to the Weapon and Game Mode information.");
+        DrawHyperlinkText("<link=asset:Assets/MFPS/Resources/GameData.asset>GameData</link> is located in the <b>Resources</b> folder of MFPS:");
         DrawServerImage(3);
     }
 
@@ -148,6 +162,38 @@ public class MFPSGeneralDoc : TutorialWizard
     void OfflineDoc()
     {
         DrawText("MFPS supports the Photon <b>Offline mode</b>, this allows you to test the map scene without the need to go to the lobby -> create a room -> load the map scene, instead you play the scene directly.\n\nThis feature is especially useful when, for example, you make changes to the player's prefab or a weapon and want to test them at runtime, save lot of time and improve the development work-flow.\n\nTo enable or disable this feature go to <b>GameData</b> -> Offline Mode\nAfter you enable it, simply open the map scene and Play.\n\nNOTE: The offline mode It <b>is not</b> designed to develop an offline game using MFPS, but rather to facilitate the development.");
+    }
+
+    void UniversalRPDoc()
+    {
+        if (subStep == 0)
+        {
+            DrawText("By default MFPS use the legacy build-in render pipeline, MFPS will be using URP <i>(Universal Render Pipeline)</i> as the default Render Pipeline in the future when it's more standardized, but for the moment in order to use MFPS with URP or HDRP you have to manually convert the project, in this doc I'll teach you how you can do it:\n\n<b><size=20>Convert MFPS project to URP:</size></b>\n\n*<i>This tutorial takes for granted that you have an MFPS project working with the build-in render pipeline in Unity 2018.4 or later</i>*\n\nFirst of all, you have to remove the Post-Processing package, for this simply go to (Unity Top Menu) <b>MFPS -> Tools -> Delete Post-Processing</b> -> Wait until script compilation finish.\n\n<i>Continue in the next step.</i>");
+        }
+        else if (subStep == 1)
+        {
+            DrawText("<b><size=22>Installing URP</size></b>\n\n1. In Unity, open your Project.\n2. In the top navigation bar, select Window > Package Manager to open the Package Manager window.\n3. Select the All tab. This tab displays the list of available packages for the version of Unity that you are currently running.\n4. Select Universal RP from the list of packages.\n5. In the bottom right corner of the Package Manager window, select Install. Unity installs URP directly into your Project.\n\n<b><size=22>Configuring URP</size></b>\n\nBefore you can start using URP, you need to configure it. To do this, you need to create a Scriptable Render Pipeline Asset and adjust your Graphics settings.\n\nCreating the Universal Render Pipeline Asset\nThe Universal Render Pipeline Asset controls the global rendering and quality settings of your Project, and creates the rendering pipeline instance. The rendering pipeline instance contains intermediate resources and the render pipeline implementation.\n\n<b><size=16>To create a Universal Render Pipeline Asset:</size></b>\n\n1. In the Editor, go to the Project window.\n2. Right-click in the Project window, and select Create > Rendering: Universal Render    Pipeline: Pipeline Asset. Alternatively, navigate to the menu bar at the top, and select Assets: Create: Rendering: Universal Render Pipeline: Pipeline Asset.\n\nYou can either leave the default name for the new Universal Render Pipeline Asset, or type a new one.");
+            DrawText("<b><size=16>Adding the Asset to your Graphics settings</size></b>\n\nTo use URP, you need to add the newly created Universal Render Pipeline Asset to your Graphics settings in Unity. If you don't, Unity still tries to use the Built-in render pipeline.\n\nTo add the Universal Render Pipeline Asset to your Graphics settings:\n\nNavigate to<b> Edit > Project Settings... > Graphics.</b>\nIn the <b>Scriptable Render Pipeline Settings</b> field, add the Universal Render Pipeline Asset you created earlier. When you add the Universal Render Pipeline Asset, the available Graphics settings immediately change. Your Project is now using URP.\n\n<b>Now you will see some (a lot) pink objects</b>, this is because the shaders from the build-in RP doesn't work on URP or HDRP, you have to upgrade the material shaders, in the next step, I'll show you how to convert them.");
+        }
+        else if (subStep == 2)
+        {
+            DrawText("<b><size=22>Upgrading your Shaders</size></b>\n\nIf your Project uses shaders from the built-in render pipeline, and you want to switch your Project to use the Universal Render Pipeline instead, you must convert those Shaders to the URP Shaders. This is because built-in Lit shaders are not compatible with URP Shaders. For an overview of the mapping between built-in shaders and URP Shaders, see Shader mappings.\n\nTo upgrade built-in Shaders:\n\n1. Open your Project in Unity, and go to Edit > Render Pipeline > Universal Render Pipeline.\n2. Select <b>Upgrade Project Materials to URP Materials</b>\n\n\n<b>Note:</b> These changes cannot be undone. Backup your Project before you upgrade it.\n\n<b>Tip:</b> If the Preview thumbnails in Project View are incorrect after you've upgraded, try right-clicking anywhere in the Project View window and selecting Reimport All.");
+            Space(10);
+            DrawText("After this, you still may see some pink objects, those objects were using a custom shader, so in order to fix them simply select them and change their material shader to a Universal RP Shader.\n");
+            DrawServerImage(31);
+            DrawText("There's one last thing you have to do, see the next step.");
+        }
+        else if (subStep == 3)
+        {
+            DrawText("Finally, there's one last thing that you have to set up.\nin URP and HDRP Camera's work different than the build-in RP, in URP/HDRP there's a 'Base' camera and if you want to render any other camera at the same time, you have to set up it as an '<b>Overlay Camera</b>' and add it on the <b>'Stack'</b> camera list of the '<b>Base Camera</b>'\n\nMFPS players use 2 cameras, one that draws only the FP Weapons and the other that draws everything else, so you have to configure the one that draws the FP Weapons as an 'Overlay Camera', <b>you have to do the following for each player prefab that you are using:</b>");
+
+            DrawText("Finally, there's one last thing that you have to set up.\nin URP and HDRP Camera's work different than the build-in RP, in URP/HDRP there's a 'Base' camera and if you want to render any other camera at the same time, you have to set up it as an '<b>Overlay Camera</b>' and add it on the <b>'Stack'</b> camera list of the '<b>Base Camera</b>'\n\nMFPS players use 2 cameras, one that draws only the FP Weapons and the other that draws everything else, so you have to configure the one that draws the FP Weapons as an 'Overlay Camera', <b>you have to do the following for each player prefab that you are using:</b>\n\n1. In the <b>Project Window</b>, select the player prefab <i>(the default MFPS player prefabs are located in the Resources folder of MFPS)</i> ➔ Click on <b>Open Prefab</b> button.");
+
+            DrawNote("<color=#FFFC01FF>NOTE:</color> You may see a warning message when you select the player prefab, this is because there's a null component attached in the 'Weapon Camera' because the Post-Processing package was removed, to fix this simply remove the null component from the Weapon Camera.");
+            DrawText("With the player prefab open do the following:");
+            DrawAnimatedImage(4);
+            DrawText("And that's, you can start using MFPS with URP, just remember that this last step has to be done in all the player prefabs that you are using.");
+        }
     }
 
     void KillFeedDoc()
@@ -232,6 +278,11 @@ public class MFPSGeneralDoc : TutorialWizard
         DrawServerImage(5);
     }
 
+    void RoomPropertiesDoc()
+    {
+        DrawHyperlinkText("There're some properties that are different per room/match besides the game mode, that you can tweak, e.g: the max players options, max rounds time limits, game goals, etc... these properties options can be different per game mode and you can modify them in the game mode info like this:\n\n► Go to <link=asset:Assets/MFPS/Resources/GameData.asset>GameData</link> ➔ Game Modes ➔ <i>*Open a game mode*</i> ➔ there you will see the list and\noptions to modify these properties.\n\n\n■ <b>Max Players:</b> the maximum number of players options that can join in the room for this\ngame mode.\n\n■ <b>Game Goals Options:</b> the score/point/kills goals options of this game mode.\n\n■ <b>Time Limits:</b> the rounds time limits options for this game mode in seconds.");
+    }
+
     void DrawRoomOptions()
     {
 
@@ -263,6 +314,13 @@ public class MFPSGeneralDoc : TutorialWizard
         DrawText("Once you open that state machine you will see others states that represent the weapon states, as this example we are looking for \"Reload\" state, select the Reload state and in the inspector view you will see the settings of this state specifically the \"Motion\" field, in this you to need drag / replace the animation clip with the new one:\n");
         DrawServerImage(16);
         DrawText("ready, you have replace the animation, for all other animations is the same steps, you also can play with other settings of states like speed, trasittion time, etc... you may need have basic knowledge of Mecanim for not break the tree system.\n");
+    }
+
+    void PlayerPrefabsDoc()
+    {
+        DrawHyperlinkText("We called <b>Player Prefabs</b> to the unity prefab that contain all the required scripts, objects, and structure that make up the player controller.\n\nThe MFPS player prefabs are located in a special Unity folder called <b>'Resources'</b> <i>(you can find it inside the MFPS folder)</i>, if you wanna change anything related to one of the players like, modify a weapon position, animation, a script property, etc... you have to apply the change to these prefabs.\n\n<b>By default, MFPS uses 2 player prefabs</b> which are assigned in the <b><link=asset:Assets/MFPS/Resources/GameData.asset>GameData</link></b> ➔ <b>Player1</b> and <b>Player2</b>, Player1 is used for Team 1 and Player2 for Team 2, in case the game mode is not a team-based mode like the Free For All game mode, the Player1 is used.\n\nSince version 1.8 you can also override the Player1 and Player2 per scene, which means that you can use different player prefabs for each team in each map, to do that you simply have to attach the script <b>bl_OverridePlayerPrefab.cs</b> in any object of your map scene ➔ then in the inspector of this script you will see the fields to assign the player prefabs and that's all.");
+        DownArrow();
+        DrawHyperlinkText("In case you are looking for a more advanced solution for the player selection or want to add more player prefabs where the players can select in-game their character, you should take a look at the <link=https://www.lovattostudio.com/en/shop/addons/player-selector/>Player Selector</link> addon.\n");
     }
 
     void DrawBullets()
@@ -301,14 +359,23 @@ public class MFPSGeneralDoc : TutorialWizard
 
     void DrawGameSettings()
     {
-        DrawHyperlinkText("MFPS has a option menu with the essential settings like: texture quality, anti-aliasing, sensitivity, volume, etc... players can open that menu in Lobby as-well in game.\n\nIn order to set the default settings value e.g: the default sensitivity, go to <link=asset:Assets/MFPS/Resources/GameData.asset>GameData</link> -> Default Settings -> *\n");
+        DrawText("MFPS allows players to modify some game settings of the game in-runtime like graphics quality and control settings, you as the developer are in charge to set the default values for these settings, the value that the player will have the first time that they play the game.");
+
+        DrawHyperlinkText("To set the default values go to <link=asset:Assets/MFPS/Resources/GameData.asset>GameData</link> ➔ Default Settings ➔ Setting Values ➔ *");
+        DrawServerImage(28);
+        DrawText("In this list, you will have all the available values, simply unfold the setting that you want to modify and set the desired value.");
         DownArrow();
-        DrawText("If you wanna make changes in the code in order to for example load the store settings differently how MFPS load them <i>(PlayerPrefs)</i>, the code where all the settings are loaded is located in <b>bl_LobbyUI -> LoadSettings()</b>\n");
+        DrawTitleText("Add a new setting");
+        DrawText("Add a new setting is really simple, in the same list <i><b>(Setting Values)</b></i> add a new field, set a unique name to the to identify the setting ➔ set the type of setting <i>(float, integer, bool, or string)</i> then set the default value.\n\nNow to use this value in-game you can load it with:");
+        DrawCodeText("var val = bl_MFPS.Settings.GetSettingOf('THE_SETTING_NAME');");
+        DrawText("once the setting is added in the list, it will automatically be saved when the player applies the settings in-game <i>(click on the <b>Save</b> button)</i>, but if you want to save the setting with your own rules you can do it with:");
+        DrawCodeText("bl_MFPS.Settings.SetSettingOf('THE_SETTING_NAME', THE_SETTING_VALUE);");
+        DrawText("As a reference of how you can use in-game you can inspect the script <b><color=#00E9FFFF>bl_SingleSettingsBinding.cs</color></b>\n");
     }
 
     void DrawObjectPooling()
     {
-        DrawText("<b><size=15>What is Object Pooling?</size></b>\n\n<b>Instantiate()</b> and <b>Destroy()</b> are useful and necessary methods during gameplay. Each generally requires minimal CPU time.\n\nHowever, for objects created during gameplay that have a short lifespan and get destroyed in vast numbers per second like Bullets per example, the CPU needs to allocate considerably more time.\n\nThere is when Object Pooling is enter, <b>Object pooling</b> is where you pre-instantiate all the objects you’ll need at any specific moment before gameplay, in MFPS bullets, decals and hit particles are pooled.\n\nThe bl_ObjectPooling.cs class is really easy to use, all what you need to do to add a new object to pooled is listed the prefab in the <b>'RegistreOnStart'</b> list of bl_ObjectPooling inspector which is attached in the <b>GameManager</b> object in the map scenes, once you add the prefab simply set a key name and how many instances of this prefab you think will be enough and that's.\n\nNow for instance this prefab from a script, before you normally will use something like:\n\n");
+        DrawText("<b><size=15>What is Object Pooling?</size></b>\n\n<b>Instantiate()</b> and <b>Destroy()</b> are useful and necessary methods during gameplay. Each generally requires minimal CPU time.\n\nHowever, for objects created during gameplay that have a short lifespan and get destroyed in vast numbers per second like Bullets per example, the CPU needs to allocate considerably more time.\n\nThere is when Object Pooling is enter, <b>Object pooling</b> is where you pre-instantiate all the objects you’ll need at any specific moment before gameplay, in MFPS bullets, decals and hit particles are pooled.\n\nThe bl_ObjectPooling.cs class is really easy to use, all what you need to do to add a new object to pooled is listed the prefab in the <b>'pooledPrefabs'</b> list of bl_ObjectPooling inspector which is attached in the <b>GameManager</b> object in the map scenes, once you add the prefab simply set a key name and how many instances of this prefab you think will be enough and that's.\n\nNow for instance this prefab from a script, before you normally will use something like:\n\n");
         DrawCodeText("GameObject ob = Instantiate(MyPrefab, position, rotation);");
         DrawText("with bl_ObjectPooling script you simply has to replace that with:");
         DrawCodeText("GameObject ob = bl_ObjectPooling.Instance.Instantiate(\"PrefabKey\", position, rotation);");
@@ -347,6 +414,33 @@ public class MFPSGeneralDoc : TutorialWizard
         DrawText("The friend list have a limit number of friends that can be added (by default is 25) this only make sense if you are saving the friends in a database (using ULogin Pro for example) since the more friends they add per player more will be the size of the player data in the database.\n\nYou can change this limit in GameData -> MaxFriendsAdded.\n");
     }
 
+    void CrosshairDoc()
+    {
+        DrawText("The Crosshair or reticle is a basic feature in most shooter games, in MFPS you can easily change the shape, color, and size of the crosshair, also you can use different crosshair for each type of weapon.");
+        DownArrow();
+        DrawTitleText("Modify crosshair");
+        DrawText("Open one of your map scenes ➔ go to <i>(in the Hierarchy window)</i> <b>UI ➔ PlayerUI ➔ Crosshair ➔ Crosshairs ➔ *</b>, there you will see all the available crosshairs setups, by default each one of them is used for different kind of weapons <i>(machineguns, shotguns, knife, etc...)</i>.\n\nSo what you have to do here is Open one of the crosshair setup/styles and apply any kind of modification that you want, you can remove or add any UI component that you want, just make sure everything is under the crosshair style root object.");
+        DrawServerImage(32);
+        DownArrow();
+        DrawTitleText("Hit Marker");
+        DrawText("The <b>hit marker</b> is a small cross that shows up when the local player hit an enemy.\n\nYou can customize the design of this on <b>UI ➔ PlayerUI ➔ Crosshair ➔ Crosshairs ➔ Hitmarker</b>.\n\nThe hit marker appears with simple scale-up animation, you can define the final size of the animation in <b>bl_UCrosshair ➔ Increase Amount</b>.");
+    }
+
+    void FootStepsDoc()
+    {
+        DrawText("The footstep sound in MFPS is driven by the surface Tag, there're some predefined tags like <i>Metal, Concrete, Dirt, Wood, and Water</i>, when a player moves a footstep sound will play depending on the surface where the player is over, of course, you can change these sounds or add more surface tags, also you can change the sounds per player prefab so you can have different sounds for different player models.");
+        DrawTitleText("Change Sounds");
+        DrawHyperlinkText("In order to change the default, MFPS footstep sounds you can simply replace the AudioClips in the default <link=asset:Assets/MFPS/Content/Prefabs/Presents/Audio/FootStepsLibrary.asset>FootStepLibrary</link>, unfold the <b>Groups</b> list ➔ unfold the tag group field ➔ replace the AudioClips in the list.");
+        DrawServerImage(29);
+        DownArrow();
+        DrawTitleText("Add Surfaces");
+        DrawHyperlinkText("If you wanna add a new surface <i>(identified by a different tag)</i> and you wanna play a specific footstep sound for it, you can do it by simply add a new field in the Groups list of the <link=asset:Assets/MFPS/Content/Prefabs/Presents/Audio/FootStepsLibrary.asset>FootStepLibrary</link>, in that new field, in the propertie <b>Tag</b> set the tag identifier for that surface.");
+        DownArrow();
+        DrawTitleText("Terrain Surfaces");
+        DrawText("Since the footstep system is driven by <b>Tags</b> you can only set a tag per object/mesh, this comes with a problem for the <b>Unity Terrain system</b>, since the terrain is a single object/mesh, you can set only one tag for it, that is inconvenient because terrains usually have various layers with different textures that simulate different surfaces, so in order to make the footstep system work correctly with the Unity Terrain system <i>(play different sounds depending on the terrain layer)</i> you need to set up your terrain layers as follow.\n\n•  First, select the Terrain object in your scene hierarchy and add the script <color=#00E9FFFF><b>bl_TerrainSurfaces.cs</b></color>\n\n•  Once you add the script you will notice in the inspector of the script that the list <b>TerrainSurfaces</b> have various fields, each of these fields represent one of the layers <i>(textures)</i> in the <b>Terrain</b>, what you have to do is set the <b>Tag</b> name to each layer, if you fold out one of the fields you will see the texture of the layer, so depending on the texture you can set which <b>tag</b> should be assigned in the property <b>Tag</b>.");
+        DrawServerImage(30);
+    }
+
     void GameStaffDoc()
     {
         DrawText("You may want to highlight working game development members with a badge on their behalf for example<b> Lovatto <color=#FF0000FF>[Admin]</color></b> with a different color that normal players, so other users can see that is a staff member on the game, on MFPS 2.0 there are a simple way to do this and you can set up right on the inspector.\n\nGo to <b>Game Data</b> and find the \"Game Team\" section at the bottom of the inspector:\n");
@@ -380,6 +474,111 @@ public class MFPSGeneralDoc : TutorialWizard
         DrawLinkText("https://docs.unity3d.com/Packages/com.unity.postprocessing@2.3/manual/index.html", true);
     }
 
+    void MFPSEventsDoc()
+    {
+        DrawText("There're some special events that you can use if you wanna implement a custom feature or modification in your own scripts, e.g: when the local player spawn, when the local player dies, when receiving damage, etc...\n\nUse these events are really simple, all you have to do is subscribe a function from your script that will listen to the callback of these events when they are dispatched in runtime.\n\nYou subscribe to these events on <b>OnEnable()</b> and unsubscribe on <b>OnDisable()</b> functions:");
+        DrawCodeText("void OnEnable()\n{\nbl_EventHandler.onLocalPlayerSpawn += OnLocalPlayerSpawn;\n}\n\nprivate void OnDisable()\n{\nbl_EventHandler.onLocalPlayerSpawn -= OnLocalPlayerSpawn;\n}\n\nvoid OnLocalPlayerSpawn()\n{\n//execute your code\n}");
+        DownArrow();
+        DrawText("Below you will have the list of all the available events with a short description\n");
+        DownArrow();
+
+        DrawCodeText("bl_EventHandler.onLocalPlayerDeath");
+        DrawText("Event called when the LOCAL player die in game");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onLocalPlayerSpawn");
+        DrawText("Event called when the LOCAL player spawn");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onPickUpGun");
+        DrawText("Event called when the local player pick up a weapon");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onChangeWeapon");
+        DrawText("Event Called when the LOCAL player change of weapon");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onLocalAimChanged");
+        DrawText("Event Called when the local player change their Aim state");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onMatchStart");
+        DrawText("Event Called when the room match start");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onFall");
+        DrawText("Event Called when the LOCAL player fall/land in a surface");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onPickUpHealth");
+        DrawText("Event called when the LOCAL player pick up a health in game");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onAirKit");
+        DrawText("Event called when the LOCAL player call an air drop");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onAmmoPickUp");
+        DrawText("Event called when the LOCAL player pick up ammo in game");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onLocalKill");
+        DrawText("Event called when the Local player get a kill or get killed in game.");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.OnRoundEnd");
+        DrawText("Event called when a game round finish");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onPlayerLand");
+        DrawText("Event called when the LOCAL player land a surface after falling");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onRemoteActorChange");
+        DrawText("Event called when a player that is not the local player spawn or die");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onGameSettingsChange");
+        DrawText("Event called when the local player change an in-game setting/option");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onEffectChange");
+        DrawText("Event called when the local player change one or more post-process effect option in game.");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onGameSettingsChange");
+        DrawText("Event called when the LOCAL player change their game settings from the settings in-game menu.");
+        DrawHorizontalSeparator();
+
+        DrawCodeText("bl_EventHandler.onGamePause");
+        DrawText("Event called when the LOCAL player pause or resume the game.");
+        DrawHorizontalSeparator();
+    }
+
+    void UpdateMFPSDoc()
+    {
+        DrawText("MFPS get mayor version update approximately every 3-4 months, these updates comes with new features, fixes, and improvements, if you were already using MFPS you most likely will want to apply all those improves and fixes to your started project, unfortunately, due to the nature of the asset you can't just import the new update package over your existing project with the older version because that will override all your changes, making you lost all the work and progress that you have done until that moment.\n\nThe work required to update an old MFPS version project to a new MFPS version depends on various factors, like how much changes have you done, the MFPS version of your project compared to the new version, the number of changes in the new update, etc...\n\nBut would give you some method to update your MFPS version in different scenarios:");
+        Space(10);
+        DrawNote("<b><color=#FF0002FF>IMPORTANT:</color> BEFORE TRY ANY OF THE BELOW METHODS OR TRY UPDATE YOUR PROJECT IN GENERAL MAKE SURE TO CREATE A BACKUP COPY OF YOUR PROJECT </b>");
+        Space(10);
+        DrawTitleText("Front-end changes");
+        DrawText("- If you only have made frontend changes like, replace the <i>player models, tweak properties, add maps, add weapons, change UI, etc...</i> but not backend changes (code changes), then update is simpler, you can import the new MFPS package over your project and just <b>unselect</b> some assets mentioned below:\n\nFirst, import the MFPS update package from the Asset Store or your disk.\n\nIn the <b>Unity Package Import window</b>, you can select which assets import and which not, by default, all assets are selected, you simply have to <b>unselect</b> the following to not override your changes:\n\n•  The <b>Resources</b> folder <i>(with all the prefabs inside and GameData)</i>\n•  MainMenu scene <i>(in case you changed the UI)</i>\n•  Any prefab that you change.\n\nDo import the ExampleLevel scene, since it almost sure that it will contain changes, and you can use as reference for your other maps scenes.\n");
+        DrawServerImage(12);
+        DownArrow();
+        DrawTitleText("Back-end changes");
+        DrawText("If you have made <b>code changes</b> to the MFPS to core scripts or modifications to the main prefabs like <b>GameManager, GameModes, Lobby, etc...</b> the update process is more complicated.\n\nFor start, it is not possible to import the new version on your current project since this would revert all your changes losing all the work done by you, to apply the changes of the new version you must merge the changes manually, checking the scripts and prefabricated modifications of the new version and comparing them with those of your project.\n\nThis process may take some time to be done and there're high chances that a wrong merger cause errors in your game, so I will give you a method that will facilitate and reduce the work to do in this case:\n\n•  First, create a new clean Unity project, in it, import the new MFPS version package as you will normally do <i>(importing Photon PUN as well)</i>, you will use this project as reference to see the frontend changes in scenes, prefabs, properties, etc...\n\n•  Then, you will <b>simulate</b> import the new MFPS version package in your started project <i>(the project with the old version of MFPS that you have modified)</i>, note that I said <b>simulate</b> because <b>you won't import it</b>, you only need that the Unity Package Import Windows show up so you can check the changed files, this window shows all the assets that the package contains and will be imported but also if one of the files already exist in the project, it shows if the file from the package is different with respect at the file in the project, you can differentiate hthose modify files with a \"Refresh\" icon at the right side of the file name:\n");
+        DrawServerImage(26);
+        DrawText("Now what you have to do is take note of the modified files, write their name in a simple text file so you can find later by their name as explained below.\n\nOnce you have all the changed file names collected, is time merge those files, unfortunatelly there's not a automated way to do this, you have to manually do this, check the changes on scripts, prefabs, etc...  but don't worry you don't have to check line by line, you can use some tools to automatically detect the changes in two files.\n\nFor check changes on scripts you can use these tools:\n");
+        DrawHyperlinkText("Standalone program: <link=https://sourcegear.com/diffmerge/>Diffmerge</link>\nOnline System: <link=https://www.diffchecker.com/>Diffchecker</link>\n");
+        DrawText("Both systems are really straight forward to use, you have two boxes, in one you assign the script and or code of the old file/script and in the other you assing the new file, then the program will analyze and highlight you the changed lines:\n");
+        DrawServerImage(27);
+        DrawText("You will assign the original file <i>(the one from your project)</i> in the left side and the file from the new MFPS version <i>(from the project that you create before)</i> in the right side.\n\nNow with the changes highlighted in the program you simple have to merge the changes in your project file <i>(the file of the old MFPS version)</i>\n\nWith the standalone program <b>Diffmerge</b> you can compare the whole MFPS folder and analyze all the files, by simple selecting the option: File -> Open Folder Diff... -> Set the path to the old version MFPS folder in the first box and set the path to the new version MFPS folder in the second box.\n");
+        DownArrow();
+        DrawText("Now that method works efficiently for text files like scripts, but for check the differences between prefabs and scenes you will have to do it differently, for check the difference between prefabs and scenes you will have to compare both projects, Fortunately, Unity allows you to open more than one instance of the editor, so you can open the old version project and the new MFPS version project in different editor windows and inspect the differences between the prefabs and or scenes in both projects.\n");
+
+
+    }
+
     void CommonQADoc()
     {
         DrawSpoilerBox("Bots walk trough walls and objects", "You have to bake the <b>Navmesh</b> in your map scenes in order to let the bots know where they can navigate in your map.\n\nIf you don't know what Navmesh is or how to bake it, check this: <link=https://docs.unity3d.com/Manual/nav-BuildingNavMesh.html>https://docs.unity3d.com/Manual/nav-BuildingNavMesh.html</link>");
@@ -394,7 +593,7 @@ public class MFPSGeneralDoc : TutorialWizard
 
         DrawSpoilerBox("Can I host my own dedicated server?", "Yes, Photon offers a solution for host your own server using their <b>Photon OnPremise</b> <i>(a.k.a Photon Server)</i> switch to this from the default Photon PUN (Cloud) doesn't require code changes, all that you have to do is setup the Photon Server SDK and set the IP in your PhotonServerSettings.\n\nInfo: <link=https://doc.photonengine.com/en-us/server/current/getting-started/photon-server-in-5min>Photon Server Information</link>\n");
 
-
+        DrawSpoilerBox("Rooms doesn't show up for other players?", "Sometimes when you testing your game with other players you may find out that the rooms that you or one of the testers created doesn't appear in the Room/Server list, the most common cause of this is that you and your tester <b>are not in the same server region</b>.\n\nIn the MainMenu/Lobby scene, in the bottom right corner you will see a drop-down with a region name, you can use it to select and change of server, so make sure you and your testers are connected to the same server region.");
     }
 
     [MenuItem("MFPS/Tutorials/Documentation", false, 111)]

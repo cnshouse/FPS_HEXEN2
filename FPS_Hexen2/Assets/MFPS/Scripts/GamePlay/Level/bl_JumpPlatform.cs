@@ -2,19 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(AudioSource))]
-public class bl_JumpPlatform : MonoBehaviour
+namespace MFPS.Runtime.Level
 {
-    [Range(0,25)] public float JumpForce;
-    [SerializeField] private AudioClip JumpSound;
-    
-    private void OnTriggerEnter(Collider other)
+    [RequireComponent(typeof(AudioSource))]
+    public class bl_JumpPlatform : MonoBehaviour
     {
-        if(other.CompareTag(bl_PlayerSettings.LocalTag))
+        [Range(0, 25)] public float JumpForce;
+        [SerializeField] private AudioClip JumpSound;
+
+        private void OnTriggerEnter(Collider other)
         {
-            bl_FirstPersonController fpc = other.GetComponent<bl_FirstPersonController>();
-            fpc.PlatformJump(JumpForce);
-            if(JumpSound != null) { AudioSource.PlayClipAtPoint(JumpSound, transform.position); }
+            if (other.CompareTag(bl_PlayerSettings.LocalTag))
+            {
+                bl_FirstPersonController fpc = other.GetComponent<bl_FirstPersonController>();
+                fpc.PlatformJump(JumpForce);
+                if (JumpSound != null) { AudioSource.PlayClipAtPoint(JumpSound, transform.position); }
+            }
         }
     }
 }

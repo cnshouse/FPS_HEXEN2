@@ -1,21 +1,15 @@
-﻿//////////////////////////////////////////////////////////////////////////////
-// bl_ExplosionDamage.cs
-//
-// This contain the logic of the explosions
-// determines the objectives that are punished,
-// and calculates the precise damage
-//                       LovattoStudio
-//////////////////////////////////////////////////////////////////////////////
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
+using MFPS.Core.Motion;
+using UnityEngine.Serialization;
 
 public class bl_ExplosionDamage : bl_PhotonHelper
 {
-
-    public ExplosionType m_Type = ExplosionType.Normal;
+    [FormerlySerializedAs("m_Type")]
+    public ExplosionType explosionType = ExplosionType.Normal;
     /// <summary>
     /// This is assigned auto
     /// </summary>
@@ -70,6 +64,12 @@ public class bl_ExplosionDamage : bl_PhotonHelper
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="viewID"></param>
+    /// <param name="team"></param>
+    /// <param name="botName"></param>
     public void AISetUp(int viewID, Team team, string botName)
     {
         isFromBot = true;
@@ -83,46 +83,64 @@ public class bl_ExplosionDamage : bl_PhotonHelper
     /// </summary>
     private void DoDamage()
     {
-        if (m_Type == ExplosionType.Shake && !bl_GameData.Instance.ArriveKitsCauseDamage)
+        if (explosionType == ExplosionType.Shake && !bl_GameData.Instance.ArriveKitsCauseDamage)
             return;
 
+        DoPlayersDamage();
+        DoCollisionDamage();
+    }
+
+    /// <summary>
+    /// Apply damage to the real players
+    /// </summary>
+    void DoPlayersDamage()
+    {
         List<Player> playersInRange = this.GetPlayersInRange();
-        if (playersInRange != null && playersInRange.Count > 0)
+
+        if (playersInRange == null || playersInRange.Count <= 0) return;
+
+        foreach (Player player in playersInRange)
         {
-            foreach (Player player in playersInRange)
+            if (player == null)
             {
-                if (player != null)
-                {
-                    GameObject p = FindPhotonPlayer(player);
-                    if (p != null)
-                    {
-                        if (!ExplosionCanHitTarget(p.transform.root, new Vector3(0, 0.6f, 0)) && !ExplosionCanHitTarget(p.transform.root, new Vector3(0, 0.15f, 0))) continue;//check if there is an obstacle between player and explosion
-
-                        bl_PlayerHealthManager pdm = p.transform.root.GetComponent<bl_PlayerHealthManager>();
-
-                        DamageData odi = new DamageData();
-                        odi.Damage = CalculatePlayerDamage(p.transform, player);
-                        odi.Direction = transform.position;
-                        odi.From = (isFromBot) ? BotName : PhotonNetwork.LocalPlayer.NickName;
-                        odi.isHeadShot = false;
-                        odi.Cause = (isFromBot) ? DamageCause.Bot : DamageCause.Explosion;
-                        odi.GunID = WeaponID;
-                        odi.Actor = PhotonNetwork.LocalPlayer;
-
-                        pdm.GetDamage(odi);
-                    }
-                    else
-                    {
-                        Debug.LogError("This Player " + player.NickName + " is not found");
-                    }
-                }
+                Debug.LogError("Player " + player.NickName + " not found in this room.");
+                continue;
             }
+
+            GameObject p = FindPhotonPlayer(player);
+            if (p == null) continue;
+  
+            //check if there is an obstacle between player and explosion
+            if (!ExplosionCanHitTarget(p.transform.root, new Vector3(0, 0.6f, 0)) && !ExplosionCanHitTarget(p.transform.root, new Vector3(0, 0.15f, 0))) continue;
+
+            bl_PlayerHealthManager pdm = p.transform.GetComponentInParent<bl_PlayerHealthManager>();
+
+            DamageData odi = new DamageData();
+            odi.Damage = CalculatePlayerDamage(p.transform, player);
+            odi.Direction = transform.position;
+            odi.From = (isFromBot) ? BotName : PhotonNetwork.LocalPlayer.NickName;
+            odi.isHeadShot = false;
+            odi.Cause = (isFromBot) ? DamageCause.Bot : DamageCause.Explosion;
+            odi.GunID = WeaponID;
+            odi.Actor = PhotonNetwork.LocalPlayer;
+
+            pdm?.GetDamage(odi);
         }
+    }
+
+    /// <summary>
+    /// Apply damage to objects, items, bots, etc... if the collider is inside the explosion radius
+    /// </summary>
+    void DoCollisionDamage()
+    {
         Collider[] colls = Physics.OverlapSphere(transform.position, explosionRadius);
         List<string> Hited = new List<string>();
         foreach (Collider c in colls)
         {
-            if (c.CompareTag("AI"))
+            //the damage to real players is handled separately
+            if((c.CompareTag("Player") || (c.CompareTag(bl_MFPS.HITBOX_TAG) || (c.CompareTag("Untagged"))))) continue;
+
+            if (c.CompareTag(bl_MFPS.AI_TAG))
             {
                 if (Hited.Contains(c.transform.root.name)) continue;
                 if (!ExplosionCanHitTarget(c.transform.root, new Vector3(0, 0.6f, 0)) && !ExplosionCanHitTarget(c.transform.root, new Vector3(0, 0.15f, 0))) continue;
@@ -139,6 +157,26 @@ public class bl_ExplosionDamage : bl_PhotonHelper
                 {
                     c.GetComponent<bl_AIHitBox>().DoDamage(damage, wp, transform.position, ActorViewID, isFromBot, t);
                 }
+            }
+            else
+            {
+                if (!ExplosionCanHitTarget(c.transform, new Vector3(0, 0.1f, 0), false)) continue;
+
+                var damageable = c.transform.GetComponent<IMFPSDamageable>();
+                if (damageable == null) continue;
+
+                int damage = CalculatePlayerDamage(c.transform, null);
+                DamageData damageData = new DamageData()
+                {
+                    Damage = (int)damage,
+                    Direction = transform.position,
+                    MFPSActor = bl_GameManager.Instance.FindMFPSActor(ActorViewID),
+                    ActorViewID = ActorViewID,
+                    GunID = WeaponID,
+                    From = isFromBot ? BotName : LocalPlayer.NickName,
+                };
+                damageData.Cause = (isFromBot) ? DamageCause.Bot : DamageCause.Explosion;
+                damageable.ReceiveDamage(damageData);
             }
         }
     }
@@ -182,14 +220,27 @@ public class bl_ExplosionDamage : bl_PhotonHelper
         return Mathf.Clamp((int)(explosionDamage * ((explosionRadius - distance) / explosionRadius)), 0, (int)explosionDamage);
     }
 
-    private bool ExplosionCanHitTarget(Transform target, Vector3 offset)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    private bool ExplosionCanHitTarget(Transform target, Vector3 offset, bool rootOnly = true)
     {
         bool result = false;
         Vector3 rhs = transform.position + offset;
         Vector3 normalized = (target.position + offset - rhs).normalized;
         if (Physics.Raycast(rhs, normalized, out hitInfo, explosionRadius))
         {
-           if(hitInfo.transform.root.name == target.name) { return true; }
+            if (rootOnly)
+            {
+                if (hitInfo.transform.root.name == target.name) { return true; }
+            }
+            else
+            {
+                if (hitInfo.transform.name == target.name) { return true; }
+            }
         }
         return result;
     }
@@ -261,6 +312,7 @@ public class bl_ExplosionDamage : bl_PhotonHelper
         }
         return list;
     }
+
     /// <summary>
     /// Calculate if player local in explosion radius
     /// </summary>
@@ -280,6 +332,7 @@ public class bl_ExplosionDamage : bl_PhotonHelper
         return false;
 
     }
+
     /// <summary>
     /// 
     /// </summary>

@@ -1,42 +1,45 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class bl_RankingUIPro : MonoBehaviour
+namespace MFPS.ULogin
 {
-    [Header("Settings")]
-    [SerializeField]private Color AdminColor;
-    [SerializeField]private Color ModColor;
-    [Header("References")]
-    [SerializeField]private Text RankText;
-    [SerializeField]private Text PlayerNameText;
-    [SerializeField]private Text ScoreText;
-    [SerializeField]private Text KillsText;
-    [SerializeField]private Text DeathsText;
-
-    public void SetInfo(LoginUserInfo info,int rank)
+    public class bl_RankingUIPro : MonoBehaviour
     {
-        RankText.text = rank.ToString();
-        PlayerNameText.text = info.NickName;
-        ScoreText.text = info.Score.ToString();
-        KillsText.text = info.Kills.ToString();
-        DeathsText.text = info.Deaths.ToString();
-        CheckStatus(info.UserStatus);
-    }
+        [Header("Settings")]
+        [SerializeField] private Color AdminColor;
+        [SerializeField] private Color ModColor;
+        [Header("References")]
+        [SerializeField] private Text RankText;
+        [SerializeField] private Text PlayerNameText;
+        [SerializeField] private Text ScoreText;
+        [SerializeField] private Text KillsText;
+        [SerializeField] private Text DeathsText;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    void CheckStatus(LoginUserInfo.Status status)
-    {
-        if (status == LoginUserInfo.Status.Admin)
+        public void SetInfo(LoginUserInfo info, int rank)
         {
-            PlayerNameText.text += " [Admin]";
-            PlayerNameText.color = AdminColor;
+            RankText.text = rank.ToString();
+            PlayerNameText.text = info.NickName;
+            ScoreText.text = info.Score.ToString();
+            KillsText.text = info.Kills.ToString();
+            DeathsText.text = info.Deaths.ToString();
+            CheckStatus(info.UserStatus);
         }
-        else if (status == LoginUserInfo.Status.Moderator)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void CheckStatus(LoginUserInfo.Status status)
         {
-            PlayerNameText.text += " [Moderator]";
-            PlayerNameText.color = ModColor;
+            if (status == LoginUserInfo.Status.Admin)
+            {
+                PlayerNameText.text += " [Admin]";
+                PlayerNameText.color = AdminColor;
+            }
+            else if (status == LoginUserInfo.Status.Moderator)
+            {
+                PlayerNameText.text += " [Moderator]";
+                PlayerNameText.color = ModColor;
+            }
         }
     }
 }

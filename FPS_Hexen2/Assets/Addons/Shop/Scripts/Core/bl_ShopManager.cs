@@ -4,9 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using MFPS.Shop;
 using UnityEngine.Networking;
-#if PSELECTOR
-using MFPS.PlayerSelector;
-#endif
 
 public class bl_ShopManager : MonoBehaviour
 {
@@ -113,9 +110,10 @@ public class bl_ShopManager : MonoBehaviour
         }
 
 #if PSELECTOR
-        for (int i = 0; i < bl_PlayerSelectorData.Instance.AllPlayers.Count; i++)
+        var allPlayers = bl_PlayerSelector.Data.AllPlayers;
+        for (int i = 0; i < allPlayers.Count; i++)
         {
-            bl_PlayerSelectorInfo pinfo = bl_PlayerSelectorData.Instance.AllPlayers[i];
+            var pinfo = allPlayers[i];
             bl_ShopItemData data = new bl_ShopItemData();
             data.ID = i;
             data.Name = pinfo.Name;
@@ -131,7 +129,7 @@ public class bl_ShopManager : MonoBehaviour
         {
             if (i == 0) continue;//skip the default camo
 
-            GlobalCamo gc = bl_CustomizerData.Instance.GlobalCamos[i];
+            var gc = bl_CustomizerData.Instance.GlobalCamos[i];
             bl_ShopItemData data = new bl_ShopItemData();
             data.ID = i;
             data.Name = gc.Name;
@@ -163,6 +161,7 @@ public class bl_ShopManager : MonoBehaviour
             }
 
             GameObject g = Instantiate(ItemPrefab) as GameObject;
+            g.SetActive(true);
             g.GetComponent<bl_ShopItemUI>().Set(Items[i]);
             g.transform.SetParent(ListPanel, false);
             if (i == 0)
@@ -188,6 +187,7 @@ public class bl_ShopManager : MonoBehaviour
             }
 #endif
             GameObject g = Instantiate(ItemPrefab) as GameObject;
+            g.SetActive(true);
             g.GetComponent<bl_ShopItemUI>().Set(Items[i]);
             g.transform.SetParent(ListPanel, false);
             if (i == 0)
@@ -221,7 +221,7 @@ public class bl_ShopManager : MonoBehaviour
         }
 
         BuyNameText.text = info.Name.ToUpper();
-        BuyPriceText.text = string.Format("${0}", info.Price);
+        BuyPriceText.text = string.Format("{0}{1}", bl_ShopData.Instance.PricePrefix, info.Price);
         previewData = info;
 #if SHOP
         CurrentPrice = info.Price;
@@ -264,19 +264,17 @@ public class bl_ShopManager : MonoBehaviour
 #if ULSP && SHOP
         bussy = true;
         LoadingUI.SetActive(true);
-        WWWForm wf = new WWWForm();
-        string hash = bl_DataBase.Instance.GetUserTokenComplete();
-        wf.AddField("hash", hash);
-        wf.AddField("id", bl_DataBase.Instance.LocalUser.ID);
-        wf.AddField("name", bl_DataBase.Instance.LocalUser.LoginName);
-        wf.AddField("coins", CurrentPrice);
+        WWWForm wf = bl_DataBaseUtils.CreateWWWForm(MFPS.ULogin.FormHashParm.Name, true);
+        wf.AddSecureField("id", bl_DataBase.Instance.LocalUser.ID);
+        wf.AddSecureField("name", bl_DataBase.Instance.LocalUser.LoginName);
+        wf.AddSecureField("coins", CurrentPrice);
         //temp add the purchase
         List<bl_ShopPurchase> plist = bl_DataBase.Instance.LocalUser.ShopData.ShopPurchases;
         bl_ShopPurchase sp = new bl_ShopPurchase();
         sp.ID = previewData.ID;
         sp.TypeID = (int)previewData.Type;
         plist.Add(sp);
-        wf.AddField("line", bl_ShopData.CompilePurchases(plist));
+        wf.AddSecureField("line", bl_ShopData.CompilePurchases(plist));
 
         using (UnityWebRequest w = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Shop), wf))
         {
@@ -332,8 +330,9 @@ public class bl_ShopManager : MonoBehaviour
 #endif
                 break;
             case bl_ShopData.ShopPaymentTypes.Paypal:
-                //Paypal SDK integration here
-                //this FREE asset will save you a lot of work: https://assetstore.unity.com/packages/tools/integration/simple-paypal-storefront-52468
+#if SHOP_PAYPAL && SHOP
+                bl_Paypal.Instance.PurchaseCoinPack(coinPack);
+#endif
                 break;
             case bl_ShopData.ShopPaymentTypes.Steam:
                 //Steam IAP integration here
@@ -377,7 +376,7 @@ public class bl_ShopManager : MonoBehaviour
         InfoPanel.SetActive(true);
         infoPreviewData = info;
         PreviewNameText.text = info.Name.ToUpper();
-        PreviewPriceText.text = string.Format("PRICE ${0}", info.Price);
+        PreviewPriceText.text = string.Format("PRICE {0}{1}", bl_ShopData.Instance.PricePrefix, info.Price);
         if (info.Type == ShopItemType.Weapon)
         {
             PreviewIcons[0].gameObject.SetActive(true);
@@ -405,7 +404,7 @@ public class bl_ShopManager : MonoBehaviour
             PreviewBars[2].transform.parent.parent.GetComponentInChildren<Text>().text = "REGENERATION:";
             PreviewBars[2].fillAmount = pdm.RegenerationSpeed / 5;
             PreviewBars[3].transform.parent.parent.GetComponentInChildren<Text>().text = "NOISE:";
-            PreviewBars[3].fillAmount = fpc.FootStepVolume / 1;
+            PreviewBars[3].fillAmount = 0.9f;
 #endif
         }
         else if (info.Type == ShopItemType.WeaponCamo)
@@ -449,6 +448,7 @@ public class bl_ShopManager : MonoBehaviour
             cats.Add(od);
         }
         catDropDown.AddOptions(cats);
+        ItemPrefab.SetActive(false);
     }
 
     public void CleanPanel()
@@ -494,6 +494,10 @@ public class bl_ShopManager : MonoBehaviour
         get
         {
             if (_instance == null) { _instance = FindObjectOfType<bl_ShopManager>(); }
+            if(_instance == null && bl_LobbyUI.Instance != null)
+            {
+                _instance = bl_LobbyUI.Instance.GetComponentInChildren<bl_ShopManager>(true);
+            }
             return _instance;
         }
     }

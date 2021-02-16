@@ -1,13 +1,5 @@
-﻿//////////////////////////////////////////////////////////////////
-//bl_PhotonHelper.cs
-//
-//This a simple base class
-//to us serve as an extension of Photon.Monobehaviour default
-//                   Lovatto Studio
-//////////////////////////////////////////////////////////////////
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
-using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 
@@ -93,6 +85,7 @@ public class bl_PhotonHelper : MonoBehaviourPun {
             return transform.root;
         }
     }
+
     /// <summary>
     /// 
     /// </summary>
@@ -119,6 +112,7 @@ public class bl_PhotonHelper : MonoBehaviourPun {
             return photonView.IsMine;
         }
     }
+
     /// <summary>
     /// Get Photon.connect
     /// </summary>
@@ -281,7 +275,7 @@ public class bl_PhotonHelper : MonoBehaviourPun {
             if (m == GameMode.GR) { b = true; }
 #endif
 #if LMS
-            if (m == GameMode.LSM) { b = true; }
+            if (m == GameMode.BR) { b = true; }
 #endif
             return b;
         }
@@ -301,9 +295,12 @@ public class bl_PhotonHelper : MonoBehaviourPun {
             if (m == GameMode.GR) { b = true; }
 #endif
 #if LMS
-            if (m == GameMode.LSM) { b = true; }
+            if (m == GameMode.BR) { b = true; }
 #endif
             return b;
         }
     }
+
+    public Room CurrentRoom => PhotonNetwork.CurrentRoom;
+    public Player LocalPlayer => PhotonNetwork.LocalPlayer;
 }

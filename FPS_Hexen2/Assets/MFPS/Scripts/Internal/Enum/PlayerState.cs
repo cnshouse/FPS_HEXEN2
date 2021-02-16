@@ -1,4 +1,4 @@
-﻿public enum PlayerState
+﻿public enum PlayerState : byte
 {
     Idle = 0,
     Walking = 1,
@@ -7,10 +7,12 @@
     Jumping = 4,
     Climbing = 5,
     Sliding = 6,
-    Dodge = 7,
+    Dropping = 7,
+    Gliding = 8,
+    InVehicle = 9,
 }
 
-public enum PlayerFPState
+public enum PlayerFPState : byte
 {
     Idle = 0,
     Firing = 1,

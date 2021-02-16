@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
@@ -9,11 +8,11 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 [RequireComponent(typeof(PhotonView))]
 public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
 {
+    #region Public members
     /// <summary>
     /// the player's team is not ours
     /// </summary>
     public Team RemoteTeam { get; set; }
-
     /// <summary>
     /// the current state of the local player in FPV
     /// </summary>
@@ -31,70 +30,58 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     /// list all remote weapons
     /// </summary>
     public List<bl_NetworkGun> NetworkGuns = new List<bl_NetworkGun>();
-
     [SerializeField]
     PhotonTransformViewPositionModel m_PositionModel = new PhotonTransformViewPositionModel();
-
     [SerializeField]
     PhotonTransformViewRotationModel m_RotationModel = new PhotonTransformViewRotationModel();
-
-    PhotonTransformViewPositionControl m_PositionControl;
-    PhotonTransformViewRotationControl m_RotationControl;
-
-    bool m_ReceivedNetworkUpdate = false;
-    [Space(5)]
-    //Script Needed
-    [Header("Necessary script")]
     public bl_GunManager gunManager;
     public bl_PlayerAnimations m_PlayerAnimation;
-    //Material for apply when disable a NetGun
     public Material InvicibleMat;
+    #endregion
+
+    #region Private members
     //private
-    private bl_FirstPersonController Controller;
-    public bl_NetworkGun CurrenGun { get; set; }
-    private bl_PlayerHealthManager PDM;
     private bl_NamePlateDrawer DrawName;
-    private bool FrienlyFire = false;
     private bool SendInfo = false;
-    public bool isFriend { get; set; }
-    private CharacterController m_CController;
     private bool isWeaponBlocked = false;
-#if UMM
-     private bl_MiniMapItem MiniMapItem = null;
-#endif
-
-#pragma warning disable 0414
-    [SerializeField]
-    bool ObservedComponentsFoldoutOpen = true;
-#pragma warning disable 0414
     private bl_NetworkGun currentGun;
-    public int currentGunID { get; set; } = -1;
+    private Transform m_Transform;
+    private Vector3 HeadPos = Vector3.zero;// Head Look to
+    private bool networkIsCrouching;
+    private string RemotePlayerName = string.Empty;
+    private Vector3 velocity;
+    PhotonTransformViewPositionControl m_PositionControl;
+    PhotonTransformViewRotationControl m_RotationControl;
+    bool m_ReceivedNetworkUpdate = false;
+    private Vector3 headEuler = Vector3.zero;
+#if UMM
+    private bl_MiniMapItem MiniMapItem = null;
+#endif
+    [HideInInspector] public bool ObservedComponentsFoldoutOpen = true;
+    #endregion
 
+    #region Public Properties
+    public bool isFriend { get; set; }
+    public int networkGunID { get; set; }
+    public bl_NetworkGun CurrenGun { get; set; }
+    public int currentGunID { get; set; } = -1;
+    public PlayerState NetworkBodyState { get; set; }
+    #endregion
+
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void Awake()
     {
         base.Awake();
         bl_PhotonCallbacks.PlayerEnteredRoom += OnPhotonPlayerConnected;
-        if (!PhotonNetwork.IsConnected)
-            Destroy(this);
-        if (!PhotonNetwork.InRoom)
-            return;
+        if (!PhotonNetwork.IsConnected || !PhotonNetwork.InRoom) return;
 
-        //FirstUpdate = false;
-        if (!isMine)
-        {
-            if (HeadTarget.gameObject.activeSelf == false)
-            {
-                HeadTarget.gameObject.SetActive(true);
-            }
-        }
-
+        m_Transform = transform;
         m_PositionControl = new PhotonTransformViewPositionControl(m_PositionModel);
         m_RotationControl = new PhotonTransformViewRotationControl(m_RotationModel);
-        Controller = GetComponent<bl_FirstPersonController>();
-        PDM = GetComponent<bl_PlayerHealthManager>();
         DrawName = GetComponent<bl_NamePlateDrawer>();
-        m_CController = GetComponent<CharacterController>();
-        FrienlyFire = (bool)PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.RoomFriendlyFire];
+        NetworkGuns.ForEach(x => x.gameObject.SetActive(false));
 #if UMM
         MiniMapItem = this.GetComponent<bl_MiniMapItem>();
         if (isMine && MiniMapItem != null)
@@ -109,54 +96,50 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     /// </summary>
     private void Start()
     {
-        InvokeRepeating("SlowLoop", 0, 1);
+        InvokeRepeating(nameof(SlowLoop), 0, 1);
     }
 
     /// <summary>
     /// serialization method of photon
+    /// </summary>
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
+        m_PositionControl.OnPhotonSerializeView(m_Transform.localPosition, stream, info);
+        m_RotationControl.OnPhotonSerializeView(m_Transform.localRotation, stream, info);
 
-        m_PositionControl.OnPhotonSerializeView(transform.localPosition, stream, info);
-        m_RotationControl.OnPhotonSerializeView(transform.localRotation, stream, info);
+#if UNITY_EDITOR
         if (isMine == false)
         {
             DoDrawEstimatedPositionError();
         }
+#endif
+
         if (stream.IsWriting)
         {
             //We own this player: send the others our data
-            stream.SendNext(HeadTarget.position);
-            stream.SendNext(HeadTarget.rotation);
-            stream.SendNext((int)Controller.State);
-            stream.SendNext(Controller.isGrounded);
-            stream.SendNext(gunManager.GetCurrentGunID);
-            stream.SendNext((int)FPState);
-            stream.SendNext(Controller.Velocity);
+            stream.SendNext(GetHeadLookPosition());
+            stream.SendNext(fpControler.State);
+            stream.SendNext(fpControler.isGrounded);
+            stream.SendNext((byte)gunManager.GetCurrentGunID);//send as byte, max value is 255.
+            stream.SendNext(FPState);
+            stream.SendNext(fpControler.Velocity);
         }
         else
         {
             //Network player, receive data
             HeadPos = (Vector3)stream.ReceiveNext();
-            HeadRot = (Quaternion)stream.ReceiveNext();
-            networkBodyState = (int)stream.ReceiveNext();
+            NetworkBodyState = (PlayerState)stream.ReceiveNext();
             networkIsCrouching = (bool)stream.ReceiveNext();
-            networkGunID = (int)stream.ReceiveNext();
-            FPState = (PlayerFPState)((int)stream.ReceiveNext());
+            networkGunID = (int)((byte)stream.ReceiveNext());
+            FPState = (PlayerFPState)stream.ReceiveNext();
             velocity = (Vector3)stream.ReceiveNext();
-
             m_ReceivedNetworkUpdate = true;
         }
     }
 
-    private Vector3 HeadPos = Vector3.zero;// Head Look to
-    private Quaternion HeadRot = Quaternion.identity;
-    private int networkBodyState;
-    private bool networkIsCrouching;
-    private string RemotePlayerName = string.Empty;
-    private int networkGunID;
-    private Vector3 velocity;
-
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void OnDisable()
     {
         base.OnDisable();
@@ -175,88 +158,73 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
         ///if the player is not ours, then
         if (isConnected == false || !PhotonNetwork.InRoom) return;
 
-        if (photonView != null && isMine == false)
+        if (photonView != null && !isMine)
         {
-            UpdatePosition();
-            UpdateRotation();
-
-            HeadTarget.position = Vector3.Lerp(HeadTarget.position, HeadPos, Time.smoothDeltaTime * m_PositionModel.InterpolateLerpSpeed);
-            HeadTarget.rotation = HeadRot;
-            m_PlayerAnimation.BodyState = (PlayerState)networkBodyState;//send the state of player local for remote animation
-            m_PlayerAnimation.grounded = networkIsCrouching;
-            m_PlayerAnimation.velocity = velocity;
-            m_PlayerAnimation.FPState = FPState;
-
-
-            if (!isOneTeamMode)
-            {
-                //Determine if remote player is teamMate or enemy
-                if (isFriend)
-                {
-                    TeamMate();
-                }
-                else
-                {
-                    Enemy();
-                }
-            }
-            else
-            {
-                Enemy();
-            }
-
-            if (!isWeaponBlocked)
-            {
-                CurrentTPVGun();
-                currentGunID = networkGunID;
-            }
+            OnRemotePlayer();
         }
         else
         {
-            m_PlayerAnimation.BodyState = Controller.State;//send the state of player local for remote animation
-            m_PlayerAnimation.grounded = Controller.isGrounded;
-            m_PlayerAnimation.velocity = Controller.Velocity;
-            m_PlayerAnimation.FPState = FPState;
-        }
-    }
-
-    void CurrentTPVGun(bool local = false)
-    {
-        if (gunManager == null)
-            return;
-        if (networkGunID == currentGunID) return;
-
-        //Get the current gun ID local and sync with remote
-        for(int i = 0; i < NetworkGuns.Count; i++)
-        {
-            currentGun = NetworkGuns[i];
-            if (currentGun == null) continue;
-
-            int currentID = (local) ? gunManager.GetCurrentWeapon().GunID : networkGunID;
-            if (currentGun.GetWeaponID == currentID)
-            {
-                currentGun.gameObject.SetActive(true);
-                if (!local)
-                {
-                    CurrenGun = currentGun.gameObject.GetComponent<bl_NetworkGun>();
-                    CurrenGun.SetUpType();
-                }
-            }
-            else
-            {
-                if(currentGun != null)
-                    currentGun.gameObject.SetActive(false);
-            }
+            OnLocalPlayer();
         }
     }
 
     /// <summary>
-    /// use this function to set all details for enemy
+    /// Function called each frame when the player is local
     /// </summary>
-    void Enemy()
+    void OnLocalPlayer()
     {
-        PDM.DamageEnabled = true;
-        DrawName.enabled = bl_RoomMenu.Instance.SpectatorMode;
+        //send the state of player local for remote animation
+        m_PlayerAnimation.BodyState = fpControler.State;
+        m_PlayerAnimation.grounded = fpControler.isGrounded;
+        m_PlayerAnimation.velocity = fpControler.Velocity;
+        m_PlayerAnimation.FPState = FPState;
+    }
+
+    /// <summary>
+    /// Function called each frame when the player is remote
+    /// </summary>
+    void OnRemotePlayer()
+    {
+        if (m_Transform.parent == null)
+        {
+            UpdatePosition();
+            UpdateRotation();
+        }
+
+        HeadTarget.LookAt(HeadPos);
+
+        m_PlayerAnimation.BodyState = NetworkBodyState;//send the state of player local for remote animation
+        m_PlayerAnimation.grounded = networkIsCrouching;
+        m_PlayerAnimation.velocity = velocity;
+        m_PlayerAnimation.FPState = FPState;
+
+        if (!isOneTeamMode)
+        {
+            //Determine if remote player is teamMate or enemy
+            if (isFriend)
+                OnTeammatePlayer();
+            else
+                OnEnemyPlayer();
+        }
+        else
+        {
+            OnEnemyPlayer();
+        }
+
+        if (!isWeaponBlocked)
+        {
+            CurrentTPVGun();
+            currentGunID = networkGunID;
+        }
+    }
+
+    /// <summary>
+    /// Function called each frame when this Remote player is an enemy
+    /// </summary>
+    void OnEnemyPlayer()
+    {
+        playerHealthManager.DamageEnabled = true;
+        DrawName.enabled = bl_SpectatorMode.IsActive();
 #if UMM
         if (bl_MiniMapData.Instance.showEnemysWhenFire)
         {
@@ -276,13 +244,13 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     }
 
     /// <summary>
-    /// use this function to set all details for teammate
+    /// Function called each frame when this Remote player is a teammate.
     /// </summary>
-    void TeamMate()
+    void OnTeammatePlayer()
     {
-        PDM.DamageEnabled = FrienlyFire;
+        playerHealthManager.DamageEnabled = bl_RoomSettings.Instance.CurrentRoomInfo.friendlyFire;
         DrawName.enabled = true;
-        m_CController.enabled = false;
+        characterController.enabled = false;
 
         if (!SendInfo)
         {
@@ -291,8 +259,41 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
         }
 
 #if UMM
-   MiniMapItem?.ShowItem();
+        MiniMapItem?.ShowItem();
 #endif
+    }
+
+    /// <summary>
+    /// This function control which TP Weapon should be showing on remote players.
+    /// </summary>
+    public void CurrentTPVGun(bool local = false)
+    {
+        if (gunManager == null)
+            return;
+        if (networkGunID == currentGunID) return;
+
+        //Get the current gun ID local and sync with remote
+        for(int i = 0; i < NetworkGuns.Count; i++)
+        {
+            currentGun = NetworkGuns[i];
+            if (currentGun == null) continue;
+
+            int currentID = (local) ? gunManager.GetCurrentWeapon().GunID : networkGunID;
+            if (currentGun.GetWeaponID == currentID)
+            {
+                currentGun.gameObject.SetActive(true);
+                if (!local)
+                {
+                    CurrenGun = currentGun;
+                    CurrenGun.SetUpType();
+                }
+            }
+            else
+            {
+                if(currentGun != null)
+                    currentGun.gameObject.SetActive(false);
+            }
+        }
     }
 
     /// <summary>
@@ -309,7 +310,7 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     }
 
     /// <summary>
-    /// 
+    /// Change the current TPWeapon on this remote player.
     /// </summary>
     public void SetNetworkWeapon(GunType weaponType, bl_NetworkGun networkGun)
     {
@@ -317,11 +318,15 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     }
 
     /// <summary>
-    /// public method to send the RPC shot synchronization
+    /// Send a call to all other clients to sync a bullet
     /// </summary>
     public void IsFire(GunType m_type, Vector3 hitPosition)
     {
-        photonView.RPC("FireSync", RpcTarget.Others, new object[] { (int)m_type, hitPosition });
+        photonView.RPC(nameof(FireSync), RpcTarget.Others, new object[] { (int)m_type, hitPosition });
+        if (m_PlayerAnimation.isActiveAndEnabled)
+        {
+            m_PlayerAnimation.PlayFireAnimation(m_type);
+        }
     }
 
     /// <summary>
@@ -329,12 +334,7 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     /// </summary>
     public void IsFireGrenade(float t_spread, Vector3 pos, Quaternion rot, Vector3 angular)
     {
-        photonView.RPC("FireGrenadeRpc", RpcTarget.Others, new object[] { t_spread, pos, rot, angular });
-    }
-
-    public Transform NetGunsRoot
-    {
-        get { if (!bl_GameData.Instance.DropGunOnDeath) { CurrentTPVGun(true); } return NetworkGuns[0].transform.parent; }
+        photonView.RPC(nameof(FireGrenadeRpc), RpcTarget.Others, new object[] { t_spread, pos, rot, angular });
     }
 
     /// <summary>
@@ -366,11 +366,6 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
                 CurrenGun.KnifeFire();//if you need add your custom fire launcher in networkgun
                 m_PlayerAnimation.PlayFireAnimation(GunType.Knife);
                 break;
-            case GunType.TwoHandedMelee:
-                CurrenGun.SwingTwoHandedMelee();
-                m_PlayerAnimation.PlayFireAnimation(GunType.TwoHandedMelee);
-                //add audio here as well...
-                break;
             default:
                 Debug.LogWarning("Not defined weapon type to sync bullets.");
                 break;
@@ -398,7 +393,7 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     /// </summary>
     public void SetActiveGrenade(bool active)
     {
-        photonView.RPC("SyncOffAmmoGrenade", RpcTarget.Others, active);
+        photonView.RPC(nameof(SyncOffAmmoGrenade), RpcTarget.Others, active);
     }
 
     [PunRPC]
@@ -412,16 +407,19 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
         CurrenGun.GetComponent<bl_NetworkGun>().DesactiveGrenade(active, InvicibleMat);
     }
 
-    public void SetWeaponBlocked(bool isBlocked)
+    public void SetWeaponBlocked(int blockState)
     {
-        isWeaponBlocked = isBlocked;
-        photonView.RPC("RPCSetWBlocked", RpcTarget.Others, isBlocked);
+        isWeaponBlocked = blockState == 1;
+        if (!PhotonNetwork.OfflineMode)
+            photonView.RPC(nameof(RPCSetWBlocked), RpcTarget.Others, blockState);
+        else
+            RPCSetWBlocked(blockState);
     }
 
     [PunRPC]
-    public void RPCSetWBlocked(bool isBlocked)
+    public void RPCSetWBlocked(int blockState)
     {
-        isWeaponBlocked = isBlocked;
+        isWeaponBlocked = blockState == 1;
         if (isWeaponBlocked)
         {
             for (int i = 0; i < NetworkGuns.Count; i++)
@@ -429,7 +427,7 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
                 NetworkGuns[i].gameObject.SetActive(false);
             }
         }
-        m_PlayerAnimation.OnWeaponBlock(isBlocked);
+        m_PlayerAnimation.OnWeaponBlock(blockState);
         currentGunID = -1;
     }
 
@@ -464,7 +462,7 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
             return;
         }
 
-        transform.localPosition = m_PositionControl.UpdatePosition(transform.localPosition);
+        m_Transform.localPosition = m_PositionControl.UpdatePosition(m_Transform.localPosition);
     }
     /// <summary>
     /// 
@@ -476,7 +474,7 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
             return;
         }
 
-        transform.localRotation = m_RotationControl.GetRotation(transform.localRotation);
+        m_Transform.localRotation = m_RotationControl.GetRotation(m_Transform.localRotation);
     }
 
     /// <summary>
@@ -484,12 +482,15 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     /// </summary>
     void DoDrawEstimatedPositionError()
     {
+        if (NetworkBodyState == PlayerState.InVehicle) return;
+
         Vector3 targetPosition = m_PositionControl.GetNetworkPosition();
 
-        Debug.DrawLine(targetPosition, transform.position, Color.red, 2f);
-        Debug.DrawLine(transform.position, transform.position + Vector3.up, Color.green, 2f);
+        Debug.DrawLine(targetPosition, m_Transform.position, Color.red, 2f);
+        Debug.DrawLine(m_Transform.position, m_Transform.position + Vector3.up, Color.green, 2f);
         Debug.DrawLine(targetPosition, targetPosition + Vector3.up, Color.red, 2f);
     }
+
     /// <summary>
     /// These values are synchronized to the remote objects if the interpolation mode
     /// or the extrapolation mode SynchronizeValues is used. Your movement script should pass on
@@ -507,7 +508,37 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     {
         if (photonView.IsMine)
         {
-            photonView.RPC("RPCSetWBlocked", RpcTarget.Others, isWeaponBlocked);
+            photonView.RPC(nameof(RPCSetWBlocked), RpcTarget.Others, isWeaponBlocked ? 1 : 0);
         }
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    private Vector3 GetHeadLookPosition()
+    {
+        if (PlayerReferences == null || PlayerReferences.playerIK == null)
+            return HeadTarget.position + HeadTarget.forward;
+
+        return PlayerReferences.playerIK.HeadLookTarget.position;
+    }
+
+    public Transform NetGunsRoot
+    {
+        get { if (!bl_GameData.Instance.DropGunOnDeath) { CurrentTPVGun(true); } return NetworkGuns[0].transform.parent; }
+    }
+
+    private bl_PlayerReferences playerReferences;
+    public bl_PlayerReferences PlayerReferences
+    {
+        get
+        {
+            if (playerReferences == null) playerReferences = GetComponent<bl_PlayerReferences>();
+            return playerReferences;
+        }
+    }
+    private bl_FirstPersonController fpControler => PlayerReferences.firstPersonController;
+    private bl_PlayerHealthManager playerHealthManager => PlayerReferences.playerHealthManager;
+    private CharacterController characterController => PlayerReferences.characterController;
 }

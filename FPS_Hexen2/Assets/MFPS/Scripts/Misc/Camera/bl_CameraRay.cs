@@ -6,16 +6,22 @@ using System;
 public class bl_CameraRay : bl_MonoBehaviour
 {
     public int CheckFrameRate = 5;
+    public CastMethod castMethod = CastMethod.Box;
     [Range(0.1f, 10)] public float DistanceCheck = 2;
     public LayerMask DetectLayers;
+    public bool Checking { get; set; }
 
+    #region Private members
     private int currentFrame = 0;
     private RaycastHit RayHit;
     private bl_GunPickUp gunPickup = null;
-    public bool Checking { get; set; }
     private List<byte> activers = new List<byte>();
     private Dictionary<string, Action<bool>> triggers = new Dictionary<string, Action<bool>>();
     bool hasDectected = false;
+    public float ExtraRayDistance { get; set; } = 0;
+    private byte increaseCounter = 0;
+    public Vector3 boxDimesion = new Vector3(0.15f, 0.15f, 0.1f);
+    #endregion
 
     /// <summary>
     /// 
@@ -36,8 +42,19 @@ public class bl_CameraRay : bl_MonoBehaviour
     /// </summary>
     void Fire()
     {
-        Ray r = new Ray(transform.position, transform.forward);
-        if (Physics.Raycast(r, out RayHit, DistanceCheck, DetectLayers, QueryTriggerInteraction.Ignore))
+        bool detected = false;
+        if (castMethod == CastMethod.Box || castMethod == CastMethod.Both)
+        {
+            detected = Physics.BoxCast(CachedTransform.position, boxDimesion, CachedTransform.forward,
+                out RayHit, CachedTransform.rotation, RayDistance, DetectLayers, QueryTriggerInteraction.Ignore);
+        }
+        if((castMethod == CastMethod.Ray || castMethod == CastMethod.Both) && !detected)
+        {
+            Ray r = new Ray(CachedTransform.position, CachedTransform.forward);
+            detected = Physics.Raycast(r, out RayHit, RayDistance, DetectLayers, QueryTriggerInteraction.Ignore);
+        }
+
+        if (detected)
         {
             hasDectected = true;
             OnHit();
@@ -93,12 +110,12 @@ public class bl_CameraRay : bl_MonoBehaviour
     /// If you wanna detect when an object is in front of the local player view
     /// register a callback in this function
     /// </summary>
-    public void AddTrigger(string objectName, Action<bool> callback, byte id)
+    public byte AddTrigger(string objectName, Action<bool> callback, byte id)
     {
-        if (triggers.ContainsKey(objectName)) { Debug.Log("This trigger already list."); return; }
+        if (triggers.ContainsKey(objectName)) { return 0; }
 
         triggers.Add(objectName, callback);
-        SetActiver(true, id);
+        return SetActiver(true, id);
     }
 
 
@@ -112,12 +129,21 @@ public class bl_CameraRay : bl_MonoBehaviour
         SetActiver(false, id);
     }
 
-    public void SetActiver(bool add, byte id)
+    /// <summary>
+    /// 
+    /// </summary>
+    public byte SetActiver(bool add, byte id)
     {
         if (add)
         {
             if (!activers.Contains(id))
             {
+                activers.Add(id);
+            }
+            else
+            {
+                increaseCounter++;
+                id = increaseCounter;
                 activers.Add(id);
             }
             Checking = true;
@@ -128,11 +154,26 @@ public class bl_CameraRay : bl_MonoBehaviour
             {
                 activers.Remove(id);
             }
-            if (activers.Count <= 0) Checking = false;
+            if (activers.Count <= 0)
+            {
+                Checking = false;
+            }
         }
+        return id;
     }
+
+    private float RayDistance => DistanceCheck + ExtraRayDistance;
+
     private void OnDrawGizmosSelected()
     {
-        Gizmos.DrawRay(transform.position, transform.forward * DistanceCheck);
+        Gizmos.DrawRay(transform.position, transform.forward * RayDistance);
+    }
+
+    [System.Serializable]
+    public enum CastMethod
+    {
+        Ray,
+        Box,
+        Both,
     }
 }

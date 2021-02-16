@@ -1,18 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class bl_KickVotation : bl_MonoBehaviour
 {
-
     [SerializeField] private KeyCode YesKey = KeyCode.F1;
     [SerializeField] private KeyCode NoKey = KeyCode.F2;
 
-    private PhotonView View;
     private bool IsOpen = false;
-
     private int YesCount = 0;
     private int NoCount = 0;
     private bl_KickVotationUI UI;
@@ -21,25 +17,59 @@ public class bl_KickVotation : bl_MonoBehaviour
     private bool Voted = false;
     private int AllVoters = 0;
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void Awake()
     {
         base.Awake();
-        View = PhotonView.Get(this);
         UI = FindObjectOfType<bl_KickVotationUI>();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void OnEnable()
     {
         base.OnEnable();
         bl_PhotonCallbacks.PlayerLeftRoom += OnPhotonPlayerDisconnected;
+        bl_PhotonNetwork.Instance.AddCallback(PropertiesKeys.VoteEvent, OnNetworkReceived);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void OnDisable()
     {
         base.OnDisable();
         bl_PhotonCallbacks.PlayerLeftRoom -= OnPhotonPlayerDisconnected;
+        bl_PhotonNetwork.Instance?.RemoveCallback(OnNetworkReceived);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    void OnNetworkReceived(Hashtable data)
+    {
+        CallType ct = (CallType)data["type"];
+        switch(ct)
+        {
+            case CallType.VoteStart:
+                VoteStart(data);
+                break;
+            case CallType.Vote:
+                OnVote(data);
+                break;
+            case CallType.VoteEnd:
+                EndVotation(data);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="player"></param>
     public void RequestKick(Player player)
     {
         if (IsOpen || player == null)
@@ -55,21 +85,11 @@ public class bl_KickVotation : bl_MonoBehaviour
             return;
         }
 
-        View.RPC("RpcRequestKick", RpcTarget.All, player);
-    }
-
-    [PunRPC]
-    void RpcRequestKick(Player player, PhotonMessageInfo info)
-    {
-        if (IsOpen)
-            return;
-
-        AllVoters = PhotonNetwork.PlayerListOthers.Length;
-        TargetPlayer = player;
-        ResetVotation();
-        isAgainMy = (player.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber);
-        UI.OpenVotatation(player, info.Sender);
-        IsOpen = true;
+        var data = bl_UtilityHelper.CreatePhotonHashTable();
+        data.Add("type", CallType.VoteStart);
+        data.Add("player", player);
+        data.Add("by", bl_PhotonNetwork.LocalPlayer);
+        bl_MFPS.Network.SendNetworkCall(PropertiesKeys.VoteEvent, data);
     }
 
     /// <summary>
@@ -83,6 +103,9 @@ public class bl_KickVotation : bl_MonoBehaviour
         Voted = false;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public override void OnUpdate()
     {
         if (!IsOpen || isAgainMy || Voted)
@@ -102,16 +125,27 @@ public class bl_KickVotation : bl_MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="yes"></param>
     void SendVote(bool yes)
     {
-        View.RPC("RPCReceiveVote", RpcTarget.All, yes);
+        var data = bl_UtilityHelper.CreatePhotonHashTable();
+        data.Add("type", CallType.Vote);
+        data.Add("vote", yes);
+        bl_MFPS.Network.SendNetworkCall(PropertiesKeys.VoteEvent, data);
+
         UI.OnSendLocalVote(yes);
     }
 
-    [PunRPC]
-    void RPCReceiveVote(bool yes, PhotonMessageInfo info)
+    /// <summary>
+    /// 
+    /// </summary>
+    void OnVote(Hashtable data)
     {
-        if (yes)
+        var vote = (bool)data["vote"];
+        if (vote)
         {
             YesCount++;
         }
@@ -129,31 +163,58 @@ public class bl_KickVotation : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
+    void VoteStart(Hashtable data)
+    {
+        if (IsOpen)
+            return;
+
+        var player = (Player)data["player"];
+        var by = (Player)data["by"];
+
+        AllVoters = PhotonNetwork.PlayerListOthers.Length;
+        TargetPlayer = player;
+        ResetVotation();
+        isAgainMy = (player.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber);
+        UI.OpenVotatation(player, by);
+        IsOpen = true;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void EndVotation(Hashtable data)
+    {
+        var kicked = (bool)data["kick"];
+
+        IsOpen = false;
+        Voted = true;
+        UI.OnFinish(kicked);
+        TargetPlayer = null;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     void CountVotes()
     {
         int half = (AllVoters / 2);
         bool kicked = false;
+        var data = bl_UtilityHelper.CreatePhotonHashTable();
+        data.Add("type", CallType.VoteEnd);
+
         if (YesCount > half)//kick
         {
             bl_PhotonNetwork.Instance.KickPlayer(TargetPlayer);
             kicked = true;
-            View.RPC("EndVotation", RpcTarget.All, kicked);
         }
-        else if (NoCount > half)//no kick
-        {
-            View.RPC("EndVotation", RpcTarget.All, kicked);
-        }
+
+        data.Add("kick", kicked);
+        bl_MFPS.Network.SendNetworkCall(PropertiesKeys.VoteEvent, data);
     }
 
-    [PunRPC]
-    void EndVotation(bool finaledKicked)
-    {
-        IsOpen = false;
-        Voted = true;
-        UI.OnFinish(finaledKicked);
-        TargetPlayer = null;
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public void OnPhotonPlayerDisconnected(Player otherPlayer)
     {
         if (TargetPlayer == null)
@@ -164,6 +225,13 @@ public class bl_KickVotation : bl_MonoBehaviour
             //cancel voting due player left the room by himself
             UI.OnFinish(true);
         }
+    }
+
+    public enum CallType
+    {
+        VoteStart = 0,
+        Vote,
+        VoteEnd
     }
 
     private static bl_KickVotation _instance;

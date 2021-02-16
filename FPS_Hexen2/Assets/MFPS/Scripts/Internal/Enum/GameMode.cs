@@ -6,7 +6,7 @@
     SND,
     CP,
     GR,
-    LSM,
+    BR,
     ELIM,
     DM,
 }

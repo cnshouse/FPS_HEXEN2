@@ -7,32 +7,21 @@ public class ShopAddonInitialiazer : MonoBehaviour
 {
     private const string DEFINE_KEY = "SHOP";
 
+#if !SHOP
     [MenuItem("MFPS/Addons/Shop/Enable")]
     private static void Enable()
     {
         EditorUtils.SetEnabled(DEFINE_KEY, true);
     }
+#endif
 
-
-    [MenuItem("MFPS/Addons/Shop/Enable", true)]
-    private static bool EnableValidate()
-    {
-        return !EditorUtils.CompilerIsDefine(DEFINE_KEY);
-    }
-
-
+#if SHOP
     [MenuItem("MFPS/Addons/Shop/Disable")]
     private static void Disable()
     {
         EditorUtils.SetEnabled(DEFINE_KEY, false);
     }
-
-
-    [MenuItem("MFPS/Addons/Shop/Disable", true)]
-    private static bool DisableValidate()
-    {
-        return EditorUtils.CompilerIsDefine(DEFINE_KEY);
-    }
+#endif
 
     [MenuItem("MFPS/Addons/Shop/Integrate")]
     private static void Instegrate()

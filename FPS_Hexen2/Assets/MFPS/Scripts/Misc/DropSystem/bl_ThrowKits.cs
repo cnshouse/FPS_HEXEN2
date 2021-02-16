@@ -24,9 +24,7 @@ public class bl_ThrowKits : bl_MonoBehaviour
     /// </summary>
     public Transform InstancePoint;
     public AudioClip SpawnSound;
-#if !CLASS_CUSTOMIZER
-    private PlayerClass m_class = PlayerClass.Assault;
-#endif
+    public PlayerClass CurrentPlayerClass { get; set; } = PlayerClass.Assault;
 
     /// <summary>
     /// 
@@ -34,7 +32,7 @@ public class bl_ThrowKits : bl_MonoBehaviour
     void Start()
     {
 #if !CLASS_CUSTOMIZER
-        m_class = bl_RoomMenu.PlayerClass;
+        CurrentPlayerClass = PlayerClass.Assault.GetSavePlayerClass();
 #endif
     }
 
@@ -54,13 +52,13 @@ public class bl_ThrowKits : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-     void OnMobileClick()
+    void OnMobileClick()
     {
         if (AmountOfKits <= 0 || DropCallerPrefab == null) return;
 
         int id = 0;
 #if !CLASS_CUSTOMIZER
-        if ((m_class == PlayerClass.Assault || m_class == PlayerClass.Recon))
+        if ((CurrentPlayerClass == PlayerClass.Assault || CurrentPlayerClass == PlayerClass.Recon))
         {
             id = 1;
         }
@@ -79,56 +77,24 @@ public class bl_ThrowKits : bl_MonoBehaviour
         if (bl_GameData.Instance.isChating) return;
         if (AmountOfKits <= 0 || DropCallerPrefab == null) return;
 
-#if !INPUT_MANAGER
 #if !CLASS_CUSTOMIZER
-        if (Input.GetKeyDown(ThrowKey))
+        if (isThrowKey())
         {
             int id = 0;
-            if((m_class == PlayerClass.Assault || m_class == PlayerClass.Recon))
+            if((CurrentPlayerClass == PlayerClass.Assault || CurrentPlayerClass == PlayerClass.Recon))
             {
                 id = 1;
             }
             ThrowCaller(id);
         }
 #else
-        ClassCutomizeInput();
-#endif
-#else
-#if !CLASS_CUSTOMIZER
-        if (bl_Input.isButtonDown("ThrowItem"))
-        {
-            int id = 0;
-            if ((m_class == PlayerClass.Assault || m_class == PlayerClass.Recon))
-            {
-                id = 1;
-            }
-            ThrowCaller(id);
-        }
-#else
-        ClassCutomizeInput();
-#endif
-#endif
-
-    }
-
-#if CLASS_CUSTOMIZER
-    void ClassCutomizeInput()
-    {
-#if !INPUT_MANAGER
-        if (Input.GetKeyDown(ThrowKey))
+        if (isThrowKey())
         {
             int id = bl_ClassManager.Instance.ClassKit;
             ThrowCaller(id);
         }
-#else
-        if (bl_Input.isButtonDown("ThrowItem"))
-        {
-            int id = bl_ClassManager.Instance.ClassKit;
-            ThrowCaller(id);
-        }
-#endif
+#endif       
     }
-#endif
 
     /// <summary>
     /// 
@@ -143,5 +109,18 @@ public class bl_ThrowKits : bl_MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(SpawnSound, this.transform.position, 1.0f);
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public bool isThrowKey()
+    {
+#if !INPUT_MANAGER
+        return Input.GetKeyDown(ThrowKey);
+#else
+        return bl_Input.isButtonDown("ThrowItem");
+#endif
     }
 }

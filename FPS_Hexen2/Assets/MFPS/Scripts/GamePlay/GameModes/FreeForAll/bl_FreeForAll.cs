@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using ExitGames.Client.Photon;
+﻿using System.Collections.Generic;
 using Photon.Realtime;
 using UnityEngine;
 using Photon.Pun;
+using MFPS.GameModes.FreeForAll;
 
 public class bl_FreeForAll : MonoBehaviour, IGameMode
 {
@@ -33,6 +32,9 @@ public class bl_FreeForAll : MonoBehaviour, IGameMode
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void OnPlayerPropertiesUpdate(Player target, ExitGames.Client.Photon.Hashtable changedProps)
     {
         if (changedProps.ContainsKey(PropertiesKeys.KillsKey))
@@ -75,6 +77,10 @@ public class bl_FreeForAll : MonoBehaviour, IGameMode
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public Player GetBestPlayer()
     {
         if (FFAPlayerSort.Count > 0 && FFAPlayerSort != null)

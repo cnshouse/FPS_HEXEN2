@@ -12,39 +12,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b55a2495e855d4b42af31d8d4a657ed7, type: 3}
   m_Name: LoginDataBasePro
   m_EditorClassIdentifier: 
-  PhpHostPath: http://blacklegendsfps.atwebpages.com/php/
+  PhpHostPath: https://www.lovattostudio.com/demo/ulogin-system-pro/v2/
   SecretKey: 123456
   OnLoginLoadLevel: MainMenu
   CheckGameVersion: 0
   AutomaticallyLoadScene: 0
-  UpdateIP: 1
+  PerToPerEncryption: 1
+  ForceLoginScene: 1
+  allowPlayAsGuest: 1
   DetectBan: 1
   RequiredEmailVerification: 0
   CanRegisterSameEmail: 0
-  BanComprobationInMid: 1
+  checkInternetConnection: 1
+  BanComprobationInMid: 0
   PlayerCanChangeNick: 1
-  ForceLoginScene: 0
-  MinPasswordLenght: 5
-  CheckBanEach: 60
+  UpdateIP: 1
   FilterUserNames: 1
+  MinPasswordLenght: 5
+  maxLoginAttempts: 5
+  waitTimeAfterFailAttempts: 180
+  CheckBanEach: 60
+  CreateClanPrice: 1500
+  DeleteEmptyClans: 1
   rememberMeBehave: 1
   LoginPhp: bl_Login
   RegisterPhp: bl_Register
   DataBasePhp: bl_DataBase
+  AdminPhp: bl_Admin
+  AccountPhp: bl_Account
   RankingPhp: bl_Ranking
   InitPhp: bl_Init
   BanListPhp: bl_BanList
-  BanPhp: bl_Ban
   ResetPassword: bl_ResetPassword
-  ChangePassword: bl_ChangePassword
-  RequestUser: bl_RequestUser
   SupportPhp: bl_Support
   DataBaseCreator: bl_DatabaseCreator
   ClanPhp: bl_Clan
   ShopPhp: bl_Shop
-  HostName: fdb30.awardspace.net:3306
-  DataBaseName: 3675070_fps
-  DataBaseUser: 3675070_fps
-  Passworld: '#Fergie440'
-  CommonFile: {fileID: 0}
+  SecurityPhp: bl_Security
+  OAuthPhp: bl_OAuth
+  HostName: 
+  DataBaseName: 
+  DataBaseUser: 
+  Passworld: 
   FullLogs: 0

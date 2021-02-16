@@ -1,155 +1,149 @@
-﻿/////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////bl_AmmoKit.cs//////////////////////////////////////
-///////put one of these in each scene to handle Items////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////Briner Games/////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 
 public class bl_ItemManager : bl_MonoBehaviour
-{ 
-    /// <summary>
-    /// instantiated reference necessary for synchronization
-    /// </summary>
-    public static int CurrentCount = 0;
-    /// <summary>
-    /// list of objects waiting to turn off again
-    /// </summary>
-    public List<GameObject> m_Objects = new List<GameObject>();
-    /// <summary>
-    /// timeouts to reactivate the gameobject (assign auto)
-    /// </summary>
-    private List<float> m_info = new List<float>();
-    /// <summary>
-    /// list of all components within this transform (assign auto)
-    /// </summary>
-    private bl_MedicalKit[] m_allmedkit;
-    private bl_AmmoKit[] m_allammo;
-    /// <summary>
-    /// time to revive, defaults Kits
-    /// </summary>
-    public float TimeToRespawn = 15;
-    public AudioClip PickSound;
-    //private
-    private int each_id = 0;
-    private List<bl_MedicalKit> store = new List<bl_MedicalKit>();
-    private List<bl_AmmoKit> storeAmmos = new List<bl_AmmoKit>();
+{
+    [Header("Network Prefabs")]
+    public List<bl_NetworkItem> networkItemsPrefabs = new List<bl_NetworkItem>();
 
-    protected override void Awake()
+    [Header("Settings")]
+    public float respawnItemsAfter = 12;
+
+    //private
+    public Dictionary<string, bl_NetworkItem> networkItemsPool = new Dictionary<string, bl_NetworkItem>();
+    private List<RespawnItems> respawnItems = new List<RespawnItems>();
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    protected override void OnEnable()
     {
-        base.Awake();
-        m_allmedkit = this.transform.GetComponentsInChildren<bl_MedicalKit>();
-        m_allammo = this.transform.GetComponentsInChildren<bl_AmmoKit>();
-        //automatically place the id
-        if (m_allmedkit.Length > 0)
+        if (!PhotonNetwork.IsConnected) return;
+
+        base.OnEnable();
+        bl_PhotonNetwork.Instance.AddCallback(PropertiesKeys.NetworkItemInstance, OnNetworkItemInstance);
+        bl_PhotonNetwork.Instance.AddCallback(PropertiesKeys.NetworkItemChange, OnNetworkItemChange);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        bl_PhotonNetwork.Instance?.RemoveCallback(OnNetworkItemInstance);
+        bl_PhotonNetwork.Instance?.RemoveCallback(OnNetworkItemChange);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="data"></param>
+    void OnNetworkItemInstance(ExitGames.Client.Photon.Hashtable data)
+    {
+        //don't instance for the player that create the item since it's already instance for him
+        int actorID = (int)data["actorID"];
+        if (PhotonNetwork.LocalPlayer.ActorNumber == actorID) return;
+
+        string prefabName = (string)data["prefab"];
+        bl_NetworkItem prefab = networkItemsPrefabs.Find(x =>
         {
-            foreach (bl_MedicalKit medit in m_allmedkit)
-            {
-                medit.m_id = each_id;
-                each_id++;
-                store.Add(medit);
-            }
+            return (x != null && x.gameObject.name == prefabName);
+        });
+
+        if (prefab == null)
+        {
+            Debug.LogWarning($"The network prefab {prefabName} is not listed in the bl_ItemManager of this scene.");
+            return;
         }
-        //continue with ammo kits.
-        if (m_allammo.Length > 0)
+
+        prefab = Instantiate(prefab.gameObject, (Vector3)data["position"], (Quaternion)data["rotation"]).GetComponent<bl_NetworkItem>();
+        prefab.OnNetworkInstance(data);
+        //pool this network item
+        PoolItem(prefabName, prefab);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void PoolItem(string itemName, bl_NetworkItem item)
+    {
+        if (networkItemsPool.ContainsKey(itemName)) return;
+        networkItemsPool.Add(itemName, item);
+    }
+
+    /// <summary>
+    /// Called when the state of a network item change, eg: OnDestroy, OnEnable or OnDisable
+    /// </summary>
+    void OnNetworkItemChange(ExitGames.Client.Photon.Hashtable data)
+    {
+        string itemName = (string)data["name"];
+
+        if (!networkItemsPool.ContainsKey(itemName))
         {
-            foreach (bl_AmmoKit ammo in m_allammo)
-            {
-                ammo.m_id = each_id;
-                each_id++;
-                storeAmmos.Add(ammo);
-            }
+            Debug.LogWarning($"The network item {itemName} couldn't be found, maybe was instanced before this player enter in the room.");
+            return;
+        }
+        int state = (int)data["active"];
+        if (state == -1)
+        {
+            Destroy(networkItemsPool[itemName].gameObject);
+        }
+        else
+        {
+            networkItemsPool[itemName].gameObject.SetActive(state == 1 ? true : false);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    public override void OnUpdate()
+    public override void OnSlowUpdate()
     {
-        if (m_info.Count <= 0)
-            return;
-        //time management to revive
-        for (int i = 0; i < m_info.Count; i++)
+        CheckTimers();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void CheckTimers()
+    {
+        if (respawnItems.Count <= 0) return;
+
+        int c = respawnItems.Count;
+        for (int i = c - 1; i > 0; i--)
         {
-            m_info[i] -= Time.deltaTime;
-            if (m_info[i] <= 0)
+            if(Time.time - respawnItems[i].AddedTime >= respawnItems[i].RespawnAfter)
             {
-                EnableAgain(m_Objects[i]);
-                m_info.Remove(m_info[i]);
-                m_Objects.Remove(m_Objects[i]);
+                respawnItems[i].Item.SetActiveSync(true);
+                respawnItems.RemoveAt(i);
             }
         }
     }
 
     /// <summary>
-    /// Call this to temporarily disable a Items
+    /// Add an item to the waiting list to respawn it after certain time
     /// </summary>
-    /// <param name="t_id">Item to disable</param>
-    public void DisableNew(int t_id)
+    public void WaitForRespawn(bl_NetworkItem item, float respawnAfter = 0)
     {
-        photonView.RPC("DisableGO", RpcTarget.AllBuffered, t_id);
-    }
-    /// <summary>
-    /// Enabled again the current finished item
-    /// </summary>
-    /// <param name="t_obj"></param>
-    void EnableAgain(GameObject t_obj)
-    {
-        t_obj.SetActive(true);
-    }
-    /// <summary>
-    /// called this when need destroy a item
-    /// </summary>
-    /// <param name="t_name">Item Name</param>
-    public void DestroyGO(string t_name){
-        photonView.RPC("DestroyGOSync", RpcTarget.All, t_name);
-    }
-
-    [PunRPC]
-    void DestroyGOSync(string GOname)
-    {
-        Destroy(GameObject.Find(GOname).gameObject);
-    }
-
-    [PunRPC]
-    void DisableGO(int m_id)
-    {
-        if (m_allmedkit.Length <= 0)
-            return;
-
-        foreach (bl_MedicalKit med in m_allmedkit)
+        respawnItems.Add(new RespawnItems()
         {
-            if (med.m_id == m_id)
-            {
-                if (PickSound)
-                {
-                    AudioSource.PlayClipAtPoint(PickSound, med.transform.position, 1.0f);
-                }
-                m_Objects.Add(med.gameObject);
-                m_info.Add(TimeToRespawn);
-                med.gameObject.SetActive(false);
-                return;
-            }
-        }
+            Item = item,
+            AddedTime = Time.time,
+            RespawnAfter = respawnAfter <= 0? respawnItemsAfter : respawnAfter
+        });
+        item.SetActiveSync(false);
+    }
 
-        foreach (bl_AmmoKit ammo in m_allammo)
-        {
-            if (ammo.m_id == m_id)
-            {
-                if (PickSound)
-                {
-                    AudioSource.PlayClipAtPoint(PickSound, ammo.transform.position, 1.0f);
-                }
-                m_Objects.Add(ammo.gameObject);
-                m_info.Add(TimeToRespawn);
-                ammo.gameObject.SetActive(false);
-            }
-        }
+    public class RespawnItems
+    {
+        public float AddedTime;
+        public float RespawnAfter;
+        public bl_NetworkItem Item;
     }
 
     private static bl_ItemManager _instance;

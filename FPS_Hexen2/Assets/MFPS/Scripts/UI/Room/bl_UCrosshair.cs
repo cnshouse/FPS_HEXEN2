@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using MFPS.Internal.Structures;
 
 public class bl_UCrosshair : bl_MonoBehaviour
 {
 
     [Header("Settings")]
+    [LovattoToogle] public bool fadeOnAim = true;
     [Range(1, 10)] public float ScaleLerp = 5;
     [Range(0.1f, 5)] public float RotationSpeed = 2;
     [Range(0.01f, 1)] public float OnFireScaleRate = 0.1f;
@@ -17,7 +19,9 @@ public class bl_UCrosshair : bl_MonoBehaviour
     public Color HitMarkerColor = Color.white;
 
     [Header("References")]
-    [SerializeField] private bl_UCrosshairInfo[] Crosshairs;
+    [SerializeField] private bl_UCrosshairInfo genericCrosshair = null;
+    [SerializeField] private WeaponCrosshair[] weaponCrosshairs = null;
+
     [SerializeField] private RectTransform RootContent;
     [SerializeField] private RectTransform HitMarkerRoot;
 
@@ -25,9 +29,7 @@ public class bl_UCrosshair : bl_MonoBehaviour
     private Vector2 InitSizeDelta;
     private bool isAim = false;
     public bool isCrouch { get; set; }
-    private int currentCross = 0;
     private Canvas m_Canvas;
-    private Vector3 InitialPosition;
     private Vector3 InitialRotation;
     private float lastTimeFire;
     private CanvasGroup m_HitAlpha;
@@ -44,7 +46,6 @@ public class bl_UCrosshair : bl_MonoBehaviour
         if (RootContent != null)
         {
             InitSizeDelta = RootContent.sizeDelta;
-            InitialPosition = RootContent.position;
             InitialRotation = RootContent.eulerAngles;
             CrossAlpha = RootContent.GetComponent<CanvasGroup>();
         }
@@ -72,6 +73,9 @@ public class bl_UCrosshair : bl_MonoBehaviour
         FadeControll();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -83,12 +87,18 @@ public class bl_UCrosshair : bl_MonoBehaviour
         RootContent.gameObject.SetActive(bl_GameData.Instance.showCrosshair);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void OnDisable()
     {
         base.OnDisable();
         bl_EventHandler.onLocalPlayerDeath -= OnLocalDeath;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     void OnLocalDeath()
     {
         isCrouch = false;
@@ -116,30 +126,58 @@ public class bl_UCrosshair : bl_MonoBehaviour
         if (CrossAlpha == null)
             return;
 
-        float at = (isAim) ? 0 : 1;
+        float at = (isAim && fadeOnAim) ? 0 : 1;
         CrossAlpha.alpha = Mathf.Lerp(CrossAlpha.alpha, at, Time.deltaTime * 8);
     }
 
     /// <summary>
     /// 
     /// </summary>
-    public void Change(int id)
+    /// <param name="gun"></param>
+    public void ActiveCrosshairForWeapon(bl_Gun gun)
     {
-        if (!bl_GameData.Instance.showCrosshair) return;
+        if (gun == null) return;
+        ActiveCrosshairForWeapon(gun.WeaponType);
+    }
 
-        if (id <= Crosshairs.Length - 1)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="gun"></param>
+    public void ActiveCrosshairForWeapon(GunType gun)
+    {
+        bool found = false;
+        for (int i = 0; i < weaponCrosshairs.Length; i++)
         {
-            currentCross = id;
-            foreach (bl_UCrosshairInfo g in Crosshairs) { g.gameObject.SetActive(false); }
-            GetCrosshair.gameObject.SetActive(true);
-            if (GetCrosshair.isStatic) { Reset(); }
+            if (weaponCrosshairs[i].gunType == gun)
+            {
+                weaponCrosshairs[i].crosshair?.SetActive(true);
+                m_currentCrosshair = weaponCrosshairs[i].crosshair;
+                found = true;
+            }
+            else
+            {
+                weaponCrosshairs[i].crosshair?.SetActive(false);
+            }
         }
-        else
+        if (!found)
         {
-            Debug.LogWarning("the id is more bigger that cross hair list length!");
+            ActiveGenericCrosshair();
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public void ActiveGenericCrosshair()
+    {
+        genericCrosshair.SetActive(true);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="show"></param>
     public void Show(bool show)
     {
         if (Block || !bl_GameData.Instance.showCrosshair)
@@ -210,18 +248,19 @@ public class bl_UCrosshair : bl_MonoBehaviour
     public void Reset()
     {
         RootContent.sizeDelta = new Vector2(GetCrosshair.NormalScaleAmount, GetCrosshair.NormalScaleAmount);
-        RootContent.position = InitialPosition;
         RootContent.eulerAngles = InitialRotation;
     }
 
     /// <summary>
     /// 
     /// </summary>
+    private bl_UCrosshairInfo m_currentCrosshair;
     public bl_UCrosshairInfo GetCrosshair
     {
         get
         {
-            return Crosshairs[currentCross];
+            if (m_currentCrosshair == null) m_currentCrosshair = genericCrosshair;
+            return m_currentCrosshair;
         }
     }
 
@@ -260,6 +299,13 @@ public class bl_UCrosshair : bl_MonoBehaviour
         RootContent.sizeDelta = new Vector2(GetCrosshair.NormalScaleAmount, GetCrosshair.NormalScaleAmount);
     }
 #endif
+
+    [System.Serializable]
+    public class WeaponCrosshair
+    {
+        public GunType gunType;
+        public bl_UCrosshairInfo crosshair;
+    }
 
     private static bl_UCrosshair m_instance;
     public static bl_UCrosshair Instance

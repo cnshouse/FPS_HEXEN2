@@ -1,58 +1,67 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using System.Text;
 using UnityEngine.Events;
 using UnityEngine.Networking;
 using System.Collections.Generic;
+using System.Globalization;
+using Ping = System.Net.NetworkInformation.Ping;
 using MFPS.ULogin;
+#if CLANS
+using MFPS.Addon.Clan;
+#endif
 
-public class bl_LoginPro : MonoBehaviour
+public class bl_LoginPro : bl_LoginProBase
 {
 
     [Header("References")]
-    [SerializeField]private GameObject[] Panels = null;
-    [SerializeField]private GameObject LoadingUI = null;
-    [SerializeField]private GameObject DataBasePrefab = null;
-    [SerializeField]private GameObject TermsAndConditions = null;
+    [SerializeField] private GameObject[] Panels = null;
+    [SerializeField] private GameObject LoadingUI = null;
+    [SerializeField] private GameObject DataBasePrefab = null;
+    [SerializeField] private GameObject TermsAndConditions = null;
     [SerializeField] private GameObject AdminPanelButon = null;
     [SerializeField] private GameObject ClanButton = null;
     [SerializeField] private GameObject OutdatedUI = null;
-    [SerializeField]private Animator PanelAnim = null;
-    [SerializeField]private Text LogText = null;
-    [SerializeField]private Text LoginSuccessText = null;
-    [SerializeField]private CanvasGroup FadeAlpha = null;
-    public Button GuestButton;
-    
+    [SerializeField] private GameObject noConnectionUI = null;
+    [SerializeField] private Animator PanelAnim = null;
+    [SerializeField] private Text LogText = null;
+    [SerializeField] private Text LoginSuccessText = null;
+    [SerializeField] private CanvasGroup FadeAlpha = null;
+    [SerializeField] private Button GuestButton;
+
     public UnityEvent OnLogin;
     public UnityEvent OnLogOut;
+    public UnityEvent onReady;
 
+    public Dictionary<string, string> loginUserData;
+    #region Private members
     private bool isRequesting = false;
-    private bl_DataBase DataBase;
     private bool isLogin = false;
+    private int remaingAttempts = 5;
     private LoginUserInfo LocalUserInfo;
     private string lastKey = string.Empty;
     private bl_BanSystem Ban;
     private string currentIP;
     private bl_SignIn SignIn;
+    #endregion
+    public CustomAuthCredentials customAuthCredentials { get; set; }
+    public static Action<AuthenticationType> onRequestAuth;
 
     /// <summary>
     /// 
     /// </summary>
     void Awake()
     {
-        PlayerPrefs.DeleteAll();
         if (FindObjectOfType<bl_DataBase>() == null)
         {
             Instantiate(DataBasePrefab);
         }
-        DataBase = FindObjectOfType<bl_DataBase>();
         Ban = FindObjectOfType<bl_BanSystem>();
         SignIn = transform.GetComponentInChildren<bl_SignIn>(true);
-        if(GuestButton != null) { GuestButton.interactable = false; }
         AdminPanelButon.SetActive(false);
         ClanButton.SetActive(false);
-        GuestButton.gameObject.SetActive(false);
+        SetPlayAsGuestButtonActive(false);
     }
 
     /// <summary>
@@ -60,16 +69,30 @@ public class bl_LoginPro : MonoBehaviour
     /// </summary>
     void Start()
     {
+        remaingAttempts = ULoginSettings.maxLoginAttempts;
         ChangePanel(0);
         LoadingUI.SetActive(false);
-        StartCoroutine(DoStartSequence());
+        InitProccess();
+
+#if INPUT_MANAGER
+        bl_Input.Initialize();
+        bl_Input.CheckGamePadRequired();
+#endif
     }
 
-#region Login
     /// <summary>
     /// 
     /// </summary>
-    public void Login(string user,string pass)
+    public void InitProccess()
+    {
+        StartCoroutine(DoStartSequence());
+    }
+
+    #region Login
+    /// <summary>
+    /// 
+    /// </summary>
+    public void Login(string user, string pass)
     {
         if (isRequesting)
             return;
@@ -83,99 +106,291 @@ public class bl_LoginPro : MonoBehaviour
     /// 
     /// </summary>
     /// <returns></returns>
-    IEnumerator LoginProcess(string user,string pass)
+    IEnumerator LoginProcess(string user, string pass)
     {
         isRequesting = true;
         LoadingUI.SetActive(true);
         SetLogText("");
 
-        //sets the mySQL query to the amount of rows to load
-        Dictionary<string, string> formData = new Dictionary<string, string>();
-        formData.Add("name",user);
-        formData.Add("password", pass);
+        var formData = CreateForm(false, true);
+        formData.AddSecureField("name", user);
+        formData.AddSecureField("password", pass);
+        formData.AddSecureField("authApp", "ulogin");
 
-        //Creates instance to run the php script to access the mySQL database
+        var credential = new CustomAuthCredentials()
+        {
+            UserName = user,
+            UniqueID = pass,
+            authenticationType = AuthenticationType.ULogin,
+        };
+
         using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Login), formData))
         {
             //Wait for server response...
             yield return www.SendWebRequest();
-            string result = www.downloadHandler.text;
+
+            var response = new ULoginResult(www);
             if (bl_LoginProDataBase.Instance.FullLogs)
             {
-                Debug.Log("Login Result: " + result);
+                Debug.Log("Login Result: " + response.RawTextReadable);
             }
             //check if we have some error
-            if (www.isNetworkError == false && !www.isHttpError)
+            if (!response.isError)
             {
-                //decompile information
-                string[] data = result.Split("|"[0]);
-
-                if (data[0].Contains("success"))
+                if (ParseLoginData(response.RawTextReadable))
                 {
                     //'Decompile' information from response
                     LoginUserInfo info = new LoginUserInfo();
-                    info.ParseFullData(data);
+                    info.ParseFullData(loginUserData);
                     info.IP = currentIP;
 #if CLANS
                     info.Clan = new bl_ClanInfo();
-                    info.Clan.GetSplitInfo(data);
+                    info.Clan.GetSplitInfo(loginUserData);
                     yield return StartCoroutine(info.Clan.GetClanBasicInfo());
                     ClanButton.SetActive(true);
 #endif
                     //send information to local database
                     DataBase.OnLogin(info);
-                    DataBase.CacheAccessToken = pass;
                     LocalUserInfo = info;
                     SignIn.OnLogin(info);
-                    if(GuestButton != null) { GuestButton.gameObject.SetActive(false); }
-                    SetLogText("Sign In success!");
-                    //detect if this account is banned before load next level
-                    if (bl_LoginProDataBase.Instance.DetectBan && Ban.CheckBanAccount(info.LoginName))
-                    {
-                        yield break;//just stop here due this account is banned
-                    }
-                    //if it's OK, load next level of show continue menu
-                    isLogin = true;
-                    if (OnLogin != null) { OnLogin.Invoke(); }
-                    //check if session has to be remember
-                    if(bl_LoginProDataBase.Instance.rememberMeBehave == RememberMeBehave.RememberSession)
-                    {
-                        if(SignIn != null && SignIn.RememberMe())
-                        {
-                            //if it's so, encrypt and save the authentication credentials that the user used.
-                            bl_LoginProDataBase.Instance.RememberCredentials = $"{user}:{pass}";
-                        }
-                    }
-                    yield return new WaitForSeconds(1f);
-                    if (bl_LoginProDataBase.Instance.AutomaticallyLoadScene)//load the scene after login success (without continue menu)
-                    {
-                        Continue();
-                    }
-                    else
-                    {
-                        LoginSuccessText.text = string.Format("Welcome <b>{0}</b>", info.NickName);
-                        if (info.UserStatus == LoginUserInfo.Status.Admin || info.UserStatus == LoginUserInfo.Status.Moderator)
-                        {
-                            AdminPanelButon.SetActive(true);
-                        }
-                        ChangePanel(3);
-                    }
+                    DataBase.CacheAccessToken = pass;
+
+                    OnAuthenticated(credential, info);
                 }
-                else//Wait, have a error?, please contact me for help with the result of next debug log.
+                else
                 {
                     //Some error with the server setup.
-                   // Debug.Log(result);
-                    ErrorType(result);
+                    if (bl_LoginProDataBase.Instance.FullLogs)
+                        Debug.Log(response.RawTextReadable);
+
+                    if (www.responseCode == 401)//wrong credentials
+                    {
+                        OnWrongCredentials(credential);
+                    }
+                    else
+                        ErrorType(response.RawTextReadable);
                 }
             }
             else
             {
-                Debug.LogError("Error: " + www.error);
+                if (www.responseCode == 401)//wrong credentials
+                {
+                    OnWrongCredentials(credential);
+                }
+                else
+                    response.PrintError();
             }
         }
         bl_ULoginLoadingWindow.Instance?.SetActive(false);
         LoadingUI.SetActive(false);
         isRequesting = false;
+    }
+
+    /// <summary>
+    /// Login with custom credentials
+    /// You can use this to login/register a player with they ID from authenticator like Facebook, Steam, GooglePlay, etc...
+    /// </summary>
+    /// <param name="credentials"></param>
+    public void Authenticate(CustomAuthCredentials credentials)
+    {
+        if (string.IsNullOrEmpty(credentials.UniqueID) || string.IsNullOrEmpty(credentials.UserName)) return;
+
+        bl_ULoginLoadingWindow.Instance?.SetText($"Authenticating with {credentials.authenticationType.ToString()}...", true);
+        customAuthCredentials = credentials;
+        WWWForm wf = CreateForm(false, true);
+        wf.AddSecureField("name", credentials.UserName);
+        wf.AddSecureField("password", credentials.GetUniquePassword());
+        wf.AddSecureField("appAuth", credentials.authenticationType.ToString().ToLower());
+        LoadingUI.SetActive(true);
+
+        WebRequest.POST(GetURL(bl_LoginProDataBase.URLType.Login), wf, (result) =>
+         {
+             if (!result.isError)
+             {
+                 //if the login is successful
+                 if (ParseLoginData(result.RawTextReadable))
+                 {
+                     //parse the player data retrieved by the server
+                     var info = BuildUserData();
+
+#if CLANS
+                     info.Clan = new bl_ClanInfo();
+                     info.Clan.GetSplitInfo(loginUserData);
+                     StartCoroutine(info.Clan.GetClanBasicInfo(() =>
+                     {
+                         OnAuthenticated(credentials, info);
+                     }));
+                     ClanButton.SetActive(true);
+#else
+                     OnAuthenticated(credentials, info);
+
+#endif
+                 }
+                 else //if we can't login
+                 {
+                     result.Print(true);
+                 }
+             }
+             else
+             {
+                 if (result.HTTPCode == 401) //because the account is not registered yet
+                 {
+                     if (string.IsNullOrEmpty(credentials.NickName))
+                     {
+                         ChangePanel(8);
+                         Panels[8].GetComponent<bl_NickNamePanel>().SetCallback((nickName) =>
+                         {
+                             customAuthCredentials.NickName = nickName;
+                             CreateAccountWithCredentials(customAuthCredentials);
+                         });
+                     }
+                     else
+                     {
+                         CreateAccountWithCredentials(customAuthCredentials);
+                         return;
+                     }
+                 }
+                 else
+                 {
+                     result.PrintError();
+                 }
+             }
+             bl_ULoginLoadingWindow.Instance.SetActive(false);
+             LoadingUI.SetActive(false);
+         });
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void OnAuthenticated(CustomAuthCredentials credentials, LoginUserInfo info)
+    {
+        SetPlayAsGuestButtonActive(false);
+        SetLogText("Sign In success!");
+        //detect if this account is banned before load next level
+        if (bl_LoginProDataBase.Instance.DetectBan && Ban.CheckBanAccount(info.LoginName))
+        {
+            return;
+        }
+        //if it's OK, load next level of show continue menu
+        isLogin = true;
+        OnLogin?.Invoke();
+        //check if session has to be remember
+        if (bl_LoginProDataBase.Instance.rememberMeBehave == RememberMeBehave.RememberSession)
+        {
+            if (SignIn != null && SignIn.RememberMe())
+            {
+                string p = credentials.authenticationType == AuthenticationType.ULogin ? credentials.UniqueID : credentials.GetUniquePassword();
+                //if it's so, encrypt and save the authentication credentials that the user used.
+                bl_LoginProDataBase.Instance.RememberCredentials = $"{(int)credentials.authenticationType}:{credentials.UserName}:{p}";
+            }
+        }
+        if (bl_LoginProDataBase.Instance.AutomaticallyLoadScene)//load the scene after login success (without continue menu)
+        {
+            Continue();
+        }
+        else
+        {
+            LoginSuccessText.text = string.Format("Welcome <b>{0}</b>", info.NickName);
+            if (info.UserStatus == LoginUserInfo.Status.Admin || info.UserStatus == LoginUserInfo.Status.Moderator)
+            {
+                AdminPanelButon.SetActive(true);
+            }
+            ChangePanel(3);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void CreateAccountWithCredentials(CustomAuthCredentials credentials)
+    {
+        if (string.IsNullOrEmpty(credentials.UniqueID) || string.IsNullOrEmpty(credentials.UserName)) return;
+
+        bl_ULoginLoadingWindow.Instance?.SetText($"Creating account with {credentials.authenticationType.ToString()}...", true);
+
+        string loginName = string.IsNullOrEmpty(credentials.UserName) ? credentials.NickName : credentials.UserName;
+        string password = credentials.GetUniquePassword();
+        //Used for security check for authorization to modify database
+        string hash = bl_DataBaseUtils.Md5Sum(loginName + password + bl_LoginProDataBase.Instance.SecretKey).ToLower();
+        WWWForm wf = CreateForm(false, true);
+        wf.AddSecureField("name", loginName); // adds the login name to the form
+        wf.AddSecureField("nick", credentials.NickName); // adds the nick name to the form
+        wf.AddSecureField("password", password); // adds the player password to the form
+        wf.AddSecureField("coins", bl_GameData.Instance.VirtualCoins.InitialCoins);
+        wf.AddSecureField("multiemail", 0);
+        wf.AddSecureField("emailVerification", 1);
+        wf.AddSecureField("uIP", currentIP);
+        wf.AddSecureField("hash", hash); // adds the security hash for Authorization
+
+        LoadingUI.SetActive(true);
+        WebRequest.POST(GetURL(bl_LoginProDataBase.URLType.Register), wf, (result) =>
+        {
+            if (!result.isError)
+            {
+                string text = result.Text;
+                if (bl_LoginProDataBase.Instance.FullLogs)
+                {
+                    Debug.Log("Register Result: " + result.RawText);
+                }
+                if (result.resultState == ULoginResult.Status.Success)
+                {
+                    //show success
+                    SetLogText("Register success!");
+                    Authenticate(credentials);
+                }
+                else if (text == "008")
+                {
+                    SetLogText("This Nickname is already taken.");
+                }
+                else
+                {
+                    ErrorType(text);
+                    result.Print();
+                }
+            }
+            else
+            {
+                result.PrintError();
+            }
+            bl_ULoginLoadingWindow.Instance.SetActive(false);
+            LoadingUI.SetActive(false);
+        });
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private LoginUserInfo BuildUserData()
+    {
+        LoginUserInfo info = new LoginUserInfo();
+        info.ParseFullData(loginUserData);
+        info.IP = currentIP;
+        info.authenticationType = customAuthCredentials != null ? customAuthCredentials.authenticationType : AuthenticationType.ULogin;
+        //send information to local database
+        DataBase.OnLogin(info);
+        LocalUserInfo = info;
+        SignIn.OnLogin(info);
+        return info;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private bool ParseLoginData(string result)
+    {
+        string[] rows = result.Split('\n');
+        if (!rows[0].Contains("success")) return false;
+
+        loginUserData = new Dictionary<string, string>();
+        for (int i = 0; i < rows.Length; i++)
+        {
+            if (string.IsNullOrEmpty(rows[i]) || i == 0) continue;
+
+            string[] keyValuePair = rows[i].Split('|');
+            loginUserData.Add(keyValuePair[0], keyValuePair[1]);
+        }
+        return true;
     }
 
     /// <summary>
@@ -186,6 +401,32 @@ public class bl_LoginPro : MonoBehaviour
         DataBase.isGuest = true;
         Continue();
     }
+
+    /// <summary>
+    /// Called when the user try to login with wrong credentials (user name or password)
+    /// </summary>
+    private void OnWrongCredentials(CustomAuthCredentials credentials)
+    {
+        remaingAttempts--;
+        if (remaingAttempts > 0)
+        {
+            if(remaingAttempts > 3)
+            SetLogText("The username or password you've entered are incorrect!");
+            else SetLogText($"The username or password you've entered are incorrect!, attempts left: {remaingAttempts}");
+        }
+        else
+        {
+            var currentTime = DateTime.Now.ToUniversalTime();
+            currentTime = currentTime.AddSeconds(ULoginSettings.waitTimeAfterFailAttempts);
+            var gt = new CultureInfo("en-US");
+            string dateStr = currentTime.ToString(gt);
+            string key = bl_DataBaseUtils.Encrypt(bl_DataBaseUtils.LOCK_TIME_KEY);
+            PlayerPrefs.SetString(key, bl_DataBaseUtils.Encrypt(dateStr));
+            SetPlayAsGuestButtonActive(false);
+            ChangePanel(9);
+            remaingAttempts = ULoginSettings.maxLoginAttempts;
+        }
+    }
 #endregion
 
 #region SignUp
@@ -193,52 +434,49 @@ public class bl_LoginPro : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    public void SinUp(string user, string nick, string pass,string email)
+    public void SinUp(string user, string nick, string pass, string email)
     {
         if (isRequesting)
             return;
         if (bl_LoginProDataBase.Instance == null)
             return;
 
-        StartCoroutine(RegisterProcess(user,nick, pass, email));
+        StartCoroutine(RegisterProcess(user, nick, pass, email));
     }
 
     /// <summary>
     /// Connect with database
     /// </summary>
     /// <returns></returns>
-    IEnumerator RegisterProcess(string user, string nick, string pass,string email)
+    IEnumerator RegisterProcess(string user, string nick, string pass, string email)
     {
         isRequesting = true;
         SetLogText("");
         //Used for security check for authorization to modify database
-        string hash = Md5Sum(user + pass + bl_LoginProDataBase.Instance.SecretKey).ToLower();
+        string hash = bl_DataBaseUtils.Md5Sum(user + pass + bl_LoginProDataBase.Instance.SecretKey).ToLower();
         LoadingUI.SetActive(true);
         //Assigns the data we want to save
         //Where -> Form.AddField("name" = matching name of value in SQL database
-        WWWForm mForm = new WWWForm();
-        mForm.AddField("name", user); // adds the login name to the form
-        mForm.AddField("nick", nick); // adds the nick name to the form
-        mForm.AddField("password", pass); // adds the player password to the form
-        mForm.AddField("kills", 0); // adds the kill total to the form
-        mForm.AddField("deaths", 0); // adds the death Total to the form
-        mForm.AddField("score", 0); // adds the score Total to the form
-        mForm.AddField("coins", bl_GameData.Instance.VirtualCoins.InitialCoins);
+        WWWForm mForm = CreateForm(false, true);
+        mForm.AddSecureField("name", user); // adds the login name to the form
+        mForm.AddSecureField("nick", nick); // adds the nick name to the form
+        mForm.AddSecureField("password", pass); // adds the player password to the form
+        mForm.AddSecureField("coins", bl_GameData.Instance.VirtualCoins.InitialCoins);
         if (bl_LoginProDataBase.Instance.RequiredEmailVerification && !string.IsNullOrEmpty(email))
         {
-            mForm.AddField("email", email);
+            mForm.AddSecureField("email", email);
         }
         else
         {
-            mForm.AddField("email", "none");
+            mForm.AddSecureField("email", "none");
         }
-        mForm.AddField("multiemail", bl_LoginProDataBase.Instance.CanRegisterSameEmailInt());
-        mForm.AddField("emailVerification", bl_LoginProDataBase.Instance.RequiereVerification());
-        mForm.AddField("uIP", currentIP);
-        mForm.AddField("hash", hash); // adds the security hash for Authorization
+        mForm.AddSecureField("multiemail", bl_LoginProDataBase.Instance.CanRegisterSameEmailInt());
+        mForm.AddSecureField("emailVerification", bl_LoginProDataBase.Instance.RequiereVerification());
+        mForm.AddSecureField("uIP", currentIP);
+        mForm.AddSecureField("hash", hash); // adds the security hash for Authorization
 
         //Creates instance of WWW to runs the PHP script to save data to mySQL database
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Register), mForm))
+        using (UnityWebRequest www = UnityWebRequest.Post(GetURL(bl_LoginProDataBase.URLType.Register), mForm))
         {
             yield return www.SendWebRequest();
 
@@ -283,7 +521,7 @@ public class bl_LoginPro : MonoBehaviour
     /// </summary>
     IEnumerator LoadSceneSecuence(string scene)
     {
-        while(FadeAlpha.alpha < 1)
+        while (FadeAlpha.alpha < 1)
         {
             FadeAlpha.alpha += Time.deltaTime * 2;
             yield return new WaitForEndOfFrame();
@@ -298,31 +536,55 @@ public class bl_LoginPro : MonoBehaviour
     IEnumerator DoStartSequence()
     {
         FadeAlpha.alpha = 1;
-        while(FadeAlpha.alpha > 0)
+        while (FadeAlpha.alpha > 0)
         {
             FadeAlpha.alpha -= Time.deltaTime;
             yield return null;
         }
+        if(ULoginSettings.checkInternetConnection)
+        yield return StartCoroutine(CheckConnection());
         StartCoroutine(InitRequest());
     }
 
     /// <summary>
-    /// Md5s Security Features
+    /// 
     /// </summary>
-    public string Md5Sum(string input)
+    /// <returns></returns>
+    IEnumerator CheckConnection()
     {
-        System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
-        byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
-        byte[] hash = md5.ComputeHash(inputBytes);
+        bl_ULoginLoadingWindow.Instance?.SetActive(true);
+        bl_ULoginLoadingWindow.Instance?.SetText("Checking connection...");
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            noConnectionUI.SetActive(true);
+            yield break;
+        }
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < hash.Length; i++) { sb.Append(hash[i].ToString("X2")); }
-        return sb.ToString();
+        using (UnityWebRequest w = UnityWebRequest.Get("https://www.google.com"))
+        {
+            yield return w.SendWebRequest();
+            if (!w.isNetworkError && !w.isHttpError)
+            {
+                if (w.responseCode != 200)
+                {
+                    noConnectionUI.SetActive(true);
+                    Debug.LogWarning("No Internet: " + w.responseCode);
+                    StopAllCoroutines();
+                }
+            }
+            else
+            {
+                noConnectionUI.SetActive(true);
+                StopAllCoroutines();
+            }
+        }
     }
+
+    
 #endregion
 
 #region Change Password
-    public void ChangePassword(string pass,string newpass)
+    public void ChangePassword(string pass, string newpass)
     {
         if (isRequesting)
             return;
@@ -331,6 +593,7 @@ public class bl_LoginPro : MonoBehaviour
         if (!isLogin) { SetLogText("Need login to request a password change."); return; }
 
         StartCoroutine(ChangePasswordRequest(pass, newpass));
+
     }
 
     /// <summary>
@@ -343,16 +606,17 @@ public class bl_LoginPro : MonoBehaviour
         LoadingUI.SetActive(true);
         SetLogText("");
         //Used for security check for authorization to modify database
-        string hash = Md5Sum(LocalUserInfo.ID + bl_LoginProDataBase.Instance.SecretKey).ToLower();
         // Create instance of WWWForm
-        WWWForm wf = new WWWForm();
+        WWWForm wf = CreateForm(FormHashParm.ID, true);
         //sets the mySQL query to the amount of rows to load
-        wf.AddField("id", LocalUserInfo.ID);
-        wf.AddField("password", pass);
-        wf.AddField("newpassword", newpass);
-        wf.AddField("hash", hash);
+        wf.AddSecureField("id", LocalUserInfo.ID);
+        wf.AddSecureField("type", 1);
+        wf.AddSecureField("password", pass);
+        wf.AddSecureField("data", newpass);
+        wf.AddSecureField("hash", bl_DataBaseUtils.CreateSecretHash(bl_DataBase.Instance.LocalUser.ID.ToString()));
+
         //Creates instance to run the php script to access the mySQL database
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.ChangePassword), wf))
+        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Account), wf))
         {
             //Wait for server response...
             yield return www.SendWebRequest();
@@ -382,7 +646,7 @@ public class bl_LoginPro : MonoBehaviour
 #endregion
 
 #region Reset Password
-    public void RequestNewPassword(string user,string email)
+    public void RequestNewPassword(string user, string email)
     {
         if (isRequesting)
             return;
@@ -412,18 +676,18 @@ public class bl_LoginPro : MonoBehaviour
         LoadingUI.SetActive(true);
         SetLogText("");
         //Used for security check for authorization to modify database
-        string hash = Md5Sum(email + bl_LoginProDataBase.Instance.SecretKey).ToLower();
         lastKey = string.Format("LS-{0}", bl_DataBaseUtils.GenerateKey(8));
         // Create instance of WWWForm
-        WWWForm wf = new WWWForm();
+        WWWForm wf = CreateForm(false, true);
         //sets the mySQL query to the amount of rows to load
-        wf.AddField("name", user);
-        wf.AddField("email", email);
-        wf.AddField("key", lastKey);
-        wf.AddField("step", 1);
-        wf.AddField("hash", hash);
+        wf.AddSecureField("id", user);
+        wf.AddSecureField("email", email);
+        wf.AddSecureField("data", lastKey);
+        wf.AddSecureField("type", 2);
+        wf.AddSecureField("hash", bl_DataBaseUtils.CreateSecretHash(user));
+
         //Creates instance to run the php script to access the mySQL database
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.ResetPassword), wf))
+        using (UnityWebRequest www = UnityWebRequest.Post(GetURL(bl_LoginProDataBase.URLType.Account), wf))
         {
             //Wait for server response...
             yield return www.SendWebRequest();
@@ -434,7 +698,7 @@ public class bl_LoginPro : MonoBehaviour
             {
                 if (result.Contains("success"))
                 {
-                    SetLogText("An email with your reset key has ben send to your email-address");
+                    SetLogText("An email with your reset key has been sent to your email-address");
                     ChangePanel(7);
                 }
                 else//Wait, have a error?, please contact me for help with the result of next debug logwarning.
@@ -460,17 +724,16 @@ public class bl_LoginPro : MonoBehaviour
         isRequesting = true;
         LoadingUI.SetActive(true);
         SetLogText("");
-        //Used for security check for authorization to modify database
-        string hash = Md5Sum(user + bl_LoginProDataBase.Instance.SecretKey).ToLower();
         // Create instance of WWWForm
-        WWWForm wf = new WWWForm();
+        WWWForm wf = CreateForm(false, true);
         //sets the mySQL query to the amount of rows to load
-        wf.AddField("name", user);
-        wf.AddField("password", pass);
-        wf.AddField("step", 2);
-        wf.AddField("hash", hash);
+        wf.AddSecureField("id", user);
+        wf.AddSecureField("password", pass);
+        wf.AddSecureField("type", 3);
+        wf.AddSecureField("hash", bl_DataBaseUtils.CreateSecretHash(user));
+
         //Creates instance to run the php script to access the mySQL database
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.ResetPassword), wf))
+        using (UnityWebRequest www = UnityWebRequest.Post(GetURL(bl_LoginProDataBase.URLType.Account), wf))
         {
             //Wait for server response...
             yield return www.SendWebRequest();
@@ -481,7 +744,7 @@ public class bl_LoginPro : MonoBehaviour
             {
                 if (result.Contains("success"))
                 {
-                    SetLogText("your password has been reset successfully,you can sign in now.");
+                    SetLogText("your password has been reset successfully, you can sign in now.");
                     ChangePanel(0);
                 }
                 else//Wait, have a error?, please contact me for help with the result of next debug logwarning.
@@ -497,9 +760,9 @@ public class bl_LoginPro : MonoBehaviour
         }
         isRequesting = false;
     }
-    #endregion
+#endregion
 
-    #region IP
+#region IP
     /// <summary>
     /// 
     /// </summary>
@@ -507,6 +770,7 @@ public class bl_LoginPro : MonoBehaviour
     IEnumerator InitRequest()
     {
         bl_ULoginLoadingWindow.Instance?.SetActive(true);
+        bl_ULoginLoadingWindow.Instance?.SetText("Collecting data base information...\n<size=10>Please wait.</size>");
         yield return new WaitForSeconds(0.5f);
         if (!bl_GameData.isDataCached)
         {
@@ -526,6 +790,7 @@ public class bl_LoginPro : MonoBehaviour
                 }
                 string[] info = result.Split("|"[0]);
                 currentIP = info[0];
+
                 if (bl_LoginProDataBase.Instance.CheckGameVersion)
                 {
                     if (bl_GameData.Instance.GameVersion != info[1])
@@ -536,21 +801,25 @@ public class bl_LoginPro : MonoBehaviour
                         yield break;
                     }
                 }
+
+                if(bl_LoginProDataBase.Instance.PerToPerEncryption)
+                {
+                    bool rsaDone = false;
+                    bl_ULoginLoadingWindow.Instance?.SetText("Securing connection...");
+                    bl_LoginProSecurity.Instance.RequestRSAPublicKey((r) =>
+                    {
+                        rsaDone = true;
+                    });
+                    while (!rsaDone) yield return null;
+                }
+
                 if (bl_LoginProDataBase.Instance.DetectBan)
                 {
-                    Ban.Process();
+                    Ban.VerifyIP(OnFinishInitialConnection);
                 }
                 else
                 {
-                    if (!CheckSessionCredentials())
-                    {
-                        bl_ULoginLoadingWindow.Instance?.SetActive(false);
-                        GuestButton.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        bl_ULoginLoadingWindow.Instance.SetText("Authenticating previous session user...");
-                    }
+                    OnFinishInitialConnection();
                 }
             }
             else
@@ -560,6 +829,30 @@ public class bl_LoginPro : MonoBehaviour
         }
     }
 #endregion
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void OnFinishInitialConnection()
+    {
+        if (!CheckSessionCredentials())
+        {
+            bl_ULoginLoadingWindow.Instance?.SetActive(false);
+            if (!bl_DataBaseUtils.IsLoginBlocked())
+            {
+                SetPlayAsGuestButtonActive(true);
+                onReady?.Invoke();
+            }
+            else
+            {
+                ChangePanel(9);
+            }
+        }
+        else
+        {
+            bl_ULoginLoadingWindow.Instance.SetText("Authenticating previous session user...");
+        }
+    }
 
     /// <summary>
     /// 
@@ -575,7 +868,7 @@ public class bl_LoginPro : MonoBehaviour
                 if (credentials.Contains(":"))
                 {
                     string[] userCredentials = credentials.Split(':');
-                    SignIn.SetCredentials(userCredentials[0], userCredentials[1]);
+                    SignIn.SetCredentials(userCredentials[1], userCredentials[2]);
                     if (!SignIn.SignIn())
                     {
                         return false;
@@ -611,6 +904,7 @@ public class bl_LoginPro : MonoBehaviour
     public void SetLogText(string text)
     {
         LogText.text = text;
+        if (ULoginSettings.FullLogs) Debug.Log(text);
     }
 
     /// <summary>
@@ -649,8 +943,23 @@ public class bl_LoginPro : MonoBehaviour
     {
         PanelAnim.Play("change", 0, 0);
         yield return new WaitForSeconds(PanelAnim.GetCurrentAnimatorStateInfo(0).length / 2);
-        for(int i = 0; i < Panels.Length; i++) { Panels[i].SetActive(false); }
+        for (int i = 0; i < Panels.Length; i++) { Panels[i].SetActive(false); }
         Panels[id].SetActive(true);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="active"></param>
+    public void SetPlayAsGuestButtonActive(bool active)
+    {
+        if (GuestButton == null) return;
+        if (!ULoginSettings.allowPlayAsGuest)
+        {
+            GuestButton.gameObject.SetActive(false);
+            return;
+        }
+        GuestButton.gameObject.SetActive(active);
     }
 
     /// <summary>
@@ -659,7 +968,7 @@ public class bl_LoginPro : MonoBehaviour
     private void ErrorType(string error)
     {
         int code = 0;
-        if (int.TryParse(error,out code))
+        if (int.TryParse(error, out code))
         {
             switch (code)
             {
@@ -701,7 +1010,6 @@ public class bl_LoginPro : MonoBehaviour
             SetLogText("Unknown error: " + error);
         }
     }
-
     public string GetKey { get { return lastKey; } }
     public string CurrentIp { get { return currentIP; } }
 

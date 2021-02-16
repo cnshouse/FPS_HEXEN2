@@ -6,21 +6,26 @@ using UnityEngine.Networking;
 
 public class bl_SupportTicketManager : MonoBehaviour
 {
-
-    [SerializeField] private GameObject TicketPrefab;
-    [SerializeField] private Transform TicketsPanel;
-    [SerializeField] private Text MessageText;
-    [SerializeField] private Text TitleText;
-    [SerializeField] private Text NameText;
-    [SerializeField] private InputField ReplyInput;
+    [SerializeField] private GameObject TicketPrefab = null;
+    [SerializeField] private Transform TicketsPanel = null;
+    [SerializeField] private Text MessageText = null;
+    [SerializeField] private Text TitleText = null;
+    [SerializeField] private Text NameText = null;
+    [SerializeField] private InputField ReplyInput = null;
 
     private bl_SupportTicket CurrentTicket;
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void Start()
     {
         LoadTickets();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void LoadTickets()
     {
         StartCoroutine(GetTickets());
@@ -45,7 +50,7 @@ public class bl_SupportTicketManager : MonoBehaviour
             yield return w.SendWebRequest();
             if (!w.isHttpError && !w.isNetworkError)
             {
-                string[] tickets = w.downloadHandler.text.Split("\n"[0]);
+                string[] tickets = w.downloadHandler.text.Split("&&"[0]);
                 List<bl_SupportTicket.Ticket> List = new List<bl_SupportTicket.Ticket>();
                 for (int i = 0; i < tickets.Length; i++)
                 {
@@ -70,6 +75,10 @@ public class bl_SupportTicketManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="ticket"></param>
     public void SelectTicket(bl_SupportTicket ticket)
     {
         CurrentTicket = ticket;
@@ -79,6 +88,9 @@ public class bl_SupportTicketManager : MonoBehaviour
         ReplyInput.text = (string.IsNullOrEmpty(ticket.cacheInfo.Reply)) ? "Reply..." : ticket.cacheInfo.Reply;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void Reply()
     {
         if (CurrentTicket == null || ReplyInput.text == string.Empty)
@@ -93,12 +105,15 @@ public class bl_SupportTicketManager : MonoBehaviour
     /// <returns></returns>
     IEnumerator ReplyTicket()
     {
+        var reply = ReplyInput.text;
+        reply = SanitazeText(reply);
+
         WWWForm wf = new WWWForm();
         string hash = bl_DataBaseUtils.Md5Sum("dev" + bl_LoginProDataBase.Instance.SecretKey).ToLower();
         wf.AddField("hash", hash);
         wf.AddField("name", "dev");
         wf.AddField("id", CurrentTicket.cacheInfo.ID);
-        wf.AddField("reply", ReplyInput.text);
+        wf.AddField("reply", reply);
         wf.AddField("type", 4);
 
         //Request public IP to the server
@@ -126,6 +141,20 @@ public class bl_SupportTicketManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    private string SanitazeText(string input)
+    {
+        input = bl_DataBaseUtils.SanitazeString(input);
+        return input;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="list"></param>
     void InstanceTickets(List<bl_SupportTicket.Ticket> list)
     {
         for(int i = 0; i < list.Count; i++)

@@ -3,43 +3,48 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class bl_CaptureOfFlagUI : MonoBehaviour
+namespace MFPS.GameModes.CaptureOfFlag
 {
-
-    public GameObject Content;
-    public Text Team1ScoreText, Team2ScoreText;
-    public Image FlagImg1, FlagImg2;
-
-    public void SetScores(int team1, int team2)
+    public class bl_CaptureOfFlagUI : MonoBehaviour
     {
-        Team1ScoreText.text = team1.ToString();
-        Team2ScoreText.text = team2.ToString();
-    }
 
-    public void ShowUp()
-    {
-        Content.SetActive(true);
-        Team1ScoreText.color = Team.Team1.GetTeamColor();
-        Team2ScoreText.color = Team.Team2.GetTeamColor();
-        FlagImg1.color = Team.Team1.GetTeamColor();
-        FlagImg2.color = Team.Team2.GetTeamColor();
-    }
+        public GameObject Content;
+        public Text Team1ScoreText, Team2ScoreText;
+        public Image FlagImg1, FlagImg2;
 
-    public void Hide()
-    {
-        Content.SetActive(false);
-    }
-
-    private static bl_CaptureOfFlagUI _instance;
-    public static bl_CaptureOfFlagUI Instance
-    {
-        get
+        public void SetScores(int team1, int team2)
         {
-            if (_instance == null)
+            Team1ScoreText.text = team1.ToString();
+            Team2ScoreText.text = team2.ToString();
+        }
+
+        public void ShowUp()
+        {
+            if (bl_UIReferences.Instance.UIMask.IsEnumFlagPresent(RoomUILayers.TopScoreBoard))
+                Content.SetActive(true);
+
+            Team1ScoreText.color = Team.Team1.GetTeamColor();
+            Team2ScoreText.color = Team.Team2.GetTeamColor();
+            FlagImg1.color = Team.Team1.GetTeamColor();
+            FlagImg2.color = Team.Team2.GetTeamColor();
+        }
+
+        public void Hide()
+        {
+            Content.SetActive(false);
+        }
+
+        private static bl_CaptureOfFlagUI _instance;
+        public static bl_CaptureOfFlagUI Instance
+        {
+            get
             {
-                _instance = FindObjectOfType<bl_CaptureOfFlagUI>();
+                if (_instance == null)
+                {
+                    _instance = FindObjectOfType<bl_CaptureOfFlagUI>();
+                }
+                return _instance;
             }
-            return _instance;
         }
     }
 }

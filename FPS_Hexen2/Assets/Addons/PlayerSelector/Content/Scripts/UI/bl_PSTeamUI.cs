@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-namespace MFPS.PlayerSelector
+
+namespace MFPS.Addon.PlayerSelector
 {
     public class bl_PSTeamUI : MonoBehaviour
     {
