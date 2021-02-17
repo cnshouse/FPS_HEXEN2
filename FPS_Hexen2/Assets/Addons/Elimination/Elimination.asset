@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a776487618c5eca41bfe2a54260297f7, type: 3}
+  m_Name: Elimination
+  m_EditorClassIdentifier: 
+  Name: Elimination
+  Version: 1.1
+  MinMFPSVersion: 1.8
+  Instructions: "<b>Get Started:\r</b>\n\r\n\u2022 After import the package in MFPS
+    Unity Project go to (Unity Tool bar) MFPS -> Addons -> Elimination -> Enable ->
+    Wait until script\r\n  compilation finish.\r\n\u2022 For integrate you have to
+    open a scene map (you have to do in each scene map that you have) -> once the
+    scene is open in editor go to \r\n  MFPS -> Addons -> Elimination -> Integrate
+    -> Save the scene.\r\n\r\n<b>How to Play:\r</b>\n\r\n\u2022 The game mode is the
+    classic Elimination game mode CS style where two teams have to kill every member
+    of the enemy team (can't re-spawn until next round) in order to win,\r\n  the
+    team that reach the maximum number of rounds wons, will be the winner of the game."
+  TutorialScript: 
