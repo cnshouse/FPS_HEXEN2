@@ -140,7 +140,7 @@ public class Teleporter : bl_MonoBehaviour
                 Teleport();
             }
 #else
-            if (bl_Input.isButtonDown("Interact") && PUM.LastTrigger == this)
+            if (bl_Input.isButtonDown("Interact"))
             {
                 Teleport();
             }
