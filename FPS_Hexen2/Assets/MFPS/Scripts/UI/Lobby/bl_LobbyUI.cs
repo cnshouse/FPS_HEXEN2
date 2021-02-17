@@ -260,6 +260,9 @@ public class bl_LobbyUI : MonoBehaviour
         {
             PlayerNameText.text = PhotonNetwork.NickName;
         }
+
+        if (bl_LobbyRoomCreatorUI.Instance == null) { bl_LobbyRoomCreatorUI.Instance = transform.GetComponentInChildren<bl_LobbyRoomCreatorUI>(true); bl_LobbyRoomCreatorUI.Instance.SetupSelectors(); }
+
     }
 
     public void SignOut()
