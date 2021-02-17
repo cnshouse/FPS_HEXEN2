@@ -210,6 +210,38 @@ MonoBehaviour:
       - Name: Extended
         ID: 1
         Description: 
+  - WeaponName: Angel
+    GunID: 10
+    Camos:
+    - Name: Default
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 2100000, guid: cb1b5a3a394ad6b42a597e2bda0d81ad, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 4
+    - Name: Hydro
+      GlobalID: 6
+      ID: 1
+      Camo: {fileID: 2100000, guid: 95c54ca002c4d6c4199b023f68275932, type: 2}
+      OverridePreview: {fileID: 2800000, guid: 19516943777febc499922c851560f17c, type: 3}
+      ofWeaponID: 4
+    Attachments:
+      Suppressers:
+      - Name: No Suppressor
+        ID: 0
+        Description: 
+      Sights:
+      - Name: Iron Sight
+        ID: 0
+        Description: 
+      Foregrips: []
+      Magazines:
+      - Name: Normal
+        ID: 0
+        Description: 
+      - Name: Hydro-Mag
+        ID: 9
+        Description: 
   GlobalCamos:
   - Name: Default
     Preview: {fileID: 2800000, guid: 104c4440614ce2341a2e47bc7244921d, type: 3}
@@ -237,6 +269,11 @@ MonoBehaviour:
     Description: 
     m_sprite: {fileID: 0}
   - Name: Dragon
+    Preview: {fileID: 2800000, guid: cb3d4d8c3882bdf44ad5a83146b0c3f7, type: 3}
+    Price: 0
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Hydro
     Preview: {fileID: 2800000, guid: cb3d4d8c3882bdf44ad5a83146b0c3f7, type: 3}
     Price: 0
     Description: 

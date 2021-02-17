@@ -697,12 +697,35 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1695665893847122, guid: f594b14f498bf4744ae89d213732e723, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1898477813806002, guid: f594b14f498bf4744ae89d213732e723, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 82677485363501138, guid: f594b14f498bf4744ae89d213732e723,
         type: 3}
       propertyPath: OutputAudioMixerGroup
       value: 
       objectReference: {fileID: 24323422, guid: 4d9f0a86cfdf01a4f892912497d155e0,
         type: 2}
+    - target: {fileID: 114568328562637430, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114568328562637430, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114568328562637430, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 224324767462244158, guid: f594b14f498bf4744ae89d213732e723,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -843,6 +866,11 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2759911721441635122, guid: f594b14f498bf4744ae89d213732e723,
+        type: 3}
+      propertyPath: m_Texture
+      value: 
+      objectReference: {fileID: 2800000, guid: b097f28f60107d64cbef827f63cc60c7, type: 3}
     - target: {fileID: 2872105871040989530, guid: f594b14f498bf4744ae89d213732e723,
         type: 3}
       propertyPath: m_AnchorMin.y
