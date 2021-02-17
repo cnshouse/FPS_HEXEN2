@@ -40746,6 +40746,7 @@ GameObject:
   - component: {fileID: 82462751745027106}
   - component: {fileID: 1550226449146865810}
   - component: {fileID: 4283028276199247457}
+  - component: {fileID: -6860303122836090729}
   m_Layer: 12
   m_Name: MPlayer4
   m_TagString: Player
@@ -41195,6 +41196,39 @@ MonoBehaviour:
   collisionOffset: 0.2
   collisionUpdateFrequency: 15
   m_overrideViewState: {fileID: 0}
+--- !u!114 &-6860303122836090729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1994311279885994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f131dd35d296fca4e90efc4ed717e48b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 4963359750807274}
+  OffSet: {x: 0, y: 0, z: 0}
+  Icon: {fileID: 21300076, guid: b2ff3b281537fbc4d91af3e848afde5c, type: 3}
+  DeathIcon: {fileID: 21300000, guid: ca37e507e47f9f148b92dd984e3137f3, type: 3}
+  IconColor: {r: 1, g: 1, b: 1, a: 1}
+  Size: 7
+  m_IconType: 1
+  ShowCircleArea: 0
+  CircleAreaRadius: 10
+  CircleAreaColor: {r: 1, g: 1, b: 1, a: 0.9}
+  isInteractable: 0
+  InfoItem: Info Icon here
+  OffScreen: 1
+  DestroyWithObject: 1
+  BorderOffScreen: 0.01
+  OffScreenSize: 5
+  isHoofdPunt: 0
+  RenderDelay: 0.3
+  m_Effect: 2
+  useCustomIconPrefab: 0
+  CustomIconPrefab: {fileID: 0}
 --- !u!1 &311198440537925604
 GameObject:
   m_ObjectHideFlags: 0

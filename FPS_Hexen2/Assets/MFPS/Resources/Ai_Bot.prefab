@@ -18702,6 +18702,7 @@ GameObject:
   - component: {fileID: 2051169379765699472}
   - component: {fileID: 8154436744694182935}
   - component: {fileID: 7705034376756495840}
+  - component: {fileID: -6485160363613407084}
   m_Layer: 9
   m_Name: Ai_Bot
   m_TagString: AI
@@ -18972,6 +18973,39 @@ MonoBehaviour:
   aiAnimation: {fileID: 8048433842495152654}
   namePlateDrawer: {fileID: 2051169379765699472}
   Agent: {fileID: 2258255967073677686}
+--- !u!114 &-6485160363613407084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2154813483622454084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f131dd35d296fca4e90efc4ed717e48b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 2156865470396423538}
+  OffSet: {x: 0, y: 0, z: 0}
+  Icon: {fileID: 21300076, guid: b2ff3b281537fbc4d91af3e848afde5c, type: 3}
+  DeathIcon: {fileID: 21300000, guid: ca37e507e47f9f148b92dd984e3137f3, type: 3}
+  IconColor: {r: 1, g: 1, b: 1, a: 1}
+  Size: 7
+  m_IconType: 2
+  ShowCircleArea: 0
+  CircleAreaRadius: 10
+  CircleAreaColor: {r: 1, g: 1, b: 1, a: 0.9}
+  isInteractable: 0
+  InfoItem: Info Icon here
+  OffScreen: 1
+  DestroyWithObject: 1
+  BorderOffScreen: 0.01
+  OffScreenSize: 5
+  isHoofdPunt: 0
+  RenderDelay: 0.3
+  m_Effect: 2
+  useCustomIconPrefab: 0
+  CustomIconPrefab: {fileID: 0}
 --- !u!1 &5411168666621703390
 GameObject:
   m_ObjectHideFlags: 0
