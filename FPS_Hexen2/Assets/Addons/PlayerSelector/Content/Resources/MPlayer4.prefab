@@ -40745,6 +40745,7 @@ GameObject:
   - component: {fileID: 114319301372459648}
   - component: {fileID: 82462751745027106}
   - component: {fileID: 1550226449146865810}
+  - component: {fileID: 4283028276199247457}
   m_Layer: 12
   m_Name: MPlayer4
   m_TagString: Player
@@ -41177,6 +41178,23 @@ MonoBehaviour:
   playerCamera: {fileID: 20043858126011860}
   weaponCamera: {fileID: 20567792197327170}
   leftArmTarget: {fileID: 8664927829389513369}
+--- !u!114 &4283028276199247457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1994311279885994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1f95ad67f29c8d478244d985c07f1e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  viewState: {fileID: 11400000, guid: b5135b0561995fe4abd2f9cff3388588, type: 2}
+  viewAimState: {fileID: 11400000, guid: 61d05f33ffdcf5c4d9a08780b6bd8189, type: 2}
+  collisionOffset: 0.2
+  collisionUpdateFrequency: 15
+  m_overrideViewState: {fileID: 0}
 --- !u!1 &311198440537925604
 GameObject:
   m_ObjectHideFlags: 0
