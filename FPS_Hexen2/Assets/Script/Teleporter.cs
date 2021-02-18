@@ -103,6 +103,7 @@ public class Teleporter : bl_MonoBehaviour
             {
                 //on Trigger teleport...
                 //Teleport();
+                bl_PickUpUI.Instance?.Show("Press E to use Teleporter", null, "E");
                 //UIReferences.ShowTeleportPromt(true);
             }
         }
@@ -113,7 +114,7 @@ public class Teleporter : bl_MonoBehaviour
         if (c.transform.CompareTag(bl_PlayerSettings.LocalTag) && Into)
         {
             Into = false;
-           // UIReferences.SetPickUp(false);
+            bl_PickUpUI.Instance?.Hide();
             if (localPlayerIn != null)
             {
                 if (m_DetectMode == DetectMode.Raycast)
@@ -180,6 +181,7 @@ public class Teleporter : bl_MonoBehaviour
         //Add the Character transform movement here...
         localPlayerIn.GetComponent<bl_FirstPersonController>().OnTeleport(TelePortDestination.transform.position, TelePortDestination.transform.rotation);
         SentTeleport = false;
+        bl_PickUpUI.Instance?.Hide();
         //UIReferences.SetPickUp(false);
     }
 

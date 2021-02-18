@@ -66,6 +66,8 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     public bl_NetworkGun CurrenGun { get; set; }
     public int currentGunID { get; set; } = -1;
     public PlayerState NetworkBodyState { get; set; }
+
+    public bool Teleporting = false;
     #endregion
 
     /// <summary>
@@ -457,6 +459,7 @@ public class bl_PlayerNetwork : bl_MonoBehaviour, IPunObservable
     /// </summary>
     void UpdatePosition()
     {
+
         if (m_PositionModel.SynchronizeEnabled == false || m_ReceivedNetworkUpdate == false)
         {
             return;

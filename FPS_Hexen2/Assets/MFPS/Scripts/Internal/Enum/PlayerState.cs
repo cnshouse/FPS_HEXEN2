@@ -10,6 +10,7 @@
     Dropping = 7,
     Gliding = 8,
     InVehicle = 9,
+    Teleporting = 10,
 }
 
 public enum PlayerFPState : byte

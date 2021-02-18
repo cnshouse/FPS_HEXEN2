@@ -111,6 +111,7 @@ public class bl_FirstPersonController : bl_MonoBehaviour
     private PlayerState lastState = PlayerState.Idle;
     private bool forcedCrouch = false;
     private Vector3 surfaceNormal = Vector3.zero;
+    private bool teleporting = false;
     #endregion
 
     /// <summary>
@@ -175,6 +176,8 @@ public class bl_FirstPersonController : bl_MonoBehaviour
     /// </summary>
     public override void OnUpdate()
     {
+        if (teleporting == true) return;
+
         Velocity = m_CharacterController.velocity;
         VelocityMagnitude = Velocity.magnitude;
         RotateView();
@@ -207,6 +210,8 @@ public class bl_FirstPersonController : bl_MonoBehaviour
     /// </summary>
     void MovementInput()
     {
+        if (teleporting == true) return;
+
         if (State == PlayerState.Sliding)
         {
             slideForce -= Time.deltaTime * slideFriction;
@@ -726,6 +731,14 @@ public class bl_FirstPersonController : bl_MonoBehaviour
             VerticalInput = VerticalInput * 1.25f;
         }
 #endif
+        if(State == PlayerState.Teleporting)
+		{
+            VerticalInput = 0;
+            HorizontalInput = 0;
+
+            isControlable = false;
+        }
+
         if (State == PlayerState.Sliding)
         {
             VerticalInput = 1;
@@ -862,12 +875,29 @@ public class bl_FirstPersonController : bl_MonoBehaviour
 
     public void OnTeleport(Vector3 TelePosition, Quaternion TeleRotation)
     {
-        Debug.Log("Teleport the player to " + TelePosition + " with a rotation of " + TeleRotation);
+        teleporting = true;
+        State = PlayerState.Teleporting;
+
         TelePosition.y = TelePosition.y + 1;
-        transform.position = TelePosition;
-        transform.rotation = TeleRotation;
+        StartCoroutine(TeleportTo(TelePosition, TeleRotation));
+        teleporting = false;
+
     }
 
+    IEnumerator TeleportTo(Vector3 pos, Quaternion rot)
+    {
+        MoveToStarted = true;
+        float t = 0;
+        Vector3 from = m_Transform.position;
+        while (t < 1)
+        {
+            t += Time.deltaTime / .2f;
+            m_Transform.position = Vector3.Lerp(from, pos, t);
+            yield return null;
+        }
+        State = PlayerState.Idle;
+        MoveToStarted = false;
+    }
     /// <summary>
     /// 
     /// </summary>
