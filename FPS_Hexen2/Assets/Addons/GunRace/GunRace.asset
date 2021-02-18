@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a776487618c5eca41bfe2a54260297f7, type: 3}
+  m_Name: GunRace
+  m_EditorClassIdentifier: 
+  Name: Gun Race
+  Version: 1.2.1
+  MinMFPSVersion: 1.6
+  Instructions: "<b>Get Started:\r</b>\n\r\n- After import the package inside a MFPS
+    2.0 project, go to (Toolbar) MFPS -> Addons -> GunRace -> Enable\r\n- Now in each
+    map scene integrate the addon, for do it simple: open the scene and click on (toolbar)
+    MFPS -> Addons -> GunRace -> Integrate\r\n- After this you should be able to select
+    the game mode in the 'Host Room' menu of the lobby.\r\n\n<b>Add Weapons:\r</b>\n\r\n-
+    After integrate the addon in a map you will see the GunRace game object inside
+    the GameModes object in hierarchy, select it\r\n  and in the inspector of bl_GunRace
+    -> <b>Gun Order List</b> -> you have to add all the weapons that will be in the
+    game mode in the order that players\r\n  will get them.\n\r\n<b>How to play?\r</b>\n\r\n-
+    in a all vs all mode, players upgrade their weapon by eliminating enemies, players
+    win the match begin the first to reached and kill a enemy with the last weapon,\r\nplayer
+    start with a gun and get new different one after killed other players."
+  TutorialScript: 
