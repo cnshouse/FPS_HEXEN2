@@ -193,7 +193,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LocalGun: {fileID: 0}
   Bullet: {fileID: 0}
-  MuzzleFlash: {fileID: 4939602266566665854}
+  MuzzleFlash: {fileID: 0}
   DesactiveOnOffAmmo: {fileID: 0}
   LeftHandPosition: {fileID: 4036003868155196593}
 --- !u!1 &3569369002887868591
@@ -418,12 +418,6 @@ PrefabInstance:
 --- !u!4 &5061381996448688812 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4000013130703348, guid: f1b1cba650e31db41a394852ab5f8004,
-    type: 3}
-  m_PrefabInstance: {fileID: 5058547204757719896}
-  m_PrefabAsset: {fileID: 0}
---- !u!198 &4939602266566665854 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 198000014156016934, guid: f1b1cba650e31db41a394852ab5f8004,
     type: 3}
   m_PrefabInstance: {fileID: 5058547204757719896}
   m_PrefabAsset: {fileID: 0}
