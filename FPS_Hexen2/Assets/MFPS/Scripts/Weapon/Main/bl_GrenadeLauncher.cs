@@ -94,5 +94,6 @@ public class bl_GrenadeLauncher : MonoBehaviour, IWeapon
         netData.Add("rotation", rotation);
 
         FPWeapon.PlayerNetwork.SyncCustomProjectile(netData);
+        bl_EventHandler.DispatchLocalPlayerFire(FPWeapon.GunID);
     }
 }

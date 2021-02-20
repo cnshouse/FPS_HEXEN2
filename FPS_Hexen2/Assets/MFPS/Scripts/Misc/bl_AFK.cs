@@ -1,74 +1,98 @@
 ﻿using Photon.Pun;
-using Photon.Realtime;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class bl_AFK : bl_MonoBehaviour
+namespace MFPS.Runtime
 {
-    private float lastInput;
-    private Vector3 oldMousePosition = Vector3.zero;
-    private bool Leaving = false;
-    private bool Watching = false;
-    private bl_UIReferences UIReferences;
-    private float AFKTimeLimit = 60;
-
-    protected override void Awake()
+    public class bl_AFK : bl_MonoBehaviour
     {
-        base.Awake();
-        UIReferences = bl_UIReferences.Instance;
-        AFKTimeLimit = bl_GameData.Instance.AFKTimeLimit;
-        if (!bl_GameData.Instance.DetectAFK)
-        {
-            this.enabled = false;
-        }
-    }
+        public Text afkText;
 
-    public override void OnUpdate()
-    {
-        float time = Time.time;
-        //if no movement or action of the player is detected, then start again
-        if ((PhotonNetwork.LocalPlayer == null || Input.anyKey) || ((oldMousePosition != Input.mousePosition)))
+        private float lastInput;
+        private Vector3 oldMousePosition = Vector3.zero;
+        private bool Leaving = false;
+        private bool Watching = false;
+        private float AFKTimeLimit = 60;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected override void Awake()
         {
-            lastInput = time;
-            if (Watching)
+            base.Awake();
+            AFKTimeLimit = bl_GameData.Instance.AFKTimeLimit;
+            if (!bl_GameData.Instance.DetectAFK)
             {
-                UIReferences.AFKText.gameObject.SetActive(false);
-                Watching = false;
+                this.enabled = false;
+                gameObject.SetActive(false);
             }
         }
-        else if ((time - lastInput) > AFKTimeLimit * 0.5f)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override void OnUpdate()
         {
-            Watching = true;
-        }
-        oldMousePosition = Input.mousePosition;
-        if (((lastInput + AFKTimeLimit) - 10f) < time)
-        {
-            float t = AFKTimeLimit - (time - lastInput);
-            if (t >= 0)
+            float time = Time.time;
+            //if no movement or action of the player is detected, then start again
+            if ((PhotonNetwork.LocalPlayer == null || Input.anyKey) || ((oldMousePosition != Input.mousePosition)))
             {
-                UIReferences.SetAFKCount(t);
+                lastInput = time;
+                if (Watching)
+                {
+                    afkText.gameObject.SetActive(false);
+                    Watching = false;
+                }
+            }
+            else if ((time - lastInput) > AFKTimeLimit * 0.5f)
+            {
+                Watching = true;
+            }
+            oldMousePosition = Input.mousePosition;
+            if (((lastInput + AFKTimeLimit) - 10f) < time)
+            {
+                float t = AFKTimeLimit - (time - lastInput);
+                if (t >= 0)
+                {
+                    SetAFKCount(t);
+                }
+            }
+            //If the maximum time is AFK then meets back to the lobby.
+            if ((lastInput + AFKTimeLimit) < time && !Leaving)
+            {
+                bl_UtilityHelper.LockCursor(false);
+                bl_PhotonNetwork.Instance.hasAFKKick = true;
+                LeaveMatch();
+                Leaving = true;
             }
         }
-        //If the maximum time is AFK then meets back to the lobby.
-        if ((lastInput + AFKTimeLimit) < time && !Leaving)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SetAFKCount(float seconds)
         {
-            bl_UtilityHelper.LockCursor(false);
-            bl_PhotonNetwork.Instance.hasAFKKick = true;
-            LeaveMatch();
-            Leaving = true;
+            afkText.gameObject.SetActive(true);
+#if LOCALIZATION
+            afkText.text = string.Format(bl_Localization.Instance.GetText(31), seconds.ToString("F2"));
+#else
+            afkText.text = string.Format(bl_GameTexts.AFKWarning, seconds.ToString("F2"));
+#endif
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void LeaveMatch()
+        {
+            if (PhotonNetwork.IsConnected)
+            {
+                PhotonNetwork.LeaveRoom();
+            }
+            else
+            {
+                bl_UtilityHelper.LoadLevel(bl_GameData.Instance.MainMenuScene);
+            }
         }
     }
-
-
-    public void LeaveMatch()
-    {
-        if (PhotonNetwork.IsConnected)
-        {
-            PhotonNetwork.LeaveRoom();
-        }
-        else
-        {
-            bl_UtilityHelper.LoadLevel(bl_GameData.Instance.MainMenuScene);
-        }
-    }
-
 }

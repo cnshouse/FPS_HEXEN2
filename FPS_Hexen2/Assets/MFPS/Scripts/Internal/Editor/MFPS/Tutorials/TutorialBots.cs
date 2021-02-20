@@ -74,7 +74,7 @@ public class TutorialBots : TutorialWizard
             if(DrawButton("Select bot weapons parent"))
             {
                 bl_AIShooterWeapon asw = FindObjectOfType<bl_AIShooterWeapon>();
-                Transform wr = asw.m_AIWeapons[0].WeaponObject.transform.parent;
+                Transform wr = asw.aiWeapons[0].transform.parent;
                 Selection.activeTransform = wr;
                 EditorGUIUtility.PingObject(wr);
             }
@@ -118,7 +118,11 @@ public class TutorialBots : TutorialWizard
             Debug.LogError("Could not build a ragdoll for this model");
             return;
         }
-        botPrefab.GetComponent<bl_AIShooterAgent>().AimTarget = modelAnimator.GetBoneTransform(HumanBodyBones.Spine);
+
+        bl_AIShooterAgent aisa = botPrefab.GetComponent<bl_AIShooterAgent>();
+        if(aisa != null)
+        botPrefab.GetComponent<bl_AIShooterAgent>().aimTarget = modelAnimator.GetBoneTransform(HumanBodyBones.Spine);
+
         model.transform.parent = oldModel.transform.parent;
         model.transform.localPosition = oldModel.transform.localPosition;
         model.transform.localRotation = oldModel.transform.localRotation;
@@ -135,7 +139,7 @@ public class TutorialBots : TutorialWizard
             hbox.isHead = allColliders[i].name.ToLower().Contains("head");
             aia.HitBoxes.Add(hbox);
         }
-        Transform weaponRoot = botPrefab.GetComponent<bl_AIShooterWeapon>().m_AIWeapons[0].WeaponObject.transform.parent;
+        Transform weaponRoot = botPrefab.GetComponent<bl_AIShooterWeapon>().aiWeapons[0].transform.parent;
         Vector3 wrp = weaponRoot.localPosition;
         Quaternion wrr = weaponRoot.localRotation;
         weaponRoot.parent = modelAnimator.GetBoneTransform(HumanBodyBones.RightHand);

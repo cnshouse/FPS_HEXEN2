@@ -1,10 +1,12 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Animations;
 
 public class bl_RoomCamera : bl_MonoBehaviour
 {
     [Header("Auto Rotation")]
     [LovattoToogle] public bool autoRotation = true;
+    public Axis rotationDirection = Axis.X;
     public float rotationSpeed = 4;
 
     [Header("Fly Camera")]
@@ -18,6 +20,19 @@ public class bl_RoomCamera : bl_MonoBehaviour
     private float rotationY = 0.0f;
     public bool cameraControl { get; set; } = false;
     private Transform m_Transform;
+    private Quaternion origiRotation;
+    private Vector3 originPosition;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    protected override void Awake()
+    {
+        base.Awake();
+        m_Transform = transform;
+        origiRotation = m_Transform.localRotation;
+        originPosition = m_Transform.localPosition;
+    }
 
     /// <summary>
     /// 
@@ -38,11 +53,18 @@ public class bl_RoomCamera : bl_MonoBehaviour
         Rotate();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     void Rotate()
     {
-        if (!autoRotation || cameraControl) return;
+        if (!autoRotation || cameraControl || rotationDirection == Axis.None) return;
 
-        m_Transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed);
+        Vector3 dir = Vector3.up;
+        if (rotationDirection == Axis.X) dir = Vector3.right;
+        else if (rotationDirection == Axis.Z) dir = Vector3.forward;
+
+        m_Transform.Rotate(dir * Time.deltaTime * rotationSpeed);
     }
 
     /// <summary>
@@ -88,6 +110,16 @@ public class bl_RoomCamera : bl_MonoBehaviour
     public void SetActive(bool active)
     {
         gameObject.SetActive(active);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void BackToOriginal()
+    {
+        cameraControl = false;
+        m_Transform.localRotation = origiRotation;
+        m_Transform.localPosition = originPosition;
     }
 
     private static bl_RoomCamera _instance;

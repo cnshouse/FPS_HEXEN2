@@ -7,8 +7,14 @@ namespace MFPSEditor
 {
     public class SpritePreviewAttribute : PropertyAttribute
     {
+        public float Height { get; set; } = 0;
         public SpritePreviewAttribute()
         {
+        }
+
+        public SpritePreviewAttribute(float height)
+        {
+            Height = height;
         }
     }
 
@@ -27,11 +33,18 @@ namespace MFPSEditor
             else
             {
                 Sprite spr = property.objectReferenceValue as Sprite;
+                Texture2D icon = null;
+                if (spr == null)
+                {
+                    icon = property.objectReferenceValue as Texture2D;
+                }
+                else icon = spr.texture;
+                float height = script.Height <= 0 ? EditorGUIUtility.singleLineHeight * 2 : script.Height;
                 Rect imgp = position;
-                imgp.height = EditorGUIUtility.singleLineHeight * 2;
+                imgp.height = height;
                 imgp.width = imgp.height;
                 imgp.x += 20;
-                GUI.DrawTexture(imgp, spr.texture, ScaleMode.ScaleAndCrop);
+                GUI.DrawTexture(imgp, icon, ScaleMode.ScaleAndCrop);
                 position.x += imgp.height + 25;
                 position.width -= imgp.height + 25;
                 position.height = EditorGUIUtility.singleLineHeight;
@@ -48,7 +61,10 @@ namespace MFPSEditor
             }
             else
             {
-                return EditorGUIUtility.singleLineHeight * 2;
+                if (script.Height <= 0)
+                    return EditorGUIUtility.singleLineHeight * 2;
+                else
+                    return script.Height;
             }
         }
     }

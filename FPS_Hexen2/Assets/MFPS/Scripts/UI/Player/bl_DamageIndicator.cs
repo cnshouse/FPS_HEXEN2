@@ -1,109 +1,126 @@
-﻿/////////////////////////////////////////////////////////////////////////////////
-////////////////////////////bl_DamageIndicator.cs////////////////////////////////
-////////////////////Use this to signal the last attack received///////////////
-/////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////Lovatto Studio///////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
-public class bl_DamageIndicator : bl_MonoBehaviour
+namespace MFPS.Runtime.UI
 {
-
-    /// <summary>
-    /// Attack from direction
-    /// </summary>
-    [HideInInspector] public Vector3 attackDirection;
-    /// <summary>
-    /// time reach for fade arrow
-    /// </summary>
-    [Range(1, 5)] public float FadeTime = 3;
-    /// <summary>
-    /// the transform root of player 
-    /// </summary>
-    public Transform target;
-    //Private
-    private Vector2 pivotPoint;
-    private float alpha = 0.0f;
-    private float rotationOffset;
-    private Transform IndicatorPivot;
-    private CanvasGroup IndicatorImage;
-    Vector3 eulerAngle = Vector3.zero;
-    Vector3 forward;
-    Vector3 rhs;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    protected override void Awake()
+    public class bl_DamageIndicator : bl_MonoBehaviour
     {
-        base.Awake();
-        IndicatorImage = bl_UIReferences.Instance.PlayerUI.DamageIndicator.GetComponent<CanvasGroup>();
-        if (IndicatorImage != null) { IndicatorPivot = IndicatorImage.transform.parent; }
-    }
+        /// <summary>
+        /// Attack from direction
+        /// </summary>
+        [HideInInspector] public Vector3 attackDirection;
+        /// <summary>
+        /// time reach for fade arrow
+        /// </summary>
+        [Range(1, 5)] public float FadeTime = 3;
+        [Header("References")]
+        public RectTransform indicatorPivot;
+        public CanvasGroup indicatorAlpha;
 
-    /// <summary>
-    /// Use this to send a new direction of attack
-    /// </summary>
-    public void AttackFrom(Vector3 dir)
-    {
-        if (dir == Vector3.zero)
-            return;
-        
-        this.attackDirection = dir;
-        this.alpha = 3f;
-    }
-    /// <summary>
-    /// if this is visible Update position
-    /// </summary>
-    public override void OnUpdate()
-    {
-        if (this.alpha > 0)
-        {
-            this.alpha -= Time.deltaTime;
-            this.UpdateDirection();
-        }
-    }
+        //Private
+        private float alpha = 0.0f;
+        private float rotationOffset;
+        Vector3 eulerAngle = Vector3.zero;
+        Vector3 forward;
+        Vector3 rhs;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    protected override void OnDisable()
-    {
-        if (IndicatorImage != null)
-            IndicatorImage.alpha = 0;
-    }
+        /// <summary>
+        /// 
+        /// </summary>
+        protected override void Awake()
+        {
+            base.Awake();
+            enabled = bl_GameData.Instance.showDamageIndicator;
+            bl_EventHandler.onLocalPlayerSpawn += OnLocalSpawn;
+        }
 
-    /// <summary>
-    /// update direction as the arrow shows
-    /// </summary>
-    void UpdateDirection()
-    {
-        rhs = attackDirection - target.position;
-        rhs.y = 0;
-        rhs.Normalize();
-        if (bl_GameManager.Instance.CameraRendered != null)
+        /// <summary>
+        /// 
+        /// </summary>
+        protected override void OnDisable()
         {
-            forward = bl_GameManager.Instance.CameraRendered.transform.forward;
+            base.OnDisable();
+            bl_EventHandler.onLocalPlayerSpawn -= OnLocalSpawn;
+            if (indicatorAlpha != null)
+                indicatorAlpha.alpha = 0;
         }
-        else
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void OnLocalSpawn()
         {
-            forward = transform.forward;
+            indicatorAlpha.alpha = 0;
+            alpha = 0;
         }
-        float GetPos = Vector3.Dot(forward, rhs);
-        if (Vector3.Cross(forward, rhs).y > 0)
+
+        /// <summary>
+        /// Use this to send a new direction of attack
+        /// </summary>
+        public void AttackFrom(Vector3 dir)
         {
-            rotationOffset = (1f - GetPos) * 90;
+            if (dir == Vector3.zero)
+                return;
+
+            attackDirection = dir;
+            alpha = 3f;
         }
-        else
+
+        /// <summary>
+        /// if this is visible Update position
+        /// </summary>
+        public override void OnUpdate()
         {
-            rotationOffset = (1f - GetPos) * -90;
+            if (alpha <= 0) return;
+            if (bl_MFPS.LocalPlayerReferences == null) return;
+
+            alpha -= Time.deltaTime;
+            UpdateDirection();
         }
-        if (IndicatorPivot != null)
+
+        /// <summary>
+        /// update direction as the arrow shows
+        /// </summary>
+        void UpdateDirection()
         {
-            IndicatorImage.alpha = alpha;
-            eulerAngle.z = -rotationOffset;
-            IndicatorPivot.eulerAngles = eulerAngle;
+            rhs = attackDirection - bl_MFPS.LocalPlayerReferences.PlayerCameraTransform.position;
+            rhs.y = 0;
+            rhs.Normalize();
+            if (bl_GameManager.Instance.CameraRendered != null)
+            {
+                forward = bl_GameManager.Instance.CameraRendered.transform.forward;
+            }
+            else
+            {
+                forward = transform.forward;
+            }
+            float GetPos = Vector3.Dot(forward, rhs);
+            if (Vector3.Cross(forward, rhs).y > 0)
+            {
+                rotationOffset = (1f - GetPos) * 90;
+            }
+            else
+            {
+                rotationOffset = (1f - GetPos) * -90;
+            }
+            if (indicatorPivot != null)
+            {
+                indicatorAlpha.alpha = alpha;
+                eulerAngle.z = -rotationOffset;
+                indicatorPivot.eulerAngles = eulerAngle;
+            }
+        }
+
+        private static bl_DamageIndicator _instance;
+        public static bl_DamageIndicator Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = FindObjectOfType<bl_DamageIndicator>();
+                }
+                return _instance;
+            }
         }
     }
 }

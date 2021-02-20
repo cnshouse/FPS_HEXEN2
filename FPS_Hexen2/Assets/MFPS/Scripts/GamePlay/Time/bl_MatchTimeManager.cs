@@ -1,41 +1,56 @@
-﻿/////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////bl_MatchTimeManager.cs///////////////////////////////////
-///////////////Use this to manage time in rooms//////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////Lovatto Studio///////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-using UnityEngine;
-using Hashtable = ExitGames.Client.Photon.Hashtable; //Replace default Hashtables with Photon hashtables
+﻿using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 
 public class bl_MatchTimeManager : bl_MonoBehaviour
 {
+    #region Public properties
+
+    [SerializeField] private RoomTimeState m_timeState = RoomTimeState.None;
+    public RoomTimeState TimeState
+    {
+        get => m_timeState;
+        set => m_timeState = value;
+    }
+
     public RoundStyle roundStyle { get; set; }
-    public RoomTimeState TimeState { get; set; }
     public int RoundDuration { get; set; }
     public float CurrentTime { get; set; }
-
-    //private
-    private const string StartTimeKey = "RoomTime";       // the name of our "start time" custom property.
-    private float m_Reference;
-    private int m_countdown = 10;
     public bool isFinish { get; set; }
-    private bl_RoomSettings RoomSettings;
-    private bl_RoomMenu RoomMenu;
     public Text TimeText { get; set; }
-    private bool roomClose = false;
     public bool Initialized { get; set; }
     public bool Pause { get; set; }
+    #endregion
+
+    #region Private members
+    private const string StartTimeKey = "RoomTime";
+    private float m_serverTimeReference;
+    private int m_countdown = 10;
     private int countDown = 5;
+    private const int SECOND = 60;
+    private bool m_overrideTimeManagment = false;
+    private bool roomClose = false;
+    private bl_RoomSettings RoomSettings;
+    private bl_RoomMenu RoomMenu;
+    #endregion
+
+    /// <summary>
+    /// If you want to handle the time management in a custom script set this to TRUE
+    /// </summary>
+    public bool OverrideTimeManagment
+    {
+        get { return m_overrideTimeManagment; }
+        set { m_overrideTimeManagment = value; }
+    }
 
     /// <summary>
     /// 
     /// </summary>
     protected override void Awake()
     {
-        if (!PhotonNetwork.IsConnected && !bl_GameData.Instance.offlineMode)
+        if (!PhotonNetwork.IsConnected && !bl_GameData.Instance.offlineMode && !bl_OfflineRoom.Instance.forceOffline)
         {
             bl_UtilityHelper.LoadLevel(bl_GameData.Instance.MainMenuScene);
             return;
@@ -73,6 +88,7 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     {
         base.OnEnable();
         bl_PhotonCallbacks.MasterClientSwitched += OnMasterClientSwitch;
+        bl_PhotonCallbacks.RoomPropertiesUpdate += OnRoomPropertiesChange;
     }
 
     /// <summary>
@@ -82,6 +98,7 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     {
         base.OnDisable();
         bl_PhotonCallbacks.MasterClientSwitched -= OnMasterClientSwitch;
+        bl_PhotonCallbacks.RoomPropertiesUpdate -= OnRoomPropertiesChange;
     }
 
     /// <summary>
@@ -90,8 +107,8 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     public void Init()
     {
         //if the match is waiting for a minimum amount of players to start
-        if (bl_GameManager.Instance.GameMatchState == MatchState.Waiting)
-        {           
+        if (bl_GameManager.Instance.GameMatchState == MatchState.Waiting && !OverrideTimeManagment)
+        {
             bl_UIReferences.Instance.SetWaitingPlayersText(string.Format(bl_GameTexts.WaitingPlayers, PhotonNetwork.PlayerList.Length, 2), true);
             return;
         }
@@ -105,7 +122,7 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
             SetTimeState(RoomTimeState.Started, true);
         }
 #if LMS
-        if (GetGameMode == GameMode.LSM)return;
+        if (GetGameMode == GameMode.BR) return;
 #endif
         GetTime(true);
     }
@@ -116,7 +133,7 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     public void InitAfterWait()
     {
         GetTime(true);
-        photonView.RPC("RpcStartTime", RpcTarget.AllBuffered, 3);
+        photonView.RPC(nameof(RpcStartTime), RpcTarget.AllBuffered, 3);
     }
 
     /// <summary>
@@ -134,10 +151,10 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
         {
             if (ResetReference)//get the server time again?
             {
-                m_Reference = (float)PhotonNetwork.Time;//get a reference time from the server
+                m_serverTimeReference = (float)PhotonNetwork.Time;//get a reference time from the server
 
                 Hashtable startTimeProp = new Hashtable();//create a property to store the reference time
-                startTimeProp.Add(StartTimeKey, m_Reference);
+                startTimeProp.Add(StartTimeKey, m_serverTimeReference);
                 PhotonNetwork.CurrentRoom.SetCustomProperties(startTimeProp);//send to the room hash tables so other clients can access to it
             }
         }
@@ -145,7 +162,7 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
         {
             if (PhotonNetwork.CurrentRoom.CustomProperties[StartTimeKey] != null)//if there's a reference time available
             {
-                m_Reference = (float)PhotonNetwork.CurrentRoom.CustomProperties[StartTimeKey];//get it from the room hash tables
+                m_serverTimeReference = (float)PhotonNetwork.CurrentRoom.CustomProperties[StartTimeKey];//get it from the room hash tables
             }
         }
         if (!Initialized) { bl_GameManager.Instance.SetGameState(MatchState.Playing); }//is this the first round?
@@ -157,6 +174,13 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     /// </summary>
     void RemoteInit()
     {
+        if (TimeState == RoomTimeState.StartedAfterCountdown)
+        {
+            SetTimeState(RoomTimeState.Started);
+            GetTime(false);
+            return;
+        }
+
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PropertiesKeys.TimeState))
         {
             TimeState = (RoomTimeState)(int)PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.TimeState];
@@ -172,13 +196,13 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    void StartCountDown()
+    public void StartCountDown()
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!PhotonNetwork.IsMasterClient || OverrideTimeManagment) return;
 
         countDown = bl_GameData.Instance.CountDownTime;
         SetTimeState(RoomTimeState.Countdown, true);
-        InvokeRepeating("SetCountDown", 1, 1);
+        InvokeRepeating(nameof(SetCountDown), 1, 1);
     }
 
     /// <summary>
@@ -187,7 +211,8 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     void SetCountDown()
     {
         countDown--;
-        photonView.RPC("RpcCountDown", RpcTarget.All, countDown);
+        if (countDown <= 0) CancelInvoke(nameof(SetCountDown));
+        photonView.RPC(nameof(RpcCountDown), RpcTarget.All, countDown);
     }
 
     [PunRPC]
@@ -200,24 +225,26 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
         if (countDown <= 0)
         {
             RoundDuration = (int)PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.TimeRoomKey];
-            m_Reference = (float)PhotonNetwork.Time;
+            m_serverTimeReference = (float)PhotonNetwork.Time;
             if (PhotonNetwork.IsMasterClient)
             {
-                CancelInvoke("SetCountDown");
+                CancelInvoke(nameof(SetCountDown));
                 Hashtable startTimeProp = new Hashtable();
-                startTimeProp.Add(StartTimeKey, m_Reference);
+                startTimeProp.Add(StartTimeKey, m_serverTimeReference);
                 PhotonNetwork.CurrentRoom.SetCustomProperties(startTimeProp);
                 SetTimeState(RoomTimeState.Started, true);
             }
             else
             {
+                SetTimeState(RoomTimeState.StartedAfterCountdown);
                 GetTime(false);
-                SetTimeState(RoomTimeState.Started);
             }
             if (!Initialized) { bl_GameManager.Instance.SetGameState(MatchState.Playing); }
             Initialized = true;
-            Pause = false;            
+            Pause = false;
         }
+        else SetTimeState(RoomTimeState.Countdown);
+
         bl_CountDownUI.Instance.SetCount(countDown);
     }
 
@@ -226,6 +253,7 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     /// </summary>
     public void SetTimeState(RoomTimeState state, bool sync = false)
     {
+        // Debug.Log($"time state changed from {TimeState.ToString()} to {state.ToString()}");
         if (sync && PhotonNetwork.IsMasterClient)
         {
             Hashtable table = new Hashtable();
@@ -243,44 +271,32 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    public void RestartTime()
+    public override void OnUpdate()
     {
-       //get the room time duration from hash tables
-        if (PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.TimeRoomKey] != null)
-        {
-            RoundDuration = (int)PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.TimeRoomKey];
-        }
-        //cause everyone is already in the room, all will get the reference locally from the server
-        m_Reference = (float)PhotonNetwork.Time;
-        //Master Client will take care of store the reference time for future players
-        if (PhotonNetwork.IsMasterClient)
-        {
-            Hashtable startTimeProp = new Hashtable();  // only use ExitGames.Client.Photon.Hashtable for Photon
-            startTimeProp.Add(StartTimeKey, m_Reference);
-            PhotonNetwork.CurrentRoom.SetCustomProperties(startTimeProp);
-        }
+        UpdateTime();
+        DisplayTime();
     }
 
     /// <summary>
     /// 
     /// </summary>
-    public override void OnFixedUpdate()
+    private void UpdateTime()
     {
-        if (!Initialized || Pause || isFinish)
+        if (!Initialized || Pause || isFinish || OverrideTimeManagment)
             return;
 
         //calculate seconds from the reference time and the current server time
-        float seconds = RoundDuration - ((float)PhotonNetwork.Time - m_Reference);
+        float seconds = RoundDuration - ((float)PhotonNetwork.Time - m_serverTimeReference);
         if (seconds > 0.0001f)
         {
             CurrentTime = seconds;
             //if the game is about to finish, close the room so it will not be listed in the lobby anymore
-            if(CurrentTime <= 30 && !roomClose && PhotonNetwork.IsMasterClient)
+            if (CurrentTime <= 30 && !roomClose && PhotonNetwork.IsMasterClient)
             {
                 roomClose = true;
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-             //   Debug.Log("Close room to prevent player join");
+                //   Debug.Log("Close room to prevent player join");
             }
         }
         else if (seconds <= 0.001 && GetTimeServed == true)//Round Finished
@@ -297,23 +313,60 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
+    public void PauseTime()
+    {
+        Pause = true;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void ResumeTime()
+    {
+        Pause = false;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void RestartTime()
+    {
+        //get the room time duration from hash tables
+        if (PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.TimeRoomKey] != null)
+        {
+            RoundDuration = (int)PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.TimeRoomKey];
+        }
+        //cause everyone is already in the room, all will get the reference locally from the server
+        m_serverTimeReference = (float)PhotonNetwork.Time;
+        //Master Client will take care of store the reference time for future players
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Hashtable startTimeProp = new Hashtable();  // only use ExitGames.Client.Photon.Hashtable for Photon
+            startTimeProp.Add(StartTimeKey, m_serverTimeReference);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(startTimeProp);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public void FinishRound()
     {
-        if (!PhotonNetwork.IsConnected)
+        if (!PhotonNetwork.IsConnected || OverrideTimeManagment)
             return;
 
-        bl_EventHandler.OnRoundEndEvent();
+        bl_EventHandler.DispatchRoundEndEvent();
         if (!isFinish)
         {
             isFinish = true;
             if (RoomMenu) { RoomMenu.isFinish = true; }
-            bl_GameManager.Instance.OnGameTimeFinish(roundStyle == RoundStyle.OneMacht); 
+            bl_GameManager.Instance.OnGameTimeFinish(roundStyle == RoundStyle.OneMacht);
             if (roundStyle == RoundStyle.OneMacht)
             {
-                FindObjectOfType<bl_GameFinish>().CollectData();
+                bl_UIReferences.Instance.ResumeScreen.CollectData();
             }
             bl_UIReferences.Instance.SetCountDown(m_countdown);
-            InvokeRepeating("FinalCountdown", 1, 1);
+            InvokeRepeating(nameof(FinalCountdown), 1, 1);
             bl_UCrosshair.Instance.Show(false);
             bl_GameManager.Instance.SetGameState(MatchState.Finishing);
         }
@@ -322,29 +375,12 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    public override void OnUpdate()
+    void DisplayTime()
     {
-        TimeControll();
-    }
+        if (CurrentTime == 0 || OverrideTimeManagment) return;
+        if (TimeText == null) return;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    void TimeControll()
-    {
-        if (CurrentTime == 0) return;
-
-        //Calculate and Format time in order to display in the HUD
-        int normalSecons = 60;
-        float remainingTime = Mathf.CeilToInt(CurrentTime);
-        int m_Seconds = Mathf.FloorToInt(remainingTime % normalSecons);
-        int m_Minutes = Mathf.FloorToInt((remainingTime / normalSecons) % normalSecons);
-        string t_time = bl_UtilityHelper.GetTimeFormat(m_Minutes, m_Seconds);
-
-        if (TimeText != null)
-        {
-            TimeText.text = t_time;
-        }
+        TimeText.text = bl_UtilityHelper.GetTimeFormat((CurrentTime / SECOND) % SECOND, CurrentTime % SECOND);
     }
 
     /// <summary>
@@ -357,17 +393,17 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
 
         if (PhotonNetwork.IsMasterClient)
         {
-            m_Reference = (float)PhotonNetwork.Time;
+            m_serverTimeReference = (float)PhotonNetwork.Time;
 
             Hashtable startTimeProp = new Hashtable();  // only use ExitGames.Client.Photon.Hashtable for Photon
-            startTimeProp.Add(StartTimeKey, m_Reference);
+            startTimeProp.Add(StartTimeKey, m_serverTimeReference);
             PhotonNetwork.CurrentRoom.SetCustomProperties(startTimeProp);
         }
         else
         {
             if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(StartTimeKey))
             {
-                m_Reference = (float)PhotonNetwork.CurrentRoom.CustomProperties[StartTimeKey];
+                m_serverTimeReference = (float)PhotonNetwork.CurrentRoom.CustomProperties[StartTimeKey];
             }
         }
     }
@@ -382,7 +418,7 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
         if (m_countdown <= 0)
         {
             FinishGame();
-            CancelInvoke("FinalCountdown");
+            CancelInvoke(nameof(FinalCountdown));
             m_countdown = 10;
         }
     }
@@ -395,7 +431,7 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
         bl_UtilityHelper.LockCursor(false);
         if (roundStyle == RoundStyle.OneMacht)
         {
-            FindObjectOfType<bl_GameFinish>().Show();
+            bl_UIReferences.Instance.ResumeScreen.Show();
         }
         if (roundStyle == RoundStyle.Rounds)
         {
@@ -403,15 +439,12 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
             if (bl_DataBase.Instance != null)
             {
                 Player p = PhotonNetwork.LocalPlayer;
-                bl_DataBase.Instance.SaveData(p.GetPlayerScore(), p.GetKills(), p.GetDeaths());
+                bl_ULoginMFPS.SaveLocalPlayerKDS();
                 bl_DataBase.Instance.StopAndSaveTime();
             }
 #endif
             GetTime(true);
-            if (RoomSettings)
-            {
-                RoomSettings.ResetRoom();
-            }
+            RoomSettings.ResetRoom();
             isFinish = false;
 
             bl_GameManager.Instance.GameFinish = false;
@@ -423,11 +456,16 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
                 RoomMenu.isPlaying = false;
                 bl_UtilityHelper.LockCursor(false);
             }
-            bl_UIReferences.Instance.ResetRound();
             bl_UIReferences.Instance.OnKillCam(false);
             m_countdown = 10;
             PhotonNetwork.CurrentRoom.IsOpen = true;
             PhotonNetwork.CurrentRoom.IsVisible = true;
+
+            bl_UIReferences.Instance.ResetRound();
+
+            if (bl_RoomSettings.Instance.AutoTeamSelection)
+                bl_RoomSettings.Instance.CheckAutoSpawn();
+
         }
     }
 
@@ -461,8 +499,8 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
         if (bl_GameManager.Instance.LocalPlayerTeam == Team.None) return;
 
         SetTimeState(RoomTimeState.Started, PhotonNetwork.IsMasterClient);
-        bl_UIReferences.Instance.SetWaitingPlayersText("STARTING MATCH...", true);
-        Invoke("StartTime", wait);
+        bl_UIReferences.Instance.SetWaitingPlayersText(bl_GameTexts.StartingMatch, true);
+        Invoke(nameof(StartTime), wait);
     }
 
     /// <summary>
@@ -483,6 +521,10 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
         bl_GameManager.Instance.SpawnPlayer(PhotonNetwork.LocalPlayer.GetPlayerTeam());
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="newMaster"></param>
     void OnMasterClientSwitch(Player newMaster)
     {
         if (newMaster.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
@@ -494,18 +536,20 @@ public class bl_MatchTimeManager : bl_MonoBehaviour
         }
     }
 
-    bool GetTimeServed
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="props"></param>
+    void OnRoomPropertiesChange(Hashtable props)
     {
-        get
+        if (props.ContainsKey(StartTimeKey) && !PhotonNetwork.IsMasterClient)
         {
-            bool m_bool = false;
-            if (Time.timeSinceLevelLoad > 7)
-            {
-                m_bool = true;
-            }
-            return m_bool;
+            RemoteInit();
         }
     }
+
+    private bool GetTimeServed => Time.timeSinceLevelLoad > 7;
+
 
     private static bl_MatchTimeManager _instance;
     public static bl_MatchTimeManager Instance

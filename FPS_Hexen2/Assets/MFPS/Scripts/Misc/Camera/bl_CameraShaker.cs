@@ -2,11 +2,11 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using MFPS.Core.Motion;
 
 public class bl_CameraShaker : MonoBehaviour
 {
     private Vector3 OrigiPosition;
-    private Quaternion DefaultCamRot;
 
     private Dictionary<string, ShakerPresent> shakersRunning = new Dictionary<string, ShakerPresent>();
     private Transform m_Transform;
@@ -17,10 +17,15 @@ public class bl_CameraShaker : MonoBehaviour
     private void Awake()
     {
         m_Transform = transform;
-        DefaultCamRot = m_Transform.localRotation;
-        OrigiPosition = m_Transform.localPosition;
-
+        GetDefaultPosition();
     }
+
+    public void GetDefaultPosition()
+    {
+        if (m_Transform == null) m_Transform = transform;
+        OrigiPosition = m_Transform.localEulerAngles;
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -42,38 +47,6 @@ public class bl_CameraShaker : MonoBehaviour
         AddShake(present, key, influence);
     }
 
-    /// <summary>
-    /// move the camera in a small range
-    /// with the presets Gun
-    /// </summary>
-    /// <returns></returns>
-    IEnumerator DoSimpleCameraShake(float amount = 0.2f, float duration = 0.4f, float intense = 0.25f, bool aim = false)
-    {
-        float elapsed = 0.0f;
-        while (elapsed < duration)
-        {
-           // elapsed += Time.deltaTime;
-            float percentComplete = elapsed / duration;
-            float damper = 1.0f - Mathf.Clamp(4.0f * percentComplete - 3.0f, 0.0f, 1.0f);
-
-            // map value to [-1, 1]
-            float x = Random.value * 2.0f - 1.0f;
-            float y = Random.value * 2.0f - 1.0f;
-            x *= intense * damper;
-            y *= intense * damper;
-            float mult = (aim) ? 1 : 3;
-            float multr = (aim) ? 25 : 40;
-
-            transform.localPosition = Vector3.Lerp(transform.localPosition, new Vector3(x * mult, y * mult, OrigiPosition.z), Time.deltaTime * 17);
-            transform.localRotation = Quaternion.Slerp(transform.localRotation, Quaternion.Euler(new Vector3(x * multr, y * multr, DefaultCamRot.z)), Time.deltaTime * 12);
-            yield return null;
-        }
-
-        transform.localPosition = OrigiPosition;
-        transform.localRotation = DefaultCamRot;
-
-    }
-    
     public void AddShake(ShakerPresent present, string key, float influenced = 1)
     {
         if (present == null) return;
@@ -96,10 +69,21 @@ public class bl_CameraShaker : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
+    public void RemoveShake(string key)
+    {
+        if (shakersRunning.ContainsKey(key))
+        {
+            shakersRunning.Remove(key);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <returns></returns>
     IEnumerator UpdateShake()
     {
-        Vector2 pos = Vector2.zero;
+        Vector3 pos = Vector3.zero;
         while (true)
         {
             if(shakersRunning.Count <= 0) { yield break; }
@@ -114,6 +98,7 @@ public class bl_CameraShaker : MonoBehaviour
                 }
                 else
                 {
+                    if(!p.Loop)
                     p.currentTime -= Time.deltaTime / (p.Duration - (p.Duration * p.fadeInTime));
                 }             
                 float amplitude = p.amplitude * p.currentTime;
@@ -123,7 +108,7 @@ public class bl_CameraShaker : MonoBehaviour
                     shakersRunning.Remove(shakersRunning.ElementAt(i).Key);
                 }
             }
-            m_Transform.localPosition = pos;
+            m_Transform.localRotation = Quaternion.Euler( OrigiPosition + pos);
             yield return null;
         }
     }
@@ -131,11 +116,11 @@ public class bl_CameraShaker : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    public static Vector2 Shake(float amplitude, float frequency, int octaves, float persistance, float lacunarity, float burstFrequency, int burstContrast, float influence)
+    public static Vector3 Shake(float amplitude, float frequency, int octaves, float persistance, float lacunarity, float burstFrequency, int burstContrast, float influence)
     {
         float valX = 0;
         float valY = 0;
-
+        amplitude = amplitude * 8;
         float iAmplitude = 1;
         float iFrequency = frequency;
         float maxAmplitude = 0;
@@ -180,6 +165,6 @@ public class bl_CameraShaker : MonoBehaviour
         valX *= (amplitude * influence);
         valY *= (amplitude * influence);
 
-        return new Vector2(valX, valY);
+        return new Vector3(valX, valY, 0);
     }
 }

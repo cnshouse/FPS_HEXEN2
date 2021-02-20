@@ -1,87 +1,90 @@
 ﻿using UnityEngine;
 
-public class bl_Ladder : MonoBehaviour
+namespace MFPS.Runtime.Level
 {
-
-    public Transform[] Points;
-    [SerializeField]private Collider TopCollider;
-    [SerializeField]private Collider BottomCollider;
-
-    public const string TopColName = "TopTrigger";
-    public const string BottomColName = "BottomTrigger";
-    public bool HasPending { get; set; }
-    private int CurrentPoint = 0;
-    public Transform InsertionPoint { get; set; }
-    private float LastTime = 0;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private void Awake()
+    public class bl_Ladder : MonoBehaviour
     {
-        TopCollider.name = TopColName;
-        BottomCollider.name = BottomColName;
-    }
 
-    public void SetToTop()
-    {
-        LastTime = Time.time;
-        CurrentPoint = 2;
-        HasPending = true;
-    }
+        public Transform[] Points;
+        [SerializeField] private Collider TopCollider;
+        [SerializeField] private Collider BottomCollider;
 
-    public void ToBottom()
-    {
-        CurrentPoint = 0;
-        HasPending = true;
-    }
+        public const string TopColName = "TopTrigger";
+        public const string BottomColName = "BottomTrigger";
+        public bool HasPending { get; set; }
+        private int CurrentPoint = 0;
+        public Transform InsertionPoint { get; set; }
+        private float LastTime = 0;
 
-    public void ToMiddle()
-    {
-        CurrentPoint = 1;
-        HasPending = true;
-    }
-
-    public void JumpOut()
-    {
-        LastTime = Time.time;
-    }
-
-    public Vector3 GetCurrent
-    {
-        get
+        /// <summary>
+        /// 
+        /// </summary>
+        private void Awake()
         {
-            return Points[CurrentPoint].position;
+            TopCollider.name = TopColName;
+            BottomCollider.name = BottomColName;
         }
-    }
 
-    public bool CanUse
-    {
-        get
+        public void SetToTop()
         {
-            return ((Time.time - LastTime) > 1.5f);
+            LastTime = Time.time;
+            CurrentPoint = 2;
+            HasPending = true;
         }
-    }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        if(Points.Length > 0 && Points[0] != null && BottomCollider != null)
+        public void ToBottom()
         {
-            Gizmos.DrawWireCube(BottomCollider.bounds.center, BottomCollider.bounds.size);
-            Gizmos.DrawLine(BottomCollider.transform.position, Points[0].position);
+            CurrentPoint = 0;
+            HasPending = true;
         }
-        for(int i = 0; i < Points.Length; i++)
+
+        public void ToMiddle()
         {
-            Gizmos.DrawWireSphere(Points[i].position,0.33f);
-            if(i < Points.Length - 1)
+            CurrentPoint = 1;
+            HasPending = true;
+        }
+
+        public void JumpOut()
+        {
+            LastTime = Time.time;
+        }
+
+        public Vector3 GetCurrent
+        {
+            get
             {
-                Gizmos.DrawLine(Points[i].position, Points[i + 1].position);
+                return Points[CurrentPoint].position;
             }
         }
-        if(TopCollider != null)
+
+        public bool CanUse
         {
-            Gizmos.DrawWireCube(TopCollider.bounds.center, TopCollider.bounds.size);
+            get
+            {
+                return ((Time.time - LastTime) > 1.5f);
+            }
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.yellow;
+            if (Points.Length > 0 && Points[0] != null && BottomCollider != null)
+            {
+                Gizmos.DrawWireCube(BottomCollider.bounds.center, BottomCollider.bounds.size);
+                Gizmos.DrawLine(BottomCollider.transform.position, Points[0].position);
+            }
+            for (int i = 0; i < Points.Length; i++)
+            {
+                Gizmos.DrawWireSphere(Points[i].position, 0.33f);
+                if (i < Points.Length - 1)
+                {
+                    Gizmos.DrawLine(Points[i].position, Points[i + 1].position);
+                }
+            }
+            if (TopCollider != null)
+            {
+                Gizmos.DrawWireCube(TopCollider.bounds.center, TopCollider.bounds.size);
+            }
         }
     }
 }

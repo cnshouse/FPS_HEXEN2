@@ -1,29 +1,38 @@
 ﻿using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
 
 [RequireComponent(typeof(AudioSource))]
 public class bl_Bullet : bl_MonoBehaviour
 {
-    private int hitCount = 0;         // hit counter for counting bullet impacts for bullet penetration
-    [HideInInspector]
-    public string GunName = ""; //Weapon name
+    #region Public members
+    /// <summary>
+    /// If is enabled, on all collisions will check if the hitted object have a IMFPSDamageable component
+    /// </summary>
+    [LovattoToogle] public bool checkDamageables = false;
+    public LayerMask HittableLayers;
+    public TrailRenderer Trail = null;
+    #endregion
+
+    #region Public properties
+    public string AIFrom { get; set; }
+    public int ActorViewID { get; set; }
+    #endregion
+
+    #region Private members
+    private Team AITeam;
+    private Vector3 dir = Vector3.zero;
+    private RaycastHit hit;
+    private Transform m_Transform;
+    private float distanceSinceLastCheck = 0;
+    private float totalTraveledDistance = 0;
+    private BulletData bulletData;
     private Vector3 velocity = Vector3.zero; // bullet velocity
     private Vector3 newPos = Vector3.zero;   // bullet's new position
     private Vector3 oldPos = Vector3.zero;   // bullet's previous location
     private bool hasHit = false;             // has the bullet hit something?
     private Vector3 direction;               // direction bullet is travelling
-    public LayerMask HittableLayers;
-
-    [SerializeField] private TrailRenderer Trail;
-    public string AIFrom { get; set; }
-    public int ActorViewID { get; set; }
-    private Team AITeam;
-    private Vector3 dir = Vector3.zero;
-    RaycastHit hit;
-    private Transform m_Transform;
-    float travelDistance = 0;
-    private BulletData bulletData;
+    private float bulletRange = 0;
+    #endregion
 
     /// <summary>
     /// 
@@ -39,13 +48,14 @@ public class bl_Bullet : bl_MonoBehaviour
         ActorViewID = bl_GameManager.LocalPlayerViewID;
         // direction bullet is traveling
         direction = m_Transform.TransformDirection(Random.Range(-maxInaccuracy, maxInaccuracy) * variableInaccuracy, Random.Range(-maxInaccuracy, maxInaccuracy) * variableInaccuracy, 1);
-
-        newPos = m_Transform.position;   // bullet's new position
-        oldPos = newPos;               // bullet's old position
+        bulletRange = info.Range;
+        newPos = m_Transform.position;
+        oldPos = newPos;
         velocity = info.Speed * m_Transform.forward; // bullet's velocity determined by direction and bullet speed
+        totalTraveledDistance = 0;
         if (Trail != null) { if (!bl_GameData.Instance.BulletTracer) { Destroy(Trail); } }
         // schedule for destruction if bullet never hits anything
-        Invoke("Disable", 5);
+        Invoke(nameof(Disable), 3);
     }
 
     /// <summary>
@@ -89,18 +99,26 @@ public class bl_Bullet : bl_MonoBehaviour
         newPos += (velocity + direction) * Time.deltaTime;
         // Check if we hit anything on the way
         dir = newPos - oldPos;
-        travelDistance = dir.magnitude;
+        distanceSinceLastCheck = dir.magnitude;
+        totalTraveledDistance += distanceSinceLastCheck;
 
-        if (travelDistance > 0)
+        if (distanceSinceLastCheck > 0)
         {
-            dir /= travelDistance;
-            if (Physics.Raycast(oldPos, dir, out hit, travelDistance, HittableLayers, QueryTriggerInteraction.Ignore))
+            dir /= distanceSinceLastCheck;
+            if (Physics.Raycast(oldPos, dir, out hit, distanceSinceLastCheck, HittableLayers, QueryTriggerInteraction.Ignore))
             {
                 newPos = hit.point;
-                OnHit(hit);
-                hasHit = true;
-                Disable();
+                if (OnHit(hit))
+                {
+                    hasHit = true;
+                    Disable();
+                }
             }
+        }
+
+        if(bulletRange > 0 && totalTraveledDistance > bulletRange)
+        {
+            Disable();
         }
 
         oldPos = m_Transform.position;  // set old position to current position
@@ -118,7 +136,7 @@ public class bl_Bullet : bl_MonoBehaviour
 
     #region Bullet On Hits
 
-    void OnHit(RaycastHit hit)
+    private bool OnHit(RaycastHit hit)
     {
         Ray mRay = new Ray(m_Transform.position, m_Transform.forward);
         if (!bulletData.isNetwork)
@@ -131,6 +149,8 @@ public class bl_Bullet : bl_MonoBehaviour
         }
         switch (hit.transform.tag) // decide what the bullet collided with and what to do with it
         {
+            case "IgnoreBullet":
+                return false;
             case "Projectile":
                 // do nothing if 2 bullets collide
                 break;
@@ -146,31 +166,26 @@ public class bl_Bullet : bl_MonoBehaviour
                 SendPlayerDamageFromBot(hit);
                 break;
             case "Wood":
-                hitCount++; // add another hit to counter
                 InstanceHitParticle("decalw", hit);
                 break;
             case "Concrete":
-                hitCount += 2; // add 2 hits to counter... concrete is hard
                 InstanceHitParticle("decalc", hit);
                 break;
             case "Metal":
-                hitCount += 3; // metal slows bullets alot
-                InstanceHitParticle("decalm", hit);
+                InstanceHitParticle("decalm", hit, true);
                 break;
             case "Dirt":
-                hasHit = true; // ground kills bullet
                 InstanceHitParticle("decals", hit);
                 break;
             case "Water":
-                hasHit = true; // water kills bullet
                 InstanceHitParticle("decalwt", hit);
                 break;
             default:
-                hitCount++; // add a hit
                 InstanceHitParticle("decal", hit);
                 break;
         }
         Disable();
+        return true;
     }
     #endregion
 
@@ -182,7 +197,7 @@ public class bl_Bullet : bl_MonoBehaviour
         if (bulletData.isNetwork) return;
 
         IMFPSDamageable damageable = hit.transform.GetComponent<IMFPSDamageable>();
-        if(damageable != null)
+        if (damageable != null)
         {
             DamageData damageData = BuildBaseDamageData();
             //check if the bullet comes from a bot or a real player.
@@ -214,11 +229,16 @@ public class bl_Bullet : bl_MonoBehaviour
         //Ping of Master Clients can be volatile since it depend of the client connection, that could affect all the players in the room.
         if (!bulletData.isNetwork)
         {
-            if (bulletData.MFPSActor == null) { Debug.LogError("MFPS actor has not been assigned"); return; }
+            if (bulletData.MFPSActor == null)
+            {
+                PhotonView pv = PhotonView.Find(bulletData.ActorViewID);
+                if (pv != null) { Debug.LogError(pv.gameObject.name); }
+                Debug.LogError($"MFPS actor has not been assigned, bullet creatorID {bulletData.ActorViewID}"); return;
+            }
             if (bulletData.MFPSActor.Name == hit.transform.root.name) { return; }
             IMFPSDamageable damageable = hit.transform.GetComponent<IMFPSDamageable>();
 
-            if(damageable != null)
+            if (damageable != null)
             {
                 //callback is in bl_AIHitBox.cs
                 var damageData = BuildBaseDamageData();
@@ -261,11 +281,20 @@ public class bl_Bullet : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    void InstanceHitParticle(string poolPrefab, RaycastHit hit)
+    void InstanceHitParticle(string poolPrefab, RaycastHit hit, bool overrideDamageable = false)
     {
         GameObject go = bl_ObjectPooling.Instance.Instantiate(poolPrefab, hit.point, Quaternion.LookRotation(hit.normal));
-        if(go != null)
-        go.transform.parent = hit.transform;
+        if (go != null)
+            go.transform.parent = hit.transform;
+
+        if (checkDamageables || overrideDamageable)
+        {
+            var damageable = hit.transform.GetComponent<IMFPSDamageable>();
+            if (damageable == null) return;
+            DamageData damageData = BuildBaseDamageData();
+            damageData.Cause = DamageCause.Player;
+            damageable.ReceiveDamage(damageData);
+        }
     }
 
     DamageData BuildBaseDamageData()
@@ -278,7 +307,7 @@ public class bl_Bullet : bl_MonoBehaviour
             ActorViewID = bulletData.ActorViewID,
             GunID = bulletData.WeaponID,
         };
-        if(data.MFPSActor != null) { data.From = data.MFPSActor.Name; }
+        if (data.MFPSActor != null) { data.From = data.MFPSActor.Name; }
         return data;
     }
 }

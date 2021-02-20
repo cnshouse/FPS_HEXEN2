@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-namespace MFPS.PlayerSelector
+namespace MFPS.Addon.PlayerSelector
 {
     [System.Serializable]
     public class bl_PlayerSelectorInfo

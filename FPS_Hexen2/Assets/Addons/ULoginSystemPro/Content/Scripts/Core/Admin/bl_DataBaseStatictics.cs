@@ -6,43 +6,54 @@ using UnityEngine.Networking;
 public class bl_DataBaseStatictics : MonoBehaviour
 {
 
-    [SerializeField]private Text PlayersCountText;
-    [SerializeField]private Text BanPlayersCountText;
-    [SerializeField]private Text LastPlayersCountText;
-    [SerializeField]private Text GamePlayTimeText;
+    [SerializeField]private Text PlayersCountText = null;
+    [SerializeField]private Text BanPlayersCountText = null;
+    [SerializeField]private Text LastPlayersCountText = null;
+    [SerializeField]private Text GamePlayTimeText = null;
 
+    private bl_ULoginWebRequest _webRequest;
+    public bl_ULoginWebRequest WebRequest { get { if (_webRequest == null) { _webRequest = new bl_ULoginWebRequest(this); } return _webRequest; } }
+
+    /// <summary>
+    /// 
+    /// </summary>
     private void Start()
     {
-        StartCoroutine(IEGetInfo());
+        GetDataBaseStats();
     }
 
-    IEnumerator IEGetInfo()
+    /// <summary>
+    /// 
+    /// </summary>
+    void GetDataBaseStats()
     {
+
         WWWForm wf = new WWWForm();
-        wf.AddField("type", "3");
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.RequestUser), wf))
+        wf.AddField("name", "admin");
+        wf.AddField("type", 6);
+        wf.AddField("hash", bl_DataBaseUtils.CreateSecretHash("admin"));
+
+        var url = bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Admin);
+        WebRequest.POST(url, wf, (result) =>
         {
-            yield return www.SendWebRequest();
-            if (www.error == null && !www.isNetworkError)
+            if (result.isError)
             {
-                string[] result = www.downloadHandler.text.Split("|"[0]);
-                if (result[0].Contains("info"))
-                {
-                    PlayersCountText.text = result[1];
-                    LastPlayersCountText.text = result[2];
-                    BanPlayersCountText.text = result[3];
-                    GamePlayTimeText.text = bl_DataBaseUtils.TimeFormat(result[4].ToInt());
-                }
-                else
-                {
-                    Debug.LogWarning(www.downloadHandler.text);
-                }
+                result.PrintError();
+                return;
+            }
+
+            if (result.resultState == ULoginResult.Status.Success)
+            {
+                string[] raw = result.RawText.Split("|"[0]);
+                PlayersCountText.text = raw[1];
+                LastPlayersCountText.text = raw[2];
+                BanPlayersCountText.text = raw[3];
+                GamePlayTimeText.text = bl_DataBaseUtils.TimeFormat(raw[4].ToInt());
             }
             else
             {
-                Debug.LogError(www.error);
-                CancelInvoke("BanComprobation");
+                result.Print(true);
             }
-        }
+        });
     }
 }

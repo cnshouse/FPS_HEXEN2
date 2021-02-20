@@ -1,7 +1,7 @@
 <?PHP
 include("bl_Common.php");
 
-echo get_client_ip() . "|" . $GameVersion;
+echo get_client_ip() . "|" . GAME_VERSION;
 
 function get_client_ip()
  {

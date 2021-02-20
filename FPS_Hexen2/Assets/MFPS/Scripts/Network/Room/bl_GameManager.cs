@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
-using Random = UnityEngine.Random;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCallbacks {
@@ -11,59 +10,35 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     public static int LocalPlayerViewID = -1;
     public static int SuicideCount = 0;
     public static bool Joined = false;
-    public int Headshots { get; set; }
-    public IGameMode GameModeLogic { get; private set; }
-    public bool GameFinish { get; set; }
-    public GameObject LocalPlayer { get; set; }
 
     public MatchState GameMatchState;
+    public Action onAllPlayersRequiredIn;
 
-    [Header("References")]
-    public bool DrawSpawnPoints = true;
-    public Mesh SpawnPointPlayerGizmo;
-    [HideInInspector]public List<Transform> AllSpawnPoints = new List<Transform>();
-    private List<Transform> ReconSpawnPoint = new List<Transform>();
-    private List<Transform> DeltaSpawnPoint = new List<Transform>();
-    private int currentReconSpawnPoint = 0;
-    private int currentDeltaSpawnPoint = 0;
     public List<Player> connectedPlayerList = new List<Player>();
-    private bool EnterInGamePlay = false;
-    public List<MFPSPlayer> OthersActorsInScene = new List<MFPSPlayer>();
+    [HideInInspector] public List<MFPSPlayer> OthersActorsInScene = new List<MFPSPlayer>();
+
+    #region Public properties
     public MFPSPlayer LocalActor { get; set; } = new MFPSPlayer();
     public Team LocalPlayerTeam { get; set; }
     public bool spawnInQueque { get; set; }
+    public int Headshots { get; set; }
+    public IGameMode GameModeLogic { get; private set; }
+    public bool GameFinish { get; set; }
+    public new GameObject LocalPlayer { get; set; }
+    public bl_PlayerReferences LocalPlayerReferences { get; set; }
+    public bl_OverridePlayerPrefab OverridePlayerPrefab { get; set; }
+    #endregion
+
+    #region Private members
     private int WaitingPlayersAmount = 1;
     private float StartPlayTime;
     private bool registered = false;
-    //Events
-    public Action onAllPlayersRequiredIn;
-
-    private Camera cameraRender = null;
-    public Camera CameraRendered
-    {
-        get
-        {
-            if(cameraRender == null)
-            {
-               // Debug.Log("Not Camera has been setup.");
-                return Camera.current;
-            }
-            return cameraRender;
-        }
-        set
-        {
-            if(cameraRender != null && cameraRender.isActiveAndEnabled)
-            {
-                //if the current render over the set camera, keep it as renderer camera
-                if (cameraRender.depth >= value.depth) return;
-            }
-            cameraRender = value;
-        }
-    }
 #if UMM
     private Canvas MiniMapCanvas = null;
 #endif
+    #endregion
 
+    #region Unity Method
     /// <summary>
     /// 
     /// </summary>
@@ -95,7 +70,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
 #endif
         if (bl_GameData.Instance.lobbyJoinMethod == LobbyJoinMethod.WaitingRoom && PhotonNetwork.LocalPlayer.GetPlayerTeam() != Team.None)
         {
-            Invoke("SpawnPlayerWithCurrentTeam", 2);
+            Invoke(nameof(SpawnPlayerWithCurrentTeam), 2);
         }
     }
 
@@ -115,7 +90,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     /// </summary>
     private void OnEnable()
     {
-        bl_EventHandler.RemoteActorsChange += OnRemoteActorChange;
+        bl_EventHandler.onRemoteActorChange += OnRemoteActorChange;
     }
 
     /// <summary>
@@ -123,7 +98,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     /// </summary>
     private void OnDisable()
     {
-        bl_EventHandler.RemoteActorsChange -= OnRemoteActorChange;
+        bl_EventHandler.onRemoteActorChange -= OnRemoteActorChange;
         if(registered)
         PhotonNetwork.RemoveCallbackTarget(this);
         if(GameModeLogic != null)
@@ -134,90 +109,99 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
             bl_EventHandler.onLocalPlayerDeath -= GameModeLogic.OnLocalPlayerDeath;
         }
     }
+    #endregion
 
     /// <summary>
-    /// Spawn Player Function
+    /// Spawn the local player in the give team
     /// </summary>
-    public bool SpawnPlayer(Team t_team)
+    /// <param name="playerTeam"></param>
+    /// <returns></returns>
+    public bool SpawnPlayer(Team playerTeam)
     {
         if (spawnInQueque) return false;//there's a reserved spawn incoming, don't spawn before that
 
-        if (!bl_RoomMenu.Instance.SpectatorMode)
+        //if there is a local player already instance
+        if (LocalPlayer != null)
         {
-            if (LocalPlayer != null)//if there is a local player already instance
-            {
-                PhotonNetwork.Destroy(LocalPlayer);//destroy it
-            }
-            if (!GameFinish)//if the game still not finish
-            {
-                //set the player team to the player properties
-                Hashtable PlayerTeam = new Hashtable();
-                PlayerTeam.Add(PropertiesKeys.TeamKey, t_team.ToString());
+            PhotonNetwork.Destroy(LocalPlayer);//destroy it
+        }
 
-                PhotonNetwork.LocalPlayer.SetCustomProperties(PlayerTeam);
-                LocalPlayerTeam = t_team;
+        //if the game finish
+        if (GameFinish)
+        {
+            bl_RoomCamera.Instance?.SetActive(false);
+            return false;
+        }
 
-                //spawn the player model
+        //set the player team to the player properties
+        Hashtable PlayerTeam = new Hashtable();
+        PlayerTeam.Add(PropertiesKeys.TeamKey, playerTeam.ToString());
+        PhotonNetwork.LocalPlayer.SetCustomProperties(PlayerTeam);
+        LocalPlayerTeam = playerTeam;
+
+        //spawn the player model
 #if !PSELECTOR
-                SpawnPlayerModel(t_team);
-                AfterSpawnSetup();
+        SpawnPlayerModel(playerTeam);
 #else
-                bl_PlayerSelector ps = FindObjectOfType<bl_PlayerSelector>();
-                if (MFPS.PlayerSelector.bl_PlayerSelectorData.Instance.PlayerSelectorMode == MFPS.PlayerSelector.bl_PlayerSelectorData.PSType.InMatch)
-                {
-                    if (ps.IsSelected && !ps.isChangeOfTeam)
-                    {
-                        ps.SpawnSelected(t_team);
-                    }
-                    else
-                    {
-                        ps.OpenSelection(t_team);
-                    }
-                }
-                else
-                {
-                    if(!PhotonNetwork.OfflineMode)
-                    SpawnSelectedPlayer(MFPS.PlayerSelector.bl_PlayerSelectorData.Instance.GetSelectedPlayerFromTeam(t_team), t_team);
-                    else
-                    {
-                        SpawnPlayerModel(t_team);
-                        AfterSpawnSetup();
-                    }
-                }
-#endif
-                return true;
+            if (bl_PlayerSelector.InMatch)
+            {
+                if (!bl_PlayerSelector.Instance.TrySpawnSelectedPlayer(playerTeam)) return false;
             }
             else
             {
-                bl_RoomCamera.Instance?.SetActive(false);
-                return false;
+                bl_PlayerSelector.SpawnPreSelectedPlayer(playerTeam);
             }
-        }
-        else
-        {
-            this.GetComponent<bl_RoomMenu>().WaitForSpectator = true;
-            return false;
-        }
+#endif
+        return true;
     }
 
-    void AfterSpawnSetup()
+    /// <summary>
+    /// Spawn player based in the team
+    /// </summary>
+    /// <returns></returns>
+    public void SpawnPlayerModel(Team playerTeam)
     {
-        bl_RoomCamera.Instance?.SetActive(false);
-        StartCoroutine(bl_UIReferences.Instance.FinalFade(false, false, 0));
-        bl_UtilityHelper.LockCursor(true);
-        if (!Joined) { StartPlayTime = Time.time; }
-        Joined = true;
+        Vector3 pos;
+        Quaternion rot;
+        bl_SpawnPointManager.Instance.GetPlayerSpawnPosition(playerTeam, out pos, out rot);
 
-#if UMM
-        if (MiniMapCanvas != null)
+        GameObject playerPrefab = bl_GameData.Instance.Player1.gameObject;
+        if (OverridePlayerPrefab == null)
         {
-            MiniMapCanvas.enabled = true;
+            if (playerTeam == Team.Team2) playerPrefab = bl_GameData.Instance.Player2.gameObject;
         }
         else
         {
-            Debug.LogWarning("MiniMap addon is enabled but not integrated in this scene");
+            playerPrefab = OverridePlayerPrefab.GetPlayerForTeam(playerTeam);
         }
-#endif
+
+        InstancePlayer(playerPrefab, pos, rot, playerTeam);
+        AfterSpawnSetup();
+
+        if (!m_enterInGame && bl_MatchInformationDisplay.Instance != null) { bl_MatchInformationDisplay.Instance.DisplayInfo(); }
+        m_enterInGame = true;
+        bl_UCrosshair.Instance.Show(true);
+    }
+
+    /// <summary>
+    /// Instanced the given player prefab
+    /// </summary>
+    public void InstancePlayer(GameObject prefab, Vector3 position, Quaternion rotation, Team team)
+    {
+        //set the some common data that will be sync right after the player is instanced in the other clients
+        var commonData = new object[1];
+        commonData[0] = team;
+
+        //instantiate the player prefab
+        LocalPlayer = PhotonNetwork.Instantiate(prefab.name, position, rotation, 0, commonData);
+
+        LocalPlayerReferences = LocalPlayer.GetComponent<bl_PlayerReferences>();
+        LocalActor.Actor = LocalPlayer.transform;
+        LocalActor.ActorView = LocalPlayer.GetComponent<PhotonView>();
+        LocalActor.Team = team;
+        LocalActor.AimPosition = LocalPlayer.GetComponent<bl_PlayerSettings>().AimPositionReference.transform;
+
+        bl_EventHandler.DispatchPlayerLocalSpawnEvent();
     }
 
     /// <summary>
@@ -257,49 +241,7 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public void SpawnPlayerModel(Team playerTeam)
-    {
-        Vector3 pos;
-        Quaternion rot;
-        GameObject playerPrefab = bl_GameData.Instance.Player1.gameObject;
-        if (playerTeam == Team.Team2)
-        {
-            GetSpawn(ReconSpawnPoint.ToArray(), out pos, out rot);
-            playerPrefab = bl_GameData.Instance.Player2.gameObject;
-        }
-        else if (playerTeam == Team.Team1)
-        {
-            GetSpawn(DeltaSpawnPoint.ToArray(), out pos, out rot);
-            playerPrefab = bl_GameData.Instance.Player1.gameObject;
-        }
-        else
-        {
-            GetSpawn(AllSpawnPoints.ToArray(), out pos, out rot);
-        }
-
-        //set the some common data that will be sync right after the player is instanced in the other clients
-        var commonData = new object[1];
-        commonData[0] = playerTeam;
-
-        //instantiate the player prefab
-        LocalPlayer = PhotonNetwork.Instantiate(playerPrefab.name, pos, rot, 0, commonData);
-
-        LocalActor.Actor = LocalPlayer.transform;
-        LocalActor.ActorView = LocalPlayer.GetComponent<PhotonView>();
-        LocalActor.Team = playerTeam;
-        LocalActor.AimPosition = LocalPlayer.GetComponent<bl_PlayerSettings>().AimPositionReference.transform;
-
-        if (!EnterInGamePlay && bl_MatchInformationDisplay.Instance != null) { bl_MatchInformationDisplay.Instance.DisplayInfo(); }
-        EnterInGamePlay = true;
-        bl_EventHandler.PlayerLocalSpawnEvent();
-        bl_UCrosshair.Instance.Show(true);
-    }
-
-    /// <summary>
-    /// 
+    /// Called when the room round time finish
     /// </summary>
     public void OnGameTimeFinish(bool gameOver)
     {
@@ -308,12 +250,35 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     }
 
     /// <summary>
-    /// 
+    /// Make the local player spawn in a random spawn point of the current team
     /// </summary>
     public void SpawnPlayerWithCurrentTeam()
     {
-        SpawnPlayer(PhotonNetwork.LocalPlayer.GetPlayerTeam());
+        if(SpawnPlayer(PhotonNetwork.LocalPlayer.GetPlayerTeam()))
         bl_RoomMenu.Instance.OnAutoTeam();
+    }
+
+    /// <summary>
+    /// Called after the local player spawn
+    /// </summary>
+    public void AfterSpawnSetup()
+    {
+        bl_RoomCamera.Instance?.SetActive(false);
+        StartCoroutine(bl_UIReferences.Instance.FinalFade(false, false, 0));
+        bl_UtilityHelper.LockCursor(true);
+        if (!Joined) { StartPlayTime = Time.time; }
+        Joined = true;
+
+#if UMM
+        if (MiniMapCanvas != null)
+        {
+            MiniMapCanvas.enabled = true;
+        }
+        else
+        {
+            Debug.LogWarning("MiniMap addon is enabled but not integrated in this scene");
+        }
+#endif
     }
 
     #region GameModes
@@ -381,46 +346,6 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     }
     #endregion
 
-#if PSELECTOR
-    /// <summary>
-    /// 
-    /// </summary>
-    public void SpawnSelectedPlayer(MFPS.PlayerSelector.bl_PlayerSelectorInfo info,Team playerTeam)
-    {
-        Vector3 pos;
-        Quaternion rot;
-        if (playerTeam == Team.Team2)
-        {
-            GetSpawn(ReconSpawnPoint.ToArray(), out pos, out rot);
-        }
-        else if (playerTeam == Team.Team1)
-        {
-            GetSpawn(DeltaSpawnPoint.ToArray(), out pos, out rot);
-        }
-        else
-        {
-            GetSpawn(AllSpawnPoints.ToArray(), out pos, out rot);
-        }
-
-        //set the some common data that will be sync right after the player is instanced in the other clients
-        var commonData = new object[1];
-        commonData[0] = playerTeam;
-
-        LocalPlayer = PhotonNetwork.Instantiate(info.Prefab.name, pos, rot, 0, commonData);
-
-        LocalActor.Actor = LocalPlayer.transform;
-        LocalActor.ActorView = LocalPlayer.GetComponent<PhotonView>();
-        LocalActor.Team = playerTeam;
-        LocalActor.AimPosition = LocalPlayer.GetComponent<bl_PlayerSettings>().AimPositionReference.transform;
-
-        AfterSpawnSetup();
-        if (!EnterInGamePlay && bl_MatchInformationDisplay.Instance != null) { bl_MatchInformationDisplay.Instance.DisplayInfo(); }
-        EnterInGamePlay = true;
-        bl_EventHandler.PlayerLocalSpawnEvent();
-        bl_UCrosshair.Instance.Show(true);
-    }
-#endif
-
     /// <summary>
     /// 
     /// </summary>
@@ -447,69 +372,6 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
         WaitingPlayersAmount = MinPlayers;
         SetGameState(MatchState.Waiting);
         return true;
-    }
-
-    public float PlayedTime => (Time.time - StartPlayTime);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public void GetSpawn(Transform[] list, out Vector3 position, out Quaternion Rotation)
-    {
-       int random = Random.Range(0, list.Length);
-       Vector3 s = Random.insideUnitSphere * list[random].GetComponent<bl_SpawnPoint>().SpawnSpace;
-       position = list[random].position + new Vector3(s.x, 0.55f, s.z);
-       Rotation = list[random].rotation;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public void RegisterSpawnPoint(bl_SpawnPoint point)
-    {
-        switch (point.m_Team)
-        {
-            case Team.Team1:
-                DeltaSpawnPoint.Add(point.transform);
-                break;
-            case Team.Team2:
-                ReconSpawnPoint.Add(point.transform);
-                break;
-        }
-        AllSpawnPoints.Add(point.transform);
-    }
-
-    public Transform GetAnSpawnPoint => AllSpawnPoints[Random.Range(0, AllSpawnPoints.Count)];
-
-    public Transform GetAnTeamSpawnPoint(Team team, bool sequencial = false)
-    {
-        if (team == Team.Team2)
-        {
-            if (sequencial)
-            {
-                currentReconSpawnPoint = (currentReconSpawnPoint + 1) % ReconSpawnPoint.Count;
-                return ReconSpawnPoint[currentReconSpawnPoint];
-            }
-            return ReconSpawnPoint[Random.Range(0, ReconSpawnPoint.Count)];
-        }
-        else if (team == Team.Team1)
-        {
-            if (sequencial)
-            {
-                currentDeltaSpawnPoint = (currentDeltaSpawnPoint + 1) % DeltaSpawnPoint.Count;
-                return DeltaSpawnPoint[currentDeltaSpawnPoint];
-            }
-            return DeltaSpawnPoint[Random.Range(0, DeltaSpawnPoint.Count)];
-        }
-        else
-        {
-            if (sequencial)
-            {
-                currentReconSpawnPoint = (currentReconSpawnPoint + 1) % AllSpawnPoints.Count;
-                return AllSpawnPoints[currentReconSpawnPoint];
-            }
-            return AllSpawnPoints[Random.Range(0, AllSpawnPoints.Count)];
-        }
     }
 
     /// <summary>
@@ -604,6 +466,23 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     }
 
     /// <summary>
+    /// Find a player or bot by their ViewID
+    /// </summary>
+    /// <returns></returns>
+    public MFPSPlayer FindMFPSActor(int viewID)
+    {
+        if (LocalPlayer != null && LocalPlayer.GetPhotonView().ViewID == viewID) { return LocalActor; }
+        for (int i = 0; i < OthersActorsInScene.Count; i++)
+        {
+            if (OthersActorsInScene[i].ActorView != null && OthersActorsInScene[i].ActorView.ViewID == viewID)
+            {
+                return OthersActorsInScene[i];
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     public MFPSPlayer GetMFPSPlayer(string nickName)
@@ -614,6 +493,23 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
             player = LocalActor;
         }
         return player;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public MFPSPlayer[] GetMFPSPlayerInTeam(Team team)
+    {
+        List<MFPSPlayer> list = new List<MFPSPlayer>();
+        for (int i = 0; i < OthersActorsInScene.Count; i++)
+        {
+            if (OthersActorsInScene[i].Team == team)
+            {
+                list.Add(OthersActorsInScene[i]);
+            }
+        }
+        if (LocalActor.Team == team) list.Add(LocalActor);
+        return list.ToArray();
     }
 
     public List<MFPSPlayer> GetNonTeamMatePlayers(bool includeBots = true)
@@ -632,7 +528,6 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     }
 
     #region PUN
-
     [PunRPC]
     void RPCSyncGame(MatchState state)
     {
@@ -768,17 +663,15 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     public void OnMasterClientSwitched(Player newMasterClient)
     {
         Debug.Log("The old masterclient left, we have a new masterclient: " + newMasterClient.NickName);
-        this.GetComponent<bl_ChatRoom>().AddLine("We have a new masterclient: " + newMasterClient.NickName);
+        bl_ChatRoom.Instance?.AddChatLocally($"We have a new MasterClient: {newMasterClient.NickName}");
     }
 
     public void OnConnected()
-    {
-      
+    {     
     }
 
     public void OnConnectedToMaster()
-    {
-       
+    {    
     }
 
     public void OnDisconnected(DisconnectCause cause)
@@ -792,32 +685,56 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
     }
 
     public void OnRegionListReceived(RegionHandler regionHandler)
-    {
-     
+    {    
     }
 
     public void OnCustomAuthenticationResponse(Dictionary<string, object> data)
-    {
-       
+    {       
     }
 
     public void OnCustomAuthenticationFailed(string debugMessage)
-    {
-       
+    {     
     }
-#endregion
+    #endregion
 
-    public bool alreadyEnterInGame
+    #region Getters
+    private Camera cameraRender = null;
+    public Camera CameraRendered
     {
         get
         {
-            return EnterInGamePlay;
+            if (cameraRender == null)
+            {
+                // Debug.Log("Not Camera has been setup.");
+                return Camera.current;
+            }
+            return cameraRender;
         }
         set
         {
-            EnterInGamePlay = value;
+            if (cameraRender != null && cameraRender.isActiveAndEnabled)
+            {
+                //if the current render over the set camera, keep it as renderer camera
+                if (cameraRender.depth >= value.depth) return;
+            }
+            cameraRender = value;
         }
     }
+
+    private bool m_enterInGame = false;
+    public bool FirstSpawnDone
+    {
+        get
+        {
+            return m_enterInGame;
+        }
+        set
+        {
+            m_enterInGame = value;
+        }
+    }
+
+    public float PlayedTime => (Time.time - StartPlayTime);
 
     public static bool isLocalAlive
     {
@@ -842,4 +759,5 @@ public class bl_GameManager : bl_PhotonHelper, IInRoomCallbacks, IConnectionCall
             return _instance;
         }
     }
-}		
+    #endregion
+}

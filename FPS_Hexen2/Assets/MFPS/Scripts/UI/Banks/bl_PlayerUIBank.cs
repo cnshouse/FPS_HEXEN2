@@ -7,14 +7,13 @@ public class bl_PlayerUIBank : MonoBehaviour
 {
     [Header("REFERENCES")]
     public Canvas PlayerUICanvas;
-    public GameObject PickUpUI;
-    public GameObject PickUpIconUI;
     public GameObject KillZoneUI;
-    public GameObject AmmoUI;
+    public GameObject WeaponStatsUI;
+    public GameObject playerStatsUI;
     public GameObject MaxKillsUI;
     public GameObject SpeakerIcon;
-
-    public Image DamageIndicator;
+    public GameObject TimeUIRoot;
+    public GameObject MaxKillsUIRoot;
     public Image PlayerStateIcon;
     public Image SniperScope;
     public Image HealthBar;
@@ -24,11 +23,32 @@ public class bl_PlayerUIBank : MonoBehaviour
     public Text HealthText;
     public Text TimeText;
     public Text FireTypeText;
-    public Text PickUpText;
     public CanvasGroup DamageAlpha;
     public bl_WeaponLoadoutUI LoadoutUI;
     public Gradient AmmoTextColorGradient;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    private void Awake()
+    {
+        UpdateUIDisplay();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void UpdateUIDisplay()
+    {
+        TimeUIRoot.SetActive(bl_UIReferences.Instance.UIMask.IsEnumFlagPresent(RoomUILayers.Time));
+        WeaponStatsUI.SetActive(bl_UIReferences.Instance.UIMask.IsEnumFlagPresent(RoomUILayers.WeaponData));
+        playerStatsUI.SetActive(bl_UIReferences.Instance.UIMask.IsEnumFlagPresent(RoomUILayers.PlayerStats));
+        if (LoadoutUI != null) LoadoutUI.SetActive(bl_UIReferences.Instance.UIMask.IsEnumFlagPresent(RoomUILayers.Loadout));
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public void UpdateWeaponState(bl_Gun gun)
     {
         int bullets = gun.bulletsLeft;
@@ -39,14 +59,17 @@ public class bl_PlayerUIBank : MonoBehaviour
         if (gun.Info.Type != GunType.Knife)
         {
             AmmoText.text = bullets.ToString();
-            ClipText.text = ClipText.text = string.Format("/ {0}", clips.ToString("F0"));
+            if (gun.HaveInfinityAmmo)
+                ClipText.text = "∞";
+            else
+                ClipText.text = ClipText.text = clips.ToString("F0");
             AmmoText.color = c;
             ClipText.color = c;
         }
         else
         {
             AmmoText.text = "--";
-            ClipText.text = ClipText.text = "/ --";
+            ClipText.text = ClipText.text = "--";
             AmmoText.color = Color.white;
             ClipText.color = Color.white;
         }

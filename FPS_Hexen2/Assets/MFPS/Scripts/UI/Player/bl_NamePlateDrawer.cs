@@ -32,6 +32,9 @@ public class bl_NamePlateDrawer : bl_MonoBehaviour
     private bool ShowHealthBar = false;
     private bool isFinish = false;
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void Awake()
     {
         base.Awake();
@@ -59,15 +62,22 @@ public class bl_NamePlateDrawer : bl_MonoBehaviour
     {
         base.OnEnable();
         this.myTransform = this.transform;
-        bl_EventHandler.OnRoundEnd += OnGameFinish;
+        bl_EventHandler.onRoundEnd += OnGameFinish;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     protected override void OnDisable()
     {
         base.OnDisable();
-        bl_EventHandler.OnRoundEnd -= OnGameFinish;
+        bl_EventHandler.onRoundEnd -= OnGameFinish;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="DrawName"></param>
     public void SetName(string DrawName)
     {
         m_PlayerName = DrawName;
@@ -77,6 +87,9 @@ public class bl_NamePlateDrawer : bl_MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     void OnGameFinish()
     {
         isFinish = true;

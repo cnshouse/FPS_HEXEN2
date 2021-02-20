@@ -23,7 +23,7 @@ public class bl_MatchInformationDisplay : MonoBehaviour
     /// </summary>
     public void DisplayInfo()
     {
-        RoomProperties props = PhotonNetwork.CurrentRoom.GetRoomInfo();
+        MFPSRoomInfo props = PhotonNetwork.CurrentRoom.GetRoomInfo();
         MapNameText.text = props.mapName.ToUpper();
         DateText.text = fakeDate;
         GameModeText.text = props.gameMode.GetName().ToUpper();

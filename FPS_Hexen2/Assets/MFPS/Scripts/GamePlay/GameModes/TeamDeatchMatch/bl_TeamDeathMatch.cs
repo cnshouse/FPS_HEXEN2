@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using ExitGames.Client.Photon;
-using Photon.Realtime;
+﻿using Photon.Realtime;
 using UnityEngine;
 using Photon.Pun;
+using MFPS.GameModes.TeamDeathMatch;
 
 public class bl_TeamDeathMatch : bl_PhotonHelper, IGameMode
 {
@@ -42,11 +40,9 @@ public class bl_TeamDeathMatch : bl_PhotonHelper, IGameMode
     /// </summary>
     public void OnFinishTime(bool gameOver)
     {
-        if (PhotonNetwork.OfflineMode) return;
-
         //determine the winner
         string finalText = "";
-        if(GetWinnerTeam() != Team.None)
+        if(!PhotonNetwork.OfflineMode && GetWinnerTeam() != Team.None)
         {
             finalText = GetWinnerTeam().GetTeamName();
         }

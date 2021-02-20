@@ -2,50 +2,53 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class bl_AudioInstance : MonoBehaviour
+namespace MFPS.Audio
 {
-    private AudioSource aSource;
-    public int ID { get; set; }
-    public bl_AudioBank.AudioInfo playingAudio { get; private set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Init()
+    public class bl_AudioInstance : MonoBehaviour
     {
-        if (aSource == null) { aSource = gameObject.AddComponent<AudioSource>(); }
-    }
-    
-    /// <summary>
-    /// 
-    /// </summary>
-    public int SetInstance(bl_AudioBank.AudioInfo info)
-    {
-        if(aSource == null) { aSource = gameObject.AddComponent<AudioSource>();  }
+        private AudioSource aSource;
+        public int ID { get; set; }
+        public bl_AudioBank.AudioInfo playingAudio { get; private set; }
 
-        aSource.clip = info.Clip;
-        aSource.volume = info.Volume;
-        aSource.spatialBlend = info.SpacialAudio ? 1 : 0;
-        aSource.loop = info.Loop;
-
-        aSource.Play();
-        playingAudio = info;
-        if (!info.Loop)
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Init()
         {
-            Invoke("Stop", info.Clip.length);
+            if (aSource == null) { aSource = gameObject.AddComponent<AudioSource>(); }
         }
-        return ID;
-    }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Stop()
-    {
-        aSource.Stop();
-        gameObject.SetActive(false);
-    }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int SetInstance(bl_AudioBank.AudioInfo info)
+        {
+            if (aSource == null) { aSource = gameObject.AddComponent<AudioSource>(); }
 
-    public bool isPlaying { get { return aSource.isPlaying; } }
-    public bool isPlayingClip(string audioName) { return (isPlaying && (playingAudio.Name.ToLower() == audioName.ToLower())); }
+            aSource.clip = info.Clip;
+            aSource.volume = info.Volume;
+            aSource.spatialBlend = info.SpacialAudio ? 1 : 0;
+            aSource.loop = info.Loop;
+
+            aSource.Play();
+            playingAudio = info;
+            if (!info.Loop)
+            {
+                Invoke("Stop", info.Clip.length);
+            }
+            return ID;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Stop()
+        {
+            aSource.Stop();
+            gameObject.SetActive(false);
+        }
+
+        public bool isPlaying { get { return aSource.isPlaying; } }
+        public bool isPlayingClip(string audioName) { return (isPlaying && (playingAudio.Name.ToLower() == audioName.ToLower())); }
+    }
 }

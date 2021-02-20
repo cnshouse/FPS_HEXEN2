@@ -2,17 +2,34 @@
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using MFPS.Addon.LevelManager;
 
 public class bl_LevelManager : ScriptableObject
 {
-
     public List<LevelInfo> Levels = new List<LevelInfo>();
     [Header("Settings")]
-    public bool UpdateLevelsInMidGame = true;
+    [LovattoToogle] public bool UpdateLevelsInMidGame = true;
 
     public bool isNewLevel { get; set; }
     private int LastLevel = 0;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public void Initialize()
+    {
+#if ULSP
+        if(bl_DataBase.Instance != null)
+        {
+            bl_DataBase.OnUpdateData -= OnDataUpdate;
+            bl_DataBase.OnUpdateData += OnDataUpdate;
+        }
+#endif
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public void GetInfo()
     {
         LastLevel = GetLevelID();
@@ -201,6 +218,15 @@ public class bl_LevelManager : ScriptableObject
         }
     }
 
+#if ULSP
+    /// <summary>
+    /// 
+    /// </summary>
+    void OnDataUpdate(MFPS.ULogin.LoginUserInfo info)
+    {
+        Check(bl_DataBase.LocalLoggedUser.Score);
+    }
+#endif
     public void Refresh()
     {
         isNewLevel = false;

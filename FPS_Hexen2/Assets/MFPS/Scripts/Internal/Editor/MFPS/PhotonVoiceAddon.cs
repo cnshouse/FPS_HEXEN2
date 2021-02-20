@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditorInternal;
 using UnityEditor.SceneManagement;
 using MFPSEditor;
+using MFPS.Addon.PlayerSelector;
 #if !UNITY_WEBGL && PVOICE
 using Photon.Voice.Unity;
 using Photon.Voice.PUN;
@@ -45,7 +46,7 @@ public class PhotonVoiceAddon : MonoBehaviour
 
 
 #if PSELECTOR
-        foreach(var p in MFPS.PlayerSelector.bl_PlayerSelectorData.Instance.AllPlayers)
+        foreach(var p in bl_PlayerSelectorData.Instance.AllPlayers)
         {
             if (p.Prefab == null ) continue;
          SetUpPlayerPrefab(p.Prefab.gameObject);

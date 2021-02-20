@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
+using MFPS.Runtime.UI;
+using MFPS.Runtime.AI;
 
 public class bl_AIShooterHealth : bl_PhotonHelper
 {
@@ -10,60 +11,66 @@ public class bl_AIShooterHealth : bl_PhotonHelper
     [Header("References")]
     public Texture2D DeathIcon;
 
-    private bl_AIShooterAgent Agent;
+    private bl_AIShooter m_AIShooter;
     private bl_AIMananger AIManager;
     private int LastActorEnemy = -1;
     private bl_AIAnimation AIAnim;
     private int m_RepetingDamage = 1;
     private DamageData RepetingDamageInfo;
     public int lastHitBoxHitted { get; set; }
+    private bl_AIShooterReferences references;
+    private bl_AIShooterAgent shooterAgent;
 
     /// <summary>
     /// 
     /// </summary>
     void Awake()
     {
-        Agent = GetComponent<bl_AIShooterAgent>();
+        references = GetComponent<bl_AIShooterReferences>();
+        m_AIShooter = references.aiShooter;
+        shooterAgent = GetComponent<bl_AIShooterAgent>();
         AIManager = bl_AIMananger.Instance;
-        AIAnim = GetComponentInChildren<bl_AIAnimation>();
+        AIAnim = references.aiAnimation;
     }
     /// <summary>
     /// 
     /// </summary>
     public void DoDamage(int damage, string wn, Vector3 direction, int vi, bool fromBot, Team team, bool ishead, int hitBoxID)
     {
-        if (Agent.death)
+        if (m_AIShooter.isDeath)
             return;
 
-        if (GetGameMode == GameMode.TDM)
+        if (!isOneTeamMode)
         {
-            if (team == Agent.AITeam) return;
+            if (team == m_AIShooter.AITeam) return;
         }
 
-        photonView.RPC("RpcDoDamage", RpcTarget.All, damage, wn, direction, vi, fromBot, ishead, hitBoxID);
+        photonView.RPC(nameof(RpcDoDamage), RpcTarget.All, damage, wn, direction, vi, fromBot, ishead, hitBoxID);
     }
 
     [PunRPC]
     void RpcDoDamage(int damage, string weaponName, Vector3 direction, int viewID, bool fromBot, bool ishead, int hitBoxID)
     {
-        if (Agent.death)
+        if (m_AIShooter.isDeath)
             return;
 
         Health -= damage;
         if (LastActorEnemy != viewID)
         {
-            Agent.personal = false;
+            if (shooterAgent != null)
+                shooterAgent.personal = false;
         }
         lastHitBoxHitted = hitBoxID;
         LastActorEnemy = viewID;
 
         if (PhotonNetwork.IsMasterClient)
         {
-            Agent.OnGetHit(direction);
+            shooterAgent?.OnGetHit(direction);
         }
         if (viewID == bl_GameManager.LocalPlayerViewID)//if was me that make damage
         {
             bl_UCrosshair.Instance.OnHit();
+            bl_EventHandler.DispatchLocalPlayerHitEnemy(gameObject.name);
         }
 
         if (Health > 0)
@@ -71,21 +78,23 @@ public class bl_AIShooterHealth : bl_PhotonHelper
             Transform t = bl_GameManager.Instance.FindActor(viewID);
             if (t != null && !t.name.Contains("(die)"))
             {
-                if (Agent.Target == null)
+                if (m_AIShooter.Target == null)
                 {
-                    Agent.personal = true;
-                    Agent.Target = t;
+                    if (shooterAgent != null)
+                        shooterAgent.personal = true;
+                    m_AIShooter.Target = t;
                 }
                 else
                 {
-                    if (t != Agent.Target)
+                    if (t != m_AIShooter.Target)
                     {
-                        float cd = bl_UtilityHelper.Distance(transform.position, Agent.Target.position);
+                        float cd = bl_UtilityHelper.Distance(transform.position, m_AIShooter.Target.position);
                         float od = bl_UtilityHelper.Distance(transform.position, t.position);
                         if (od < cd && (cd - od) > 7)
                         {
-                            Agent.personal = true;
-                            Agent.Target = t;
+                            if (shooterAgent != null)
+                                shooterAgent.personal = true;
+                            m_AIShooter.Target = t;
                         }
                     }
                 }
@@ -103,20 +112,21 @@ public class bl_AIShooterHealth : bl_PhotonHelper
     /// </summary>
     void Die(int viewID, bool fromBot, bool ishead, string weaponName, Vector3 direction)
     {
-        Agent.death = true;
-        Agent.OnDeath();
+        //Debug.Log($"{gameObject.name} die with {weaponName} from viewID {viewID} Bot?= {fromBot}");
+        m_AIShooter.isDeath = true;
+        m_AIShooter.OnDeath();
         gameObject.name += " (die)";
-        Agent.AimTarget.name += " (die)";
-        Agent.AIWeapon.OnDeath();
-        Agent.enabled = false;
-        Agent.Agent.isStopped = true;
+        m_AIShooter.AimTarget.name += " (die)";
+        references.shooterWeapon.OnDeath();
+        m_AIShooter.enabled = false;
+        references.Agent.isStopped = true;
         GetComponent<bl_NamePlateDrawer>().enabled = false;
         //update the MFPSPlayer data
-        MFPSPlayer player = bl_GameManager.Instance.GetMFPSPlayer(Agent.AIName);
+        MFPSPlayer player = bl_GameManager.Instance.GetMFPSPlayer(m_AIShooter.AIName);
         if(player != null)
         player.isAlive = false;
 
-        bl_AIShooterAgent killerBot = null;
+        bl_AIShooter killerBot = null;
         if (viewID == bl_GameManager.LocalPlayerViewID && !fromBot)//if was me that kill this bot
         {
             Team team = PhotonNetwork.LocalPlayer.GetPlayerTeam();
@@ -125,9 +135,10 @@ public class bl_AIShooterHealth : bl_PhotonHelper
             if (weaponName.Contains("cmd:") || gunID == -1)
             {
                 weaponName = weaponName.Replace("cmd:", "");
-                gunID = -(bl_KillFeed.Instance.GetCustomIconIndex(weaponName));
+                gunID = -(bl_KillFeed.Instance.GetCustomIconIndex(weaponName) + 1);
             }
-            bl_KillFeed.Instance.SendKillMessageEvent(LocalName, Agent.AIName, gunID, team, ishead);
+
+            bl_KillFeed.Instance.SendKillMessageEvent(LocalName, m_AIShooter.AIName, gunID, team, ishead);
 
             //Add a new kill and update information
             PhotonNetwork.LocalPlayer.PostKill(1);//Send a new kill
@@ -150,10 +161,10 @@ public class bl_AIShooterHealth : bl_PhotonHelper
             //show an local notification for the kill
             KillInfo localKillInfo = new KillInfo();
             localKillInfo.Killer = PhotonNetwork.LocalPlayer.NickName;
-            localKillInfo.Killed = string.IsNullOrEmpty(Agent.AIName) ? gameObject.name.Replace("(die)", "") : Agent.AIName;
+            localKillInfo.Killed = string.IsNullOrEmpty(m_AIShooter.AIName) ? gameObject.name.Replace("(die)", "") : m_AIShooter.AIName;
             localKillInfo.byHeadShot = ishead;
             localKillInfo.KillMethod = weaponName;
-            bl_EventHandler.FireLocalKillEvent(localKillInfo);
+            bl_EventHandler.DispatchLocalKillEvent(localKillInfo);
 
             //update team score
             bl_GameManager.Instance.SetPoint(1, GameMode.TDM, team);
@@ -163,11 +174,11 @@ public class bl_AIShooterHealth : bl_PhotonHelper
             if (PhotonNetwork.IsMasterClient)
             {
                 PhotonView p = PhotonView.Find(viewID);
-                bl_AIShooterAgent bot = null;
+                bl_AIShooter bot = null;
                 string killer = "Unknown";
                 if (p != null)
                 {
-                    bot = p.GetComponent<bl_AIShooterAgent>();//killer bot
+                    bot = p.GetComponent<bl_AIShooter>();//killer bot
                     killer = bot.AIName;
                     if (string.IsNullOrEmpty(killer)) { killer = p.gameObject.name.Replace(" (die)", ""); }
                     //update bot stats
@@ -176,11 +187,11 @@ public class bl_AIShooterHealth : bl_PhotonHelper
 
                 //send kill feed message
                 int gunID = bl_GameData.Instance.GetWeaponID(weaponName);
-                bl_KillFeed.Instance.SendKillMessageEvent(killer, Agent.AIName, gunID, bot.AITeam, ishead);
+                bl_KillFeed.Instance.SendKillMessageEvent(killer, m_AIShooter.AIName, gunID, bot.AITeam, ishead);
 
                 if (bot != null)
                 {
-                    bot.KillTheTarget();
+                   // bot.KillTheTarget();
                     killerBot = bot;
                 }
                 else
@@ -190,35 +201,46 @@ public class bl_AIShooterHealth : bl_PhotonHelper
             }
         }//else, (if other player kill this bot) -> do nothing.
 
-        AIManager.SetBotDeath(Agent.AIName);
+        var mplayer = new MFPSPlayer(photonView, false, false);
+        bl_EventHandler.DispatchRemotePlayerDeath(mplayer);
+
+        AIManager.SetBotDeath(m_AIShooter.AIName);
         if (PhotonNetwork.IsMasterClient)
         {
             if (!isOneTeamMode)
             {
-                if (Agent.AITeam == PhotonNetwork.LocalPlayer.GetPlayerTeam())
+                if (m_AIShooter.AITeam == PhotonNetwork.LocalPlayer.GetPlayerTeam())
                 {
                     GameObject di = bl_ObjectPooling.Instance.Instantiate("deathicon", transform.position, transform.rotation);
                     di.GetComponent<bl_ClampIcon>().SetTempIcon(DeathIcon, 5, 20);
                 }
             }
-            AIManager.OnBotDeath(Agent, killerBot);
+            AIManager.OnBotDeath(m_AIShooter, killerBot);
         }
         var deathData = bl_UtilityHelper.CreatePhotonHashTable();
+        deathData.Add("type", AIRemoteCallType.DestroyBot);
         deathData.Add("direction", direction);
         if (weaponName.Contains("Grenade"))
         {
             deathData.Add("explosion", true);
         }
-        this.photonView.RPC("BotDestroyRpc", RpcTarget.AllBuffered, deathData);//callback is in bl_AIShooterAgent.cs
+        this.photonView.RPC(bl_AIShooterAgent.RPC_NAME, RpcTarget.AllBuffered, deathData);//callback is in bl_AIShooterAgent.cs
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void DestroyBot()
     {
         var deathData = bl_UtilityHelper.CreatePhotonHashTable();
+        deathData.Add("type", AIRemoteCallType.DestroyBot);
         deathData.Add("instant", true);
-        this.photonView.RPC("BotDestroyRpc", RpcTarget.AllBuffered, deathData);//callback is in bl_AIShooterAgent.cs
+        this.photonView.RPC(bl_AIShooterAgent.RPC_NAME, RpcTarget.AllBuffered, deathData);//callback is in bl_AIShooterAgent.cs
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void DoRepetingDamage(int damage, int each, DamageData info = null)
     {
         m_RepetingDamage = damage;
@@ -246,6 +268,9 @@ public class bl_AIShooterHealth : bl_PhotonHelper
         DoDamage((int)info.Damage, "[Burn]", info.Direction, bl_GameManager.LocalPlayerViewID, false, PhotonNetwork.LocalPlayer.GetPlayerTeam(), false, 0);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void CancelRepetingDamage()
     {
         CancelInvoke("MakeDamageRepeting");

@@ -1,11 +1,37 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 public class bl_FootStepsLibrary : ScriptableObject
 {
-    public AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
-    public AudioClip[] DirtStepSounds;
-    public AudioClip[] WatertepSounds;
-    public AudioClip[] MetalStepSounds;
+    public AudioGroup[] Groups;
+    public Vector2 pitchRange = new Vector2(0.95f, 1.05f);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <returns></returns>
+    public AudioGroup GetGroupFor(string tag)
+    {
+        for (int i = 0; i < Groups.Length; i++)
+        {
+            if (Groups[i].Tag.Equals(tag))
+            {
+                return Groups[i];
+            }
+        }
+        return Groups[0];
+    }
+
+    [Serializable]
+    public class AudioGroup
+    {
+        public string Tag;
+        public AudioClip[] StepSounds;
+
+        public AudioClip GetRandomClip()
+        {
+            return StepSounds[UnityEngine.Random.Range(0, StepSounds.Length)];
+        }
+    }
 }

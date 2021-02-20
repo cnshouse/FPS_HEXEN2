@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c311fd21bf7c334690a170bd037a39a, type: 3}
+  m_Name: DM Audio Bank
+  m_EditorClassIdentifier: 
+  AudioBank:
+  - Name: bomb planted
+    Clip: {fileID: 8300000, guid: 70296eb0338d4e049bccd45c215c714a, type: 3}
+    Volume: 1
+    SpacialAudio: 0
+    Loop: 0
+  - Name: planted loop
+    Clip: {fileID: 8300000, guid: abaf944843128b84aa31dcd8d1d148d2, type: 3}
+    Volume: 0.763
+    SpacialAudio: 0
+    Loop: 1
+  - Name: bomb defuse
+    Clip: {fileID: 8300000, guid: e1c8bcecbf75d9d4485ac24128e15996, type: 3}
+    Volume: 1
+    SpacialAudio: 0
+    Loop: 0

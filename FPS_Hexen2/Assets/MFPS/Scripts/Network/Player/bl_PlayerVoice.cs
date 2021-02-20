@@ -38,9 +38,9 @@ public class bl_PlayerVoice : bl_MonoBehaviour
         {
             if(VoiceRecorder != null)
             VoiceRecorder.enabled = true;
-            PushToTalk = bl_UIReferences.Instance.PushToTalkToggle.isOn;
-            if(Speaker != null)
-            Speaker.enabled = !bl_UIReferences.Instance.MuteVoiceToggle.isOn;
+            PushToTalk = (bool)bl_MFPS.Settings.GetSettingOf("Voice Chat");
+            if (Speaker != null)
+            Speaker.enabled = (bool)bl_MFPS.Settings.GetSettingOf("PushToTalk");
         }
         else
         {

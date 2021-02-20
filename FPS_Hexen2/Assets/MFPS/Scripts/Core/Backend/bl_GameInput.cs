@@ -31,6 +31,26 @@ public class bl_GameInput
         }
     }
 
+    public static float MouseX
+    {
+        get
+        {
+            if (!bl_RoomMenu.Instance.isCursorLocked || bl_GameData.Instance.isChating) return 0;
+
+            return Input.GetAxis("Mouse X");
+        }
+    }
+
+    public static float MouseY
+    {
+        get
+        {
+            if (!bl_RoomMenu.Instance.isCursorLocked || bl_GameData.Instance.isChating) return 0;
+
+            return Input.GetAxis("Mouse Y");
+        }
+    }
+
     public static bool Run(GameInputType inputType = GameInputType.Hold)
     {
 #if INPUT_MANAGER
@@ -61,13 +81,30 @@ public class bl_GameInput
 #endif
     }
 
+    public static bool Interact(GameInputType inputType = GameInputType.Down)
+    {
+#if INPUT_MANAGER
+        return GetInputManager("Interact", inputType);
+#else
+        return GetButton(KeyCode.F, inputType);
+#endif
+    }
+
+    public static bool Reload(GameInputType inputType = GameInputType.Down)
+    {
+#if INPUT_MANAGER
+        return GetInputManager("Reload", inputType);
+#else
+        return GetButton(KeyCode.R, inputType);
+#endif
+    }
+
     public static bool WeaponSlot(int slotID)
     {
 #if INPUT_MANAGER
         return GetInputManager($"Weapon{slotID}", GameInputType.Down);
 #else
-        // return GetButton(KeyCode.Space, inputType);
-        return false;
+         return GetButton(KeyCode.Alpha1, GameInputType.Down);
 #endif
     }
 

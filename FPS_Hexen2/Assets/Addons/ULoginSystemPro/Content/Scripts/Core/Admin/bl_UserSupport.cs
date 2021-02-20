@@ -8,18 +8,19 @@ public class bl_UserSupport : MonoBehaviour
 {
     public float WindowSize = 141;
     [Range(1,100)] public float ShowSpeed = 100;
+    public MonoBehaviour[] disableOnOpen;
 
     [Header("References")]
-    [SerializeField] private GameObject LoginBlock;
-    [SerializeField] private GameObject ReplyWindow;
-    [SerializeField] private InputField TitleInput;
-    [SerializeField] private InputField ContentInput;
-    [SerializeField] private Button SummitButton;
-    [SerializeField] private Button CloseButton;
-    [SerializeField] private Text MessageText;
-    [SerializeField] private Text ReplyText;
-    [SerializeField] private GameObject Loading;
-    [SerializeField] private RectTransform WindowTransform;
+    [SerializeField] private GameObject LoginBlock = null;
+    [SerializeField] private GameObject ReplyWindow = null;
+    [SerializeField] private InputField TitleInput = null;
+    [SerializeField] private InputField ContentInput = null;
+    [SerializeField] private Button SummitButton = null;
+    [SerializeField] private Button CloseButton = null;
+    [SerializeField] private Text MessageText = null;
+    [SerializeField] private Text ReplyText = null;
+    [SerializeField] private GameObject Loading = null;
+    [SerializeField] private RectTransform WindowTransform = null;
 
     private bl_LoginPro LoginPro;
     private bl_DataBase DataBase;
@@ -73,6 +74,12 @@ public class bl_UserSupport : MonoBehaviour
         ShowWindow = !ShowWindow;
         StopCoroutine("ShowWindowIE");
         StartCoroutine("ShowWindowIE", ShowWindow);
+
+        foreach (var item in disableOnOpen)
+        {
+            if (item == null) continue;
+            item.enabled = !ShowWindow;
+        }
     }
 
     /// <summary>
@@ -84,12 +91,16 @@ public class bl_UserSupport : MonoBehaviour
         Loading.SetActive(true);
         SummitButton.interactable = false;
         sending = true;
+
+        var content = bl_DataBaseUtils.SanitazeString(ContentInput.text);
+        var title = bl_DataBaseUtils.SanitazeString(TitleInput.text);
+
         WWWForm wf = new WWWForm();
         string hash = bl_DataBaseUtils.Md5Sum(DataBase.LocalUser.NickName  + bl_LoginProDataBase.Instance.SecretKey).ToLower();
         wf.AddField("hash", hash);
         wf.AddField("name", DataBase.LocalUser.NickName);
-        wf.AddField("title", TitleInput.text);
-        wf.AddField("content", ContentInput.text);
+        wf.AddField("title", title);
+        wf.AddField("content", content);
         wf.AddField("type", 1);
 
         //Request public IP to the server

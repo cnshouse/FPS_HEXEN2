@@ -1,20 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Hashtable = ExitGames.Client.Photon.Hashtable; //Replace default Hashtables with Photon hashtables
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using Photon.Pun;
 using Photon.Realtime;
 
 public class bl_RoomSettings : bl_MonoBehaviour
 {
-    //Private
-    [HideInInspector] public int Team_1_Score = 0;
-    [HideInInspector] public int Team_2_Score = 0;
-    public bool AutoTeamSelection { get; set; }
+    [LovattoToogle] public bool canSuicide = true;
 
-    private bl_MatchTimeManager TimeManager;
-    [HideInInspector] public GameMode currentGameMode = GameMode.FFA;
-    public int GameGoal { get; set; }
-    private bl_GameData GameData;
+    #region Public properties
+    public GameMode CurrentGameMode => CurrentRoomInfo.gameMode;
+    public int GameGoal => CurrentRoomInfo.goal;
+    public bool AutoTeamSelection => CurrentRoomInfo.autoTeamSelection;
+    public MFPSRoomInfo CurrentRoomInfo { get; set; }
+    #endregion
 
     /// <summary>
     /// 
@@ -25,14 +24,21 @@ public class bl_RoomSettings : bl_MonoBehaviour
         if ((!PhotonNetwork.IsConnected || !PhotonNetwork.InRoom) && !bl_GameData.Instance.offlineMode)
             return;
 
-        TimeManager = base.GetComponent<bl_MatchTimeManager>();
-        GameData = bl_GameData.Instance;
         ResetRoom();
         GetRoomInfo();
     }
- 
+
     /// <summary>
     /// 
+    /// </summary>
+    IEnumerator Start()
+    {
+        while (!bl_GameData.isDataCached) yield return null;
+        if (bl_MFPS.Settings != null) bl_MFPS.Settings.ApplySettings(false, true);
+    }
+
+    /// <summary>
+    /// Reset all the room properties to it's default values
     /// </summary>
     public void ResetRoom()
     {
@@ -42,11 +48,11 @@ public class bl_RoomSettings : bl_MonoBehaviour
         {
             table.Add(PropertiesKeys.Team1Score, 0);
             table.Add(PropertiesKeys.Team2Score, 0);
-            PhotonNetwork.CurrentRoom.SetCustomProperties(table);
+            CurrentRoom.SetCustomProperties(table);
         }
         table.Clear();
         //Initialize new properties where the information will stay Players
-        if (bl_GameData.Instance.lobbyJoinMethod == LobbyJoinMethod.DirectToMap)
+        if (bl_GameData.Instance.lobbyJoinMethod == LobbyJoinMethod.DirectToMap || PhotonNetwork.OfflineMode)
         {
             table.Add(PropertiesKeys.TeamKey, Team.None.ToString());
         }
@@ -54,7 +60,7 @@ public class bl_RoomSettings : bl_MonoBehaviour
         table.Add(PropertiesKeys.DeathsKey, 0);
         table.Add(PropertiesKeys.ScoreKey, 0);
         table.Add(PropertiesKeys.UserRole, bl_GameData.Instance.RolePrefix);
-        PhotonNetwork.LocalPlayer.SetCustomProperties(table);
+        LocalPlayer.SetCustomProperties(table);
 
 #if ULSP && LM
         bl_DataBase db = FindObjectOfType<bl_DataBase>();
@@ -65,53 +71,47 @@ public class bl_RoomSettings : bl_MonoBehaviour
         }
         Hashtable PlayerTotalScore = new Hashtable();
         PlayerTotalScore.Add("TotalScore", scoreLevel);
-        PhotonNetwork.LocalPlayer.SetCustomProperties(PlayerTotalScore);
-#endif
+        LocalPlayer.SetCustomProperties(PlayerTotalScore);
+#endif      
     }
 
     /// <summary>
-    /// 
+    /// Get the custom room properties of this room
+    /// These properties was set by the room creator (Host)
     /// </summary>
     void GetRoomInfo()
     {
-        currentGameMode = GetGameMode;
-        TimeManager.roundStyle = (RoundStyle)PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.RoomRoundKey];
-        AutoTeamSelection = (bool)PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.TeamSelectionKey];
-        GameGoal = (int)PhotonNetwork.CurrentRoom.CustomProperties[PropertiesKeys.RoomGoal];
-        LoadPrefs();
-
-        if (AutoTeamSelection && bl_GameData.Instance.lobbyJoinMethod == LobbyJoinMethod.DirectToMap)
-        {
-            bl_UIReferences.Instance.AutoTeam(true);
-            bl_UIReferences.Instance.ShowMenu(false);
-            Invoke("SelectTeamAutomatically", 3);
-        }
-        else if (bl_GameData.Instance.lobbyJoinMethod == LobbyJoinMethod.WaitingRoom && PhotonNetwork.LocalPlayer.GetPlayerTeam() == Team.None)
-        {
-            bl_UIReferences.Instance.AutoTeam(true);
-            bl_UIReferences.Instance.ShowMenu(false);
-            Invoke("SelectTeamAutomatically", 3);
-        }
+        CurrentRoomInfo = PhotonNetwork.CurrentRoom.GetRoomInfo();
+        bl_MatchTimeManager.Instance.roundStyle = (RoundStyle)CurrentRoom.CustomProperties[PropertiesKeys.RoomRoundKey];
+        CheckAutoSpawn();
     }
 
     /// <summary>
-    /// 
+    /// Check if the local player should spawn automatically
+    /// or should let him decide when spawn.
     /// </summary>
-    protected override void OnEnable()
+    public void CheckAutoSpawn()
     {
-        base.OnEnable();
-        bl_EventHandler.OnRoundEnd += this.OnRoundEnd;
-    }
+        if (CurrentRoomInfo.autoTeamSelection && bl_GameData.Instance.lobbyJoinMethod == LobbyJoinMethod.DirectToMap)
+        {
+            bl_UIReferences.Instance.AutoTeam(true);
+            bl_UIReferences.Instance.ShowMenu(false);
+            Invoke(nameof(SelectTeamAutomatically), 3);
+        }
+        else if (bl_GameData.Instance.lobbyJoinMethod == LobbyJoinMethod.WaitingRoom && LocalPlayer.GetPlayerTeam() == Team.None)
+        {
+            if (PhotonNetwork.OfflineMode && !CurrentRoomInfo.autoTeamSelection)
+            {
+                bl_UIReferences.Instance.SetUpUI();
+                bl_UIReferences.Instance.SetUpJoinButtons(true);
+                return;
+            }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-        bl_EventHandler.OnRoundEnd -= this.OnRoundEnd;
+            bl_UIReferences.Instance.AutoTeam(true);
+            bl_UIReferences.Instance.ShowMenu(false);
+            Invoke(nameof(SelectTeamAutomatically), 3);
+        }
     }
-
 
     /// <summary>
     /// Set the player that just join to the room to the team with less players on it automatically
@@ -151,7 +151,7 @@ public class bl_RoomSettings : bl_MonoBehaviour
         bl_RoomMenu.Instance.OnAutoTeam();
         bl_UIReferences.Instance.AutoTeam(false);
 
-        if (GetGameMode.GetGameModeInfo().onRoundStartedSpawn == bl_GameData.GameModesEnabled.OnRoundStartedSpawn.WaitUntilRoundFinish && bl_GameManager.Instance.GameMatchState == MatchState.Playing)
+        if (GetGameMode.GetGameModeInfo().onRoundStartedSpawn == GameModeSettings.OnRoundStartedSpawn.WaitUntilRoundFinish && bl_GameManager.Instance.GameMatchState == MatchState.Playing)
         {
             if (bl_RoomMenu.Instance.onWaitUntilRoundFinish != null) { bl_RoomMenu.Instance.onWaitUntilRoundFinish.Invoke(team); }
             bl_GameManager.Instance.SetLocalPlayerToTeam(team);
@@ -160,75 +160,6 @@ public class bl_RoomSettings : bl_MonoBehaviour
 
         //spawn player
         bl_GameManager.Instance.SpawnPlayer(team);
-    }
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    void OnRoundEnd()
-    {
-        StartCoroutine(DisableUI());        
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public string GetWinnerName2
-    {
-        get
-        {
-            if (!isOneTeamMode)
-            {
-                if (Team_1_Score > Team_2_Score)
-                {
-                    return GameData.Team1Name;
-                }
-                else if (Team_1_Score < Team_2_Score)
-                {
-                    return GameData.Team2Name;
-                }
-                else
-                {
-                    return bl_GameTexts.NoOneWonName;
-                }
-            }
-            else
-            {
-
-#if GR
-                 if(GetGameMode == GameMode.GR)
-                {
-                   return FindObjectOfType<bl_GunRace>().GetWinnerPlayer.NickName;
-                }
-#endif
-                return "";
-            }
-        }
-    }
-
-    void LoadPrefs()
-    {
-        QualitySettings.SetQualityLevel(PlayerPrefs.GetInt(PropertiesKeys.Quality, 3));
-        AudioListener.volume = PlayerPrefs.GetFloat(PropertiesKeys.Volume, 1);
-        int i = PlayerPrefs.GetInt(PropertiesKeys.Aniso, 2);
-        if (i == 0)
-        {
-            QualitySettings.anisotropicFiltering = AnisotropicFiltering.Disable;
-        }
-        else if (i == 1)
-        {
-            QualitySettings.anisotropicFiltering = AnisotropicFiltering.Enable;
-        }
-        else
-        {
-            QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
-        }
-    }
-
-    IEnumerator DisableUI()
-    {
-        yield return new WaitForSeconds(10);
     }
 
     private static bl_RoomSettings _instance;

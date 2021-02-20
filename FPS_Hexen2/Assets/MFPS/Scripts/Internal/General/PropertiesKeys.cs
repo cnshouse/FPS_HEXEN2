@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public static class PropertiesKeys
 {
@@ -30,26 +31,12 @@ public static class PropertiesKeys
     public const string WaitingState = "WaitingState";
 
     //Prefs
-    public const string WeaponFov = "mfps.weapon.fov";
-    public const string Quality = "mfps.settings.quality";
-    public const string Aniso = "mfps.settings.aniso";
-    public const string Volume = "mfps.settings.volume";
-    public const string BackgroundVolume = "mfps.settings.backvolume";
-    public const string Sensitivity = "mfps.settings.sensitivity";
-    public const string SensitivityAim = "mfps.settings.sensitivity.aim";
-    public const string SSAO = "mfps.settings.ssao";
-    public const string FrameRate = "mfps.settings.framerate";
-    public const string InvertMouseVertical = "mfps.settings.imv";
-    public const string InvertMouseHorizontal = "mfps.settings.imh";
-    public const string MuteVoiceChat = "mfps.settings.mutevoicechat";
-    public const string PushToTalk = "mfps.settings.pushtotalk";
     public const string PreferredRegion = "mfps.lobby.region";
-    public const string MotionBlur = "mfps.settings.motionb";
     public const string PlayerName = "mfps.game.username";
     public const string RememberMe = "mfps.game.rememberme";
     public const string FrameRateOption = "mfps.game.frop";
 
-    //Event Code
+    //Network Event Code
     public const byte KickPlayerEvent = 101;
     public const byte WaitingPlayerReadyEvent = 102;
     public const byte WaitingInitialSyncEvent = 103;
@@ -59,6 +46,12 @@ public static class PropertiesKeys
     public const byte DemolitionEvent = 107;
     public const byte DMBombEvent = 108;
     public const byte KillStreakEvent = 109;
+    public const byte BattleRoyalEvent = 110;
+    public const byte NetworkItemInstance = 111;
+    public const byte NetworkItemChange = 112;
+    public const byte WeaponPickUpEvent = 113;
+    public const byte VoteEvent = 114;
+    public const byte EliminationGameMode = 115;
 
     //Unique User
     public static string UserCoins { get { return string.Format("{0}.mfps.coins", PlayerPrefs.GetString(PlayerName)); } }

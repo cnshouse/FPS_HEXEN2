@@ -6,6 +6,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
 
+[DefaultExecutionOrder(-1002)]
 public class bl_PhotonNetwork : bl_PhotonHelper
 {
 
@@ -54,6 +55,8 @@ public class bl_PhotonNetwork : bl_PhotonHelper
     /// </summary>
     public void OnEventCustom(EventData data)
     {
+        if (data.CustomData == null) return;
+        
         switch (data.Code)
         {
             case PropertiesKeys.KickPlayerEvent:
@@ -117,9 +120,19 @@ public class bl_PhotonNetwork : bl_PhotonHelper
         }
     }
 
-    public static Player LocalPlayer { get { return PhotonNetwork.LocalPlayer; } }
+    public static new Player LocalPlayer { get { return PhotonNetwork.LocalPlayer; } }
     public static bool IsConnected { get { return PhotonNetwork.IsConnected; } }
     public static bool IsConnectedInRoom { get { return PhotonNetwork.IsConnected && PhotonNetwork.InRoom; } }
+    public static bool IsMasterClient => PhotonNetwork.IsMasterClient;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void OnApplicationQuit()
+    {
+        bl_GameData.Instance.ResetInstance();
+        Resources.UnloadUnusedAssets();
+    }
 
     public class PhotonEventsCallbacks
     {
@@ -132,7 +145,8 @@ public class bl_PhotonNetwork : bl_PhotonHelper
     {
         get
         {
-            if (_instance == null) { _instance = FindObjectOfType<bl_PhotonNetwork>(); }
+            if (_instance == null)
+                _instance = FindObjectOfType<bl_PhotonNetwork>();
             return _instance;
         }
     }

@@ -7,11 +7,15 @@ using System.Text;
 using System.Security.Cryptography;
 using System;
 using System.IO;
+using System.Globalization;
 using Random = UnityEngine.Random;
+using System.Text.RegularExpressions;
+using UnityEngine.Analytics;
+using MFPS.ULogin;
 
 public static class bl_DataBaseUtils
 {
-
+    public const string LOCK_TIME_KEY = "ulsp.ll.time";
     public static void LoadLevel(string scene)
     {
 #if UNITY_5_3 || UNITY_5_4 || UNITY_5_3_OR_NEWER
@@ -53,8 +57,8 @@ public static class bl_DataBaseUtils
 
     public static string Md5Sum(string input)
     {
-        System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
-        byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+        MD5 md5 = MD5.Create();
+        byte[] inputBytes = Encoding.ASCII.GetBytes(input);
         byte[] hash = md5.ComputeHash(inputBytes);
 
         StringBuilder sb = new StringBuilder();
@@ -62,9 +66,14 @@ public static class bl_DataBaseUtils
         return sb.ToString();
     }
 
-    public static string TimeFormat(float seconds)
+    public static string CreateSecretHash(string parameters)
     {
-        TimeSpan t = TimeSpan.FromSeconds((double)seconds);
+        return Md5Sum(parameters + bl_LoginProDataBase.Instance.SecretKey).ToLower();
+    }
+
+    public static string TimeFormat(float minutes)
+    {
+        TimeSpan t = TimeSpan.FromMinutes((double)minutes);
         string answer = string.Format("{0:D2}h:{1:D2}m", t.Hours, t.Minutes);
         return answer;
     }
@@ -79,19 +88,37 @@ public static class bl_DataBaseUtils
 
         return false;
     }
-
-    public static WWWForm CreateWWWForm(bool addBasicHash = true)
+    public static WWWForm CreateWWWForm(FormHashParm hashParamenter = FormHashParm.ID, bool addSID = false)
     {
         WWWForm wf = new WWWForm();
-        if (addBasicHash)
+        if (hashParamenter != FormHashParm.None)
         {
-            int id = bl_DataBase.Instance == null ? 1 : bl_DataBase.Instance.LocalUser.ID;
-            string hash = Md5Sum(id + bl_LoginProDataBase.Instance.SecretKey).ToLower();
-            wf.AddField("hash", hash);
+            string parm = "0";
+            if (bl_DataBase.Instance != null && bl_DataBase.Instance.LocalUser != null)
+            {
+                parm = hashParamenter == FormHashParm.ID ? bl_DataBase.Instance.LocalUser.ID.ToString() : bl_DataBase.Instance.LocalUser.LoginName;
+            }
+            if (hashParamenter == FormHashParm.Name)
+            {
+                wf.AddSecureField("name", parm);
+            }
+            string hash = Md5Sum(parm + bl_LoginProDataBase.Instance.SecretKey).ToLower();
+            wf.AddSecureField("hash", hash);
+        }
+        if (addSID && bl_DataBase.Instance != null)
+        {
+            wf.AddField("sid", AnalyticsSessionInfo.sessionId.ToString());
         }
         return wf;
     }
 
+    public static WWWForm CreateWWWForm(bool addBasicHash = true, bool addSID = false) => CreateWWWForm(addBasicHash ? FormHashParm.ID : FormHashParm.None, addSID);
+
+    /// <summary>
+    /// Simple AES Encryption
+    /// </summary>
+    /// <param name="encryptString"></param>
+    /// <returns></returns>
     public static string Encrypt(string encryptString)
     {
         if (string.IsNullOrEmpty(encryptString))
@@ -120,6 +147,11 @@ public static class bl_DataBaseUtils
         return encryptString;
     }
 
+    /// <summary>
+    /// Simple AES decryption
+    /// </summary>
+    /// <param name="cipherText"></param>
+    /// <returns></returns>
     public static string Decrypt(string cipherText)
     {
         if (string.IsNullOrEmpty(cipherText))
@@ -147,5 +179,71 @@ public static class bl_DataBaseUtils
             }
         }
         return cipherText;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="username"></param>
+    /// <returns></returns>
+    public static bool IsUsername(string username)
+    {
+        string pattern;
+        // start with a letter, allow letter or number, length between 6 to 12.
+        pattern = @"^[a-zA-Z0-9_ ]+$";
+        Regex regex = new Regex(pattern);
+        return regex.IsMatch(username);
+    }
+
+    /// <summary>
+    /// Sanitize input from the client before send to the server
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    public static string SanitazeString(string input)
+    {
+        input = input.Replace("|", "");
+        input = input.Replace("&&", "");
+        return input;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static void AddSecureField(this WWWForm wf, string key, int value) => AddSecureField(wf, key, value.ToString());
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static void AddSecureField(this WWWForm wf, string key, string value)
+    {
+        if (bl_LoginProDataBase.Instance.PerToPerEncryption && bl_DataBase.Instance != null && !string.IsNullOrEmpty(bl_DataBase.Instance.RSAPublicKey))
+            wf.AddField(key, bl_RSA.Encrypter(value, bl_DataBase.Instance.RSAPublicKey));
+        else
+            wf.AddField(key, value);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public static string GetUnitySessionID() => AnalyticsSessionInfo.sessionId.ToString();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public static bool IsLoginBlocked()
+    {
+        string key = Encrypt(LOCK_TIME_KEY);
+        string date = PlayerPrefs.GetString(key, string.Empty);
+        if (string.IsNullOrEmpty(date)) return false;
+
+        date = Decrypt(date);
+        var gl = new CultureInfo("en-US");
+        var lockDate = DateTime.Parse(date, gl);
+        var ct = lockDate.Subtract(DateTime.Now.ToUniversalTime());
+
+        return (ct.Minutes > 0 || ct.Seconds > 0);
     }
 }

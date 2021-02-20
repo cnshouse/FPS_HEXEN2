@@ -11,15 +11,9 @@ using Photon.Pun;
 
 public class bl_GunManager : bl_MonoBehaviour
 {
-
+    #region Public members
     [Header("Weapons List")]
-    /// <summary>
-    /// all the Guns of game
-    /// </summary>
     public List<bl_Gun> AllGuns = new List<bl_Gun>();
-    /// <summary>
-    /// weapons that the player take equipped
-    /// </summary>
     [HideInInspector] public List<bl_Gun> PlayerEquip = new List<bl_Gun>() { null, null, null, null };
 
     [Header("Player Class")]
@@ -40,22 +34,30 @@ public class bl_GunManager : bl_MonoBehaviour
     public float PickUpTime = 2.5f;
     public ChangeWeaponStyle changeWeaponStyle = ChangeWeaponStyle.HideAndDraw;
 
-    [HideInInspector] public bl_Gun CurrentGun;
-    public bool CanSwich { get; set; }
     [Header("References")]
     public Animator HeadAnimator;
     public Transform TrowPoint = null;
     public AudioClip SwitchFireAudioClip;
-    private bl_GunPickUpManager PUM;
+    #endregion
+
+    #region Public properties
+    public bl_Gun CurrentGun { get; set; }
+    public bool CanSwich { get; set; } = true;
+    public bool isGameStarted { get; set; }
+    public AutoChangeOnPickup EquipPickUpMode { get; set; } = AutoChangeOnPickup.Always;
+    #endregion
+
+    #region Private members
+    private bl_GunPickUpManager pickupManager;
     private int PreviousGun = 0;
     private bool isFastFire = false;
     public bool ObservedComponentsFoldoutOpen = false;
     AudioSource ASource;
-    public bool isGameStarted { get; set; }
 #if GR
     public bool isGunRace { get; set; }
     private bl_GunRace GunRace;
 #endif
+    #endregion
 
     /// <summary>
     /// 
@@ -63,7 +65,7 @@ public class bl_GunManager : bl_MonoBehaviour
     protected override void Awake()
     {
         base.Awake();
-        PUM = FindObjectOfType<bl_GunPickUpManager>();
+        pickupManager = bl_GunPickUpManager.Instance;
         ASource = GetComponent<AudioSource>();
         isGameStarted = bl_MatchTimeManager.Instance.TimeState == RoomTimeState.Started;
 #if GR
@@ -75,7 +77,7 @@ public class bl_GunManager : bl_MonoBehaviour
         }
 #endif
         //when player instance select player class select in bl_RoomMenu
-        GetClass();
+        SetupLoadout();
     }
 
     /// <summary>
@@ -87,6 +89,7 @@ public class bl_GunManager : bl_MonoBehaviour
         foreach (bl_Gun g in PlayerEquip) { g?.Setup(true); }
         foreach (bl_Gun guns in AllGuns) { guns.gameObject?.SetActive(false); }
         bl_UIReferences.Instance.PlayerUI.LoadoutUI.SetInitLoadout(PlayerEquip);
+        EquipPickUpMode = bl_GameData.Instance.switchToPickupWeapon;
 #if GR
         if (isGunRace)
         {
@@ -94,40 +97,35 @@ public class bl_GunManager : bl_MonoBehaviour
             currentWeaponIndex = 0;
         }
 #endif
-        TakeWeapon(PlayerEquip[currentWeaponIndex]);
-        bl_EventHandler.ChangeWeaponEvent(PlayerEquip[currentWeaponIndex].GunID);
+        var firstWeapon = PlayerEquip[currentWeaponIndex];
+        TakeWeapon(firstWeapon);
+        if(firstWeapon != null)
+        bl_EventHandler.ChangeWeaponEvent(firstWeapon.GunID);
 
-        if (bl_GameManager.Instance.GameMatchState == MatchState.Waiting && !bl_GameManager.Instance.alreadyEnterInGame)
+        if (bl_GameManager.Instance.GameMatchState == MatchState.Waiting && !bl_GameManager.Instance.FirstSpawnDone)
         {
             BlockAllWeapons();
         }
 #if LMS
-        if (GetGameMode == GameMode.LSM)
+        if (GetGameMode == GameMode.BR)
         {
-            PlayerEquip[currentWeaponIndex].gameObject.SetActive(false);
-            for (int i = 0; i < PlayerEquip.Count; i++)
-            {
-                PlayerEquip[i] = null;
-            }
-            bl_UCrosshair.Instance.Show(false);
-            bl_UCrosshair.Instance.Block = true;
+            UnEquipEverything();
         }
 #endif
     }
 
     /// <summary>
-    /// 
+    /// Setup the player equipped weapons from the selected player class
     /// </summary>
-    void GetClass()
+    void SetupLoadout()
     {
 #if CLASS_CUSTOMIZER
-        //Get info for class
-        bl_RoomMenu.PlayerClass = bl_ClassManager.Instance.m_Class;
         bl_ClassManager.Instance.SetUpClasses(this);
 #else
         //when player instance select player class select in bl_RoomMenu
         bl_PlayerClassLoadout pcl = null;
-        switch (bl_RoomMenu.PlayerClass)
+        var currentClass = PlayerClass.Assault.GetSavePlayerClass();
+        switch (currentClass)
         {
             case PlayerClass.Assault:
                 pcl = m_AssaultClass;
@@ -145,7 +143,7 @@ public class bl_GunManager : bl_MonoBehaviour
 
         if (pcl == null)
         {
-            Debug.LogError($"Player Class Loadout has not been assigned for the class {bl_RoomMenu.PlayerClass.ToString()}");
+            Debug.LogError($"Player Class Loadout has not been assigned for the class {currentClass.ToString()}");
             return;
         }
 
@@ -167,8 +165,9 @@ public class bl_GunManager : bl_MonoBehaviour
     protected override void OnEnable()
     {
         base.OnEnable();
-        bl_EventHandler.OnPickUpGun += this.PickUpGun;
+        bl_EventHandler.onPickUpGun += this.PickUpGun;
         bl_EventHandler.onMatchStart += OnMatchStart;
+        bl_EventHandler.onGameSettingsChange += OnGameSettingsChanged;
     }
 
     /// <summary>
@@ -177,10 +176,10 @@ public class bl_GunManager : bl_MonoBehaviour
     protected override void OnDisable()
     {
         base.OnDisable();
-        bl_EventHandler.OnPickUpGun -= this.PickUpGun;
+        bl_EventHandler.onPickUpGun -= this.PickUpGun;
         bl_EventHandler.onMatchStart -= OnMatchStart;
+        bl_EventHandler.onGameSettingsChange -= OnGameSettingsChanged;
     }
-    void OnMatchStart() { isGameStarted = true; }
 
     /// <summary>
     /// 
@@ -202,36 +201,35 @@ public class bl_GunManager : bl_MonoBehaviour
         if (!CanSwich || bl_GameData.Instance.isChating)
             return;
 #if GR
-        if (isGunRace)
-            return;
+        if (isGunRace) return;
 #endif
 
 #if !INPUT_MANAGER
-        if (Input.GetKeyDown(KeyCode.Alpha1) && currentWeaponIndex != 0 && PlayerEquip[0] != null)
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             ChangeCurrentWeaponTo(0);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha2) && currentWeaponIndex != 1 && PlayerEquip[1] != null)
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             ChangeCurrentWeaponTo(1);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha3) && currentWeaponIndex != 2 && PlayerEquip[2] != null)
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             ChangeCurrentWeaponTo(2);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha4) && currentWeaponIndex != 3 && PlayerEquip[3] != null)
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             ChangeCurrentWeaponTo(3);
         }
 
         //fast fire knife
-        if (Input.GetKeyDown(KeyCode.V) && PlayerEquip[3].m_AllowQuickFire && currentWeaponIndex != 3 && !isFastFire && PlayerEquip[3] != null)
+        if (Input.GetKeyDown(KeyCode.V) && PlayerEquip[3] != null && PlayerEquip[3].m_AllowQuickFire && currentWeaponIndex != 3 && !isFastFire)
         {
-          DoFastKnifeShot();
+            DoFastKnifeShot();
         }
 
         //fast throw grenade
-        if (Input.GetKeyDown(KeyCode.G) && PlayerEquip[2].AllowQuickFire() && currentWeaponIndex != 2 && !isFastFire && PlayerEquip[2] != null)
+        if (Input.GetKeyDown(KeyCode.G) && PlayerEquip[2] != null && PlayerEquip[2].AllowQuickFire() && currentWeaponIndex != 2 && !isFastFire)
         {
             DoSingleGrenadeThrow();
         }
@@ -250,7 +248,6 @@ public class bl_GunManager : bl_MonoBehaviour
         {
             SwitchPrevious();
         }
-
     }
 
     /// <summary>
@@ -258,12 +255,15 @@ public class bl_GunManager : bl_MonoBehaviour
     /// </summary>
     public int SwitchNext()
     {
-#if GR
-        if (isGunRace)
+        if (PlayerEquip.Count <= 0 || PlayerEquip == null)
             return 0;
+#if GR
+        if (isGunRace) return 0;
 #endif
 
         int next = (this.currentWeaponIndex + 1) % this.PlayerEquip.Count;
+        if (PlayerEquip[next] == null) return 0;
+
         ChangeCurrentWeaponTo(next);
         return currentWeaponIndex;
     }
@@ -273,10 +273,12 @@ public class bl_GunManager : bl_MonoBehaviour
     /// </summary>
     public int SwitchPrevious()
     {
-#if GR
-        if (isGunRace)
+        if (PlayerEquip.Count <= 0 || PlayerEquip == null)
             return 0;
+#if GR
+        if (isGunRace) return 0;
 #endif
+
         int next = 0;
         if (this.currentWeaponIndex != 0)
         {
@@ -286,6 +288,7 @@ public class bl_GunManager : bl_MonoBehaviour
         {
             next = PlayerEquip.Count - 1;
         }
+        if (PlayerEquip[next] == null) return 0;
         ChangeCurrentWeaponTo(next);
         return currentWeaponIndex;
     }
@@ -295,12 +298,15 @@ public class bl_GunManager : bl_MonoBehaviour
     /// </summary>
     public void DoFastKnifeShot()
     {
+        var equippedKnife = PlayerEquip[3];
+        if (equippedKnife == null || equippedKnife.Info.Type != GunType.Knife) return;
+
         PreviousGun = currentWeaponIndex;
         isFastFire = true;
         currentWeaponIndex = 3; // 3 = knife position in list
         PlayerEquip[PreviousGun].gameObject.SetActive(false);
-        PlayerEquip[currentWeaponIndex].gameObject.SetActive(true);
-        PlayerEquip[currentWeaponIndex].FastKnifeFire(OnReturnWeapon);
+        equippedKnife.gameObject.SetActive(true);
+        equippedKnife.QuickMelee(OnReturnWeapon);
         CanSwich = false;
     }
 
@@ -309,12 +315,15 @@ public class bl_GunManager : bl_MonoBehaviour
     /// </summary>
     public void DoSingleGrenadeThrow()
     {
+        var equippedGrenade = PlayerEquip[2];// 2 = GRENADE position in list
+        if (equippedGrenade == null || equippedGrenade.Info.Type != GunType.Grenade) return;
+
         PreviousGun = currentWeaponIndex;
         isFastFire = true;
-        currentWeaponIndex = 2; // 2 = GRENADE position in list
+        currentWeaponIndex = 2; 
         PlayerEquip[PreviousGun].gameObject.SetActive(false);
-        PlayerEquip[currentWeaponIndex].gameObject.SetActive(true);
-        StartCoroutine(PlayerEquip[currentWeaponIndex].FastGrenadeFire(OnReturnWeapon));
+        equippedGrenade.gameObject.SetActive(true);
+        StartCoroutine(equippedGrenade.FastGrenadeFire(OnReturnWeapon));
         CanSwich = false;
     }
 
@@ -334,8 +343,9 @@ public class bl_GunManager : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    void TakeWeapon(bl_Gun gun)
+    void TakeWeapon(bl_Gun gun, bool forced = false)
     {
+        if (!CanSwich && !forced) return;
         if (gun == null) return;
         gun.gameObject.SetActive(true);
         CanSwich = true;
@@ -350,7 +360,7 @@ public class bl_GunManager : bl_MonoBehaviour
         bl_UCrosshair.Instance.Show(false);
         bl_UCrosshair.Instance.Block = true;
         CanSwich = false;
-        PlayerSync.SetWeaponBlocked(true);
+        PlayerSync.SetWeaponBlocked(1);
     }
 
     /// <summary>
@@ -369,36 +379,38 @@ public class bl_GunManager : bl_MonoBehaviour
         {
             TakeWeapon(PlayerEquip[currentWeaponIndex]);
         }
-        PlayerSync.SetWeaponBlocked(false);
+        PlayerSync.SetWeaponBlocked(0);
+    }
+
+    /// <summary>
+    /// Unequipped all the player weapons leaving him with anything to attack.
+    /// </summary>
+    public void UnEquipEverything()
+    {
+        foreach (bl_Gun g in PlayerEquip) { g.gameObject.SetActive(false); }
+        for (int i = 0; i < PlayerEquip.Count; i++)
+        {
+            PlayerEquip[i] = null;
+        }
+        bl_UCrosshair.Instance.Show(false);
+        bl_UCrosshair.Instance.Block = true;
+        bl_EventHandler.ChangeWeaponEvent(-1);
+        bl_UIReferences.Instance.PlayerUI.WeaponStatsUI.SetActive(false);
     }
 
     /// <summary>
     /// 
     /// </summary>
-    /// <returns></returns>
-    public bl_Gun GetCurrentWeapon()
+    public void SetInfinityAmmoToAllEquippeds(bool infinity)
     {
-        if (CurrentGun == null)
+        AllGuns.ForEach((x)=>
         {
-            return PlayerEquip[currentWeaponIndex];
-        }
-        else
-        {
-            return CurrentGun;
-        }
-    }
-
-    public int GetCurrentGunID
-    {
-        get
-        {
-            if (GetCurrentWeapon() == null) { return -1; }
-            return GetCurrentWeapon().GunID;
-        }
+            if (x != null) x.SetInifinityAmmo(infinity);
+        });
     }
 
     /// <summary>
-    /// 
+    /// Change the current weapon (if any) to the given one
     /// </summary>
     public void ChangeTo(int AllWeaponsIndex)
     {
@@ -407,7 +419,7 @@ public class bl_GunManager : bl_MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Change to a weapon without delay/animation
     /// </summary>
     public void ChangeToInstant(int AllWeaponsIndex)
     {
@@ -423,12 +435,15 @@ public class bl_GunManager : bl_MonoBehaviour
     /// <param name="nextSlotID"></param>
     public void ChangeCurrentWeaponTo(int nextSlotID)
     {
+        if (currentWeaponIndex == nextSlotID || PlayerEquip[nextSlotID] == null) return;
         if (!CanSwich || bl_GameData.Instance.isChating)
             return;
-        if (!PlayerEquip[nextSlotID].CanBeTaken()) return;//if the weapons can't be taken when is empty (of ammo)
+
+        var next = PlayerEquip[nextSlotID];
+        if (next == null || !next.CanBeTaken()) return;//if the weapons can't be taken when is empty (of ammo)
 
         PreviousGun = currentWeaponIndex;
-        StartCoroutine(ChangeGun(currentWeaponIndex, PlayerEquip[nextSlotID].gameObject, nextSlotID));
+        StartCoroutine(ChangeGun(currentWeaponIndex, next.gameObject, nextSlotID));
         currentWeaponIndex = nextSlotID;
     }
 
@@ -465,56 +480,102 @@ public class bl_GunManager : bl_MonoBehaviour
                 guns.gameObject.SetActive(false);
             }
         }
-        TakeWeapon(PlayerEquip[newID]);
+        TakeWeapon(PlayerEquip[newID], true);
         bl_EventHandler.ChangeWeaponEvent(PlayerEquip[newID].GunID);
     }
 
     /// <summary>
-    /// 
+    /// This function is called when the local player pick up a weapon in the map
     /// </summary>
     public void PickUpGun(GunPickUpData e)
     {
-        if (PUM == null)
+        if (pickupManager == null)
         {
-            Debug.LogError("Need a 'Pick Up Manager' in scene!");
+            Debug.LogWarning("Need a 'Pick Up Manager' in the scene!");
             return;
         }
-        //If not already equip
+        //find the pick up weapon in the FP weapon list of this player prefab
+        bl_Gun pickedLocalGun = AllGuns.Find(x => x.GunID == e.ID);
+        if(pickedLocalGun == null)
+        {
+            Debug.LogWarning($"The weapon {e.ID} is not listed in this player prefab.");
+            return;
+        }
+        //If not already equipped
         if (!PlayerEquip.Exists(x => x != null && x.GunID == e.ID))
         {
+            bl_GunInfo gunInfo = bl_GameData.Instance.GetWeapon(e.ID);
+            //first we need to make sure that there's not an empty slot in the loadout
+            for (int i = 0; i < PlayerEquip.Count; i++)
+            {
+                //if there's an empty slot
+                if(PlayerEquip[i] == null)
+                {
+                    //check if the this weapon can by equipped in this slot
+                    if (bl_GameData.Instance.weaponSlotRuler.CanBeOnSlot(gunInfo.Type, i))
+                    {
+                        SetUpPickUpWeapon(e, pickedLocalGun, i);
+                        if (EquipPickUpMode.IsEnumFlagPresent(AutoChangeOnPickup.OnlyOnEmptySlots | AutoChangeOnPickup.Always))
+                        {
+                            StartCoroutine(SwitchToPickUpGun(null, pickedLocalGun, null, i));
+                            currentWeaponIndex = i;
+                        }
+                        return;
+                    }
+                }
+            }
 
-            int actualID = (PlayerEquip[currentWeaponIndex] == null) ? -1 : PlayerEquip[currentWeaponIndex].GunID;
-            int nextID = AllGuns.FindIndex(x => x.GunID == e.ID);
-            //Get Info
+            //if get there means that there's not empty slots so we have to replace the current weapon
+            //so first let's check if the pick up weapon can replace the weapon in the current slot.
+
+            bool isEmpty = PlayerEquip[currentWeaponIndex] == null;
+            int actualID = isEmpty ? -1 : PlayerEquip[currentWeaponIndex].GunID;
+
+            //Get the required data from the weapon that we are going to replace
             int[] info = new int[2];
-            int clips = (PlayerEquip[currentWeaponIndex] == null) ? 3 : PlayerEquip[currentWeaponIndex].numberOfClips;
+            int clips = isEmpty ? 3 : PlayerEquip[currentWeaponIndex].numberOfClips;
             info[0] = clips;
-            info[1] = (PlayerEquip[currentWeaponIndex] == null) ? 30 : PlayerEquip[currentWeaponIndex].bulletsLeft;
-            bool replace = true;
-            if (PlayerEquip.Exists(x => x == null))
+            info[1] = isEmpty ? 30 : PlayerEquip[currentWeaponIndex].bulletsLeft;
+
+            bl_Gun oldGun;
+            //if the pick up weapon can't replace the current slot
+            if (!bl_GameData.Instance.weaponSlotRuler.CanBeOnSlot(gunInfo.Type, currentWeaponIndex))
             {
-                int nullId = PlayerEquip.FindIndex(x => x == null);
-                PlayerEquip[nullId] = AllGuns[nextID];
-                replace = false;
+                //let's find out the a compatible slot for it and replace the weapon there
+                for (int i = 0; i < 4; i++)
+                {
+                    //when find the slot for this pick up weapon
+                    if (bl_GameData.Instance.weaponSlotRuler.CanBeOnSlot(gunInfo.Type, i))
+                    {
+                        oldGun = PlayerEquip[i];
+                        //change the weapon on that slot with the pick up one
+                        SetUpPickUpWeapon(e, pickedLocalGun, i);
+                        if (EquipPickUpMode == (AutoChangeOnPickup.OnlyOnReplacements | AutoChangeOnPickup.Always))
+                        {
+                            StartCoroutine(SwitchToPickUpGun(oldGun, pickedLocalGun, info, i));
+                            currentWeaponIndex = i;
+                        }
+                        else
+                        {
+                            pickupManager.ThrowGun(oldGun.GunID, TrowPoint.position, info, false);
+                        }
+                        return;
+                    }
+                }
             }
-            else
-            {
-                PlayerEquip[currentWeaponIndex] = AllGuns[nextID];
-            }
-            //Send Info
-            AllGuns[nextID].numberOfClips = e.Clips;
-            AllGuns[nextID].bulletsLeft = e.Bullets;
-            AllGuns[nextID].Setup(true);
-            bl_UIReferences.Instance.PlayerUI.LoadoutUI.ReplaceSlot(currentWeaponIndex, AllGuns[nextID]);
-            StartCoroutine(PickUpGun((PlayerEquip[currentWeaponIndex].gameObject), AllGuns[nextID], actualID, info, replace));
+
+            oldGun = PlayerEquip[currentWeaponIndex];
+            //Replace the current equipped weapon
+            SetUpPickUpWeapon(e, pickedLocalGun, currentWeaponIndex);
+            StartCoroutine(SwitchToPickUpGun(oldGun, pickedLocalGun, info, currentWeaponIndex));
         }
-        else
+        else//if the weapon is already equipped
         {
             foreach (bl_Gun g in PlayerEquip)
             {
                 if (g != null && g.GunID == e.ID)
                 {
-                    g.OnPickUpAmmo(e.Bullets, e.Clips, 1);
+                    g.OnPickUpAmmo(e.Bullets * e.Clips, 1, e.ID);
                     break;
                 }
             }
@@ -524,34 +585,51 @@ public class bl_GunManager : bl_MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    public IEnumerator PickUpGun(GameObject t_current, bl_Gun nextGun, int id, int[] info, bool replace)
+    void SetUpPickUpWeapon(GunPickUpData data, bl_Gun gun, int slotID)
     {
-        CanSwich = false;
-        if (HeadAnimator != null)
+        PlayerEquip[slotID] = gun;
+        gun.Setup(true);
+
+        if (gun.Info.Type == GunType.Grenade)
         {
-            HeadAnimator.Play("TakeGun", 0, 0);
+            if (gun.bulletsLeft <= 0) gun.bulletsLeft = 1;
+            else
+                gun.numberOfClips++;
         }
-        t_current.GetComponent<bl_Gun>().DisableWeapon();
-        yield return new WaitForSeconds(PickUpTime);
-        foreach (bl_Gun guns in AllGuns)
+        else
         {
-            if (guns.gameObject.activeSelf == true)
-            {
-                guns.gameObject.SetActive(false);
-            }
+            gun.bulletsLeft = data.Bullets;
+            if (bl_GameData.Instance.AmmoType == AmmunitionType.Bullets)
+                gun.numberOfClips = data.Bullets * data.Clips;
+            else
+                gun.numberOfClips = data.Clips;
         }
-        TakeWeapon(nextGun);
-        if (replace)
-        {
-            PUM.TrownGun(id, TrowPoint.position, info, false);
-        }
-        bl_EventHandler.ChangeWeaponEvent(PlayerEquip[currentWeaponIndex].GunID);
+
+        bl_UIReferences.Instance.PlayerUI.LoadoutUI.ReplaceSlot(slotID, gun);
     }
 
-    public void ThrwoCurrent(bool AutoDestroy)
+    /// <summary>
+    /// 
+    /// </summary>
+    public IEnumerator SwitchToPickUpGun(bl_Gun currentGun, bl_Gun nextGun, int[] info, int newSlotID)
     {
-        ThrwoCurrent(AutoDestroy, TrowPoint.position);
+        HeadAnimator?.Play("TakeGun", 0, 0);
+        currentGun?.DisableWeapon();
+        if(currentWeaponIndex != newSlotID)
+        bl_UIReferences.Instance.PlayerUI.LoadoutUI.ChangeWeapon(newSlotID);
+        yield return new WaitForSeconds(PickUpTime);
+        AllGuns.ForEach(x => { if (x != null) { x.gameObject.SetActive(false); } });
+        TakeWeapon(nextGun, true);
+        if (currentGun != null)
+        {
+            pickupManager.ThrowGun(currentGun.GunID, TrowPoint.position, info, false);
+        }
+        bl_EventHandler.ChangeWeaponEvent(nextGun.GunID);
+        bl_UIReferences.Instance.PlayerUI.WeaponStatsUI.SetActive(true);
+        CanSwich = true;
     }
+
+    public void ThrwoCurrent(bool AutoDestroy) => ThrwoCurrent(AutoDestroy, TrowPoint.position);
 
     /// <summary>
     /// Throw the current gun
@@ -566,9 +644,12 @@ public class bl_GunManager : bl_MonoBehaviour
         int clips = (bl_GameData.Instance.AmmoType == AmmunitionType.Bullets) ? PlayerEquip[currentWeaponIndex].numberOfClips / PlayerEquip[currentWeaponIndex].bulletsPerClip : PlayerEquip[currentWeaponIndex].numberOfClips;
         info[0] = clips;
         info[1] = PlayerEquip[currentWeaponIndex].bulletsLeft;
-        PUM.TrownGun(actualID, throwPosition, info, AutoDestroy);
+        pickupManager.ThrowGun(actualID, throwPosition, info, AutoDestroy);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bl_Gun GetGunOnListById(int id)
     {
         bl_Gun gun = null;
@@ -578,13 +659,28 @@ public class bl_GunManager : bl_MonoBehaviour
         }
         else
         {
-            Debug.LogError("Gun: " + id + " has not been added on this player list.");
+            Debug.LogError("The FPWeapon: " + id + " has not been added on this player prefab.");
         }
         return gun;
     }
 
+    /// <summary>
+    /// Called when the game settings changed in runtime
+    /// </summary>
+    public void OnGameSettingsChanged()
+    {
+        if (bl_MFPS.Settings == null) return;
+
+        float fov = (float)bl_MFPS.Settings.GetSettingOf("Weapon FOV");
+        foreach (var item in PlayerEquip)
+        {
+            if (item == null) continue;
+            item.SetDefaultWeaponCameraFOV(fov);
+        }
+    }
+
 #if INPUT_MANAGER
-     void InputManagerControll()
+    void InputManagerControll()
     {
         if (!CanSwich) return;
 
@@ -602,19 +698,19 @@ public class bl_GunManager : bl_MonoBehaviour
         }
         else
         {
-            if (bl_Input.isButtonDown("Weapon1") && CanSwich && currentWeaponIndex != 0)
+            if (bl_Input.isButtonDown("Weapon1"))
             {
                ChangeCurrentWeaponTo(0);
             }
-            if (bl_Input.isButtonDown("Weapon2") && CanSwich && currentWeaponIndex != 1)
+            if (bl_Input.isButtonDown("Weapon2"))
             {
                 ChangeCurrentWeaponTo(1);
             }
-            if (bl_Input.isButtonDown("Weapon3") && CanSwich && currentWeaponIndex != 2)
+            if (bl_Input.isButtonDown("Weapon3"))
             {
                ChangeCurrentWeaponTo(2);
             }
-            if (bl_Input.isButtonDown("Weapon4") && CanSwich && currentWeaponIndex != 3)
+            if (bl_Input.isButtonDown("Weapon4"))
             {
                ChangeCurrentWeaponTo(3);
             }
@@ -664,12 +760,43 @@ public class bl_GunManager : bl_MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public bl_Gun GetCurrentWeapon()
+    {
+        if (CurrentGun == null)
+        {
+            return PlayerEquip[currentWeaponIndex];
+        }
+        else
+        {
+            return CurrentGun;
+        }
+    }
+
+    /// <summary>
+    /// The GunID of the current equipped weapon
+    /// -1 means that the player doesn't have a weapon equipped yet
+    /// </summary>
+    public int GetCurrentGunID
+    {
+        get
+        {
+            if (GetCurrentWeapon() == null) { return -1; }
+            return GetCurrentWeapon().GunID;
+        }
+    }
+
+    void OnMatchStart() { isGameStarted = true; }
+
     private bl_PlayerNetwork _Sync;
     public bl_PlayerNetwork PlayerSync
     {
         get
         {
-            if (_Sync == null) { _Sync = transform.root.GetComponent<bl_PlayerNetwork>(); }
+            if (_Sync == null) { _Sync = bl_MFPS.LocalPlayerReferences.playerNetwork; }
             return _Sync;
         }
     }
@@ -680,5 +807,14 @@ public class bl_GunManager : bl_MonoBehaviour
         HideAndDraw,
         CounterStrike,
         HideCompletelyAndThenDraw,
+    }
+
+    [System.Serializable, System.Flags]
+    public enum AutoChangeOnPickup
+    {
+        Always = 0,
+        OnlyOnEmptySlots,
+        OnlyOnReplacements,
+        Never,
     }
 }

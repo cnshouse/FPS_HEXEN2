@@ -11,11 +11,11 @@ GameObject:
   - component: {fileID: 4249388465293298}
   - component: {fileID: 20085053445724648}
   - component: {fileID: 124300308612352696}
-  - component: {fileID: 81591535375489144}
   - component: {fileID: 114940538720361244}
   - component: {fileID: 82786684165785986}
   - component: {fileID: 114383334669326604}
   - component: {fileID: 114463452784902268}
+  - component: {fileID: 81565932963246662}
   m_Layer: 0
   m_Name: KillCamera
   m_TagString: Untagged
@@ -82,14 +82,6 @@ Camera:
   m_StereoSeparation: 0.022
 --- !u!124 &124300308612352696
 Behaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1439181263161366}
-  m_Enabled: 1
---- !u!81 &81591535375489144
-AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -287,6 +279,14 @@ MonoBehaviour:
   m_BeforeTransparentBundles: []
   m_BeforeStackBundles: []
   m_AfterStackBundles: []
+--- !u!81 &81565932963246662
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439181263161366}
+  m_Enabled: 1
 --- !u!1 &1534650534709812286
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,7 +13,7 @@ public class bl_PostProcessEffects : MonoBehaviour
     /// </summary>
     private void OnEnable()
     {
-        bl_EventHandler.OnEffectChange += OnPostEffect;
+        bl_EventHandler.onEffectChange += OnPostEffect;
     }
 
     /// <summary>
@@ -21,7 +21,7 @@ public class bl_PostProcessEffects : MonoBehaviour
     /// </summary>
     private void OnDisable()
     {
-        bl_EventHandler.OnEffectChange -= OnPostEffect;
+        bl_EventHandler.onEffectChange -= OnPostEffect;
     }
 
     /// <summary>

@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using MFPSEditor;
+using MFPS.Addon.LevelManager;
 
 public class LevelManagerInitializer 
 {

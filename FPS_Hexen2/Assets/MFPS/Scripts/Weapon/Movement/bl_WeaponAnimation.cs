@@ -3,7 +3,6 @@ using System.Collections;
 
 public class bl_WeaponAnimation : MonoBehaviour
 {
-    [Header("AnimationType")]
     public AnimationType m_AnimationType = AnimationType.Animation;
 
     public AnimationClip DrawName;
@@ -38,7 +37,6 @@ public class bl_WeaponAnimation : MonoBehaviour
     public AudioClip m_Fire;
 
     //private
-    private int m_repeatReload;
     public bl_Gun ParentGun { get; set; }
     private bl_GunManager GunManager;
     private bool cancelReload = false;
@@ -51,7 +49,7 @@ public class bl_WeaponAnimation : MonoBehaviour
     void Awake()
     {
         if(ParentGun == null) { ParentGun = transform.parent.GetComponent<bl_Gun>(); }
-        GunManager = transform.root.GetComponentInChildren<bl_GunManager>();
+        GunManager = transform.GetComponentInParent<bl_GunManager>();
         GunBob = GunManager.GetComponent<bl_WeaponBob>();
         m_source = GetComponent<AudioSource>();
         if(m_source == null)
@@ -61,6 +59,9 @@ public class bl_WeaponAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
    void OnEnable()
     {
         if (m_AnimationType == AnimationType.Animation)
@@ -73,6 +74,10 @@ public class bl_WeaponAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="playerState"></param>
     void UpdateAnimated(PlayerState playerState)
     {
         if (ParentGun != null && (ParentGun.FPState == PlayerFPState.Idle || ParentGun.FPState == PlayerFPState.Running))
@@ -123,7 +128,7 @@ public class bl_WeaponAnimation : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Play the fire animation one time
     /// </summary>
     public float Fire()
     {
@@ -148,34 +153,9 @@ public class bl_WeaponAnimation : MonoBehaviour
             return SoloFireClip.length / FireSpeed;
         }
     }
-    /// <summary>
-    /// Twho Handed Melee
-    /// </summary>
-    public float TwoHandedFire(bool Quickfire)
-    {
-        if (m_AnimationType == AnimationType.Animation)
-        {
-            if (FireAimAnimation == null)
-                return 0;
-
-            string an = Quickfire ? QuickFireAnim.name : FireAimAnimation.name;
-            Anim.Rewind(an);
-            Anim[an].speed = FireSpeed;
-            Anim.Play(an);
-
-            return Anim[an].length / FireSpeed;
-        }
-        else
-        {
-            string an = Quickfire ? "QuickFire" : "Fire";
-            animator.Play(an, 0, 0);
-            animator.speed = FireSpeed;
-            return SoloFireClip.length / FireSpeed;
-        }
-    }
 
     /// <summary>
-    /// 
+    /// Play the fire animation for the knife
     /// </summary>
     public float KnifeFire(bool Quickfire)
     {
@@ -200,6 +180,11 @@ public class bl_WeaponAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Play the fire animation for the grenade
+    /// </summary>
+    /// <param name="fastFire"></param>
+    /// <returns></returns>
     public float FireGrenade(bool fastFire)
     {
         if (fastFire)
@@ -224,12 +209,20 @@ public class bl_WeaponAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     IEnumerator FastGrenade()
     {
         yield return new WaitForSeconds(DrawWeapon());
         AimFire();
     }
 
+    /// <summary>
+    /// Throw the grenade prefab (from the bl_Gun.cs)
+    /// This should be called from an animation event
+    /// </summary>
     public void ThrowProjectile()
     {
         StartCoroutine(ParentGun.ThrowGrenade(false, false));
@@ -260,7 +253,7 @@ public class bl_WeaponAnimation : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Play the draw/take in animation
     /// </summary>
     public float DrawWeapon()
     {
@@ -283,8 +276,9 @@ public class bl_WeaponAnimation : MonoBehaviour
             return DrawName.length / DrawSpeed;
         }
     }
+
     /// <summary>
-    ///  
+    ///  Play the hide/take out animation
     /// </summary>
     public float HideWeapon()
     {
@@ -306,6 +300,7 @@ public class bl_WeaponAnimation : MonoBehaviour
         }
         return TakeOut == null ? 0 : TakeOut.length / HideSpeed;
     }
+
     /// <summary>
     /// event called by animation when is a reload state
     /// </summary>
@@ -343,11 +338,21 @@ public class bl_WeaponAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="ReloadTime"></param>
+    /// <param name="Bullets"></param>
     public void SplitReload(float ReloadTime, int Bullets)
     {
       StartCoroutine(StartShotgunReload(Bullets));
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="Bullets"></param>
+    /// <returns></returns>
     IEnumerator StartShotgunReload(int Bullets)
     {
         if (m_AnimationType == AnimationType.Animation)
@@ -452,17 +457,28 @@ public class bl_WeaponAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void PlayThrow()
     {
         GunManager.HeadAnimator.Play("Throw", 0, 0);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
     public void PlayParticle(int id)
     {
         ParticleSystem.EmissionModule m = Particles[id].emission;
         m.rateOverTime = ParticleRate;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
     public void StopParticle(int id)
     {
         ParticleSystem.EmissionModule m = Particles[id].emission;

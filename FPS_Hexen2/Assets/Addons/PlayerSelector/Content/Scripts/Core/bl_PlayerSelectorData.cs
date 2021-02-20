@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using MFPS.PlayerSelector;
 using UnityEngine.Serialization;
 
-namespace MFPS.PlayerSelector
+namespace MFPS.Addon.PlayerSelector
 {
     public class bl_PlayerSelectorData : ScriptableObject
     {

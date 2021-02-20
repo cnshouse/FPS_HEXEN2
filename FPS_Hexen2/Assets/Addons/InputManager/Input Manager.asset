@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a776487618c5eca41bfe2a54260297f7, type: 3}
+  m_Name: Input Manager
+  m_EditorClassIdentifier: 
+  Name: Input Manager
+  Version: 1.7
+  MinMFPSVersion: 1.8
+  Instructions: "<b>Integration:\r</b>\n\r\n- Import the package into your MFPS 2.0
+    project.\r\n- For integrate simple go to (Top editor menu) MFPS -> Addons -> InputManager
+    -> Integrate\r\n- Save the scene.\r\n- That's\r\n\r\n<b>- Usage:\r</b>\n\nAfter
+    integrate you should be able to see a new button in the 'Options' menu of lobby
+    called \"Controls\", if you click this the input control panel will open,\r\nthere
+    you can change the input for each action listed in the Input Manager.\r\n\r\n<b>-
+    Add New keys:\r</b>\nThe asset comes with a wizard editor window to easily add,
+    remove or edit keys, for open it go to: (Toolbar) MFPS -> Addons -> InputManager
+    -> Add Keys.\r\n\r\n<b>- GamePad / Console setup:\r</b>\n if you want use the
+    game pad input you need made some extra set ups:\r\n\r\n 1 - Edit the Unity Input
+    Manager, the addon package comes with a InputManager.asset with all the gamepad
+    input set up, you only need put this on the 'ProjectSettings' folder\r\n  extract
+    the InputManager.asset of the addon located in: Addons -> InputManager -> Content
+    -> Asset -> GamePad-InputManager, copy and paste it in the ProjectSettings folder.\r\n\r\n
+    2 - Go to the MainMenu scene, if you have integrate the addon already, you'll
+    have a InputManager prefab in the hierarchy, select this and in the variable 'Input
+    Type' select 'Xbox' option\r\n on the InputMapped variable drag the GamePad InputMapped
+    located in: Addons -> InputManager -> Content -> Prefabs -> Mappeds -> GamePad.\r\n\r\n
+    Ready."
+  TutorialScript: InputManagerDocumentation

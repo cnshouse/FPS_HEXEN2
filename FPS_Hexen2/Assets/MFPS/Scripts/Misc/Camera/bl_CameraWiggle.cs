@@ -22,14 +22,14 @@ public class bl_CameraWiggle : bl_MonoBehaviour
     protected override void OnEnable()
     {
         base.OnEnable();
-        bl_EventHandler.OnSmallImpact += this.OnSmallImpact;
+        bl_EventHandler.onPlayerLand += this.OnSmallImpact;
         wiggle = bl_GameData.Instance.playerCameraWiggle;
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
-        bl_EventHandler.OnSmallImpact -= this.OnSmallImpact;
+        bl_EventHandler.onPlayerLand -= this.OnSmallImpact;
     }
 
     public override void OnUpdate()
@@ -38,7 +38,7 @@ public class bl_CameraWiggle : bl_MonoBehaviour
 
         if (bl_RoomMenu.Instance.isCursorLocked)
         {
-            float t_amount = -Input.GetAxis("Mouse X") * this.tiltAngle;
+            float t_amount = -bl_GameInput.MouseX * this.tiltAngle;
             t_amount = Mathf.Clamp(t_amount, -this.tiltAngle, this.tiltAngle);
             if (!Input.GetMouseButton(1))
             {

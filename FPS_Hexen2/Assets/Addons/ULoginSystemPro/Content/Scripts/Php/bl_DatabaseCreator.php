@@ -1,28 +1,35 @@
 <?php
-include("bl_Common.php");
+include_once("bl_Common.php");
+include_once("bl_Functions.php");
 
 $localhost    = $_POST['localhost'];
 $databaseuser = $_POST['dbuser'];
 $databasename = $_POST['dbname'];
 $dbpassword   = $_POST['dbpassword'];
+$name         = strip_tags($_POST['name']);
+$type         = strip_tags($_POST['type']);
+$dev          = $_GET['dev'];
 
-$name = strip_tags($_POST['name']);
-$type = strip_tags($_POST['type']);
-
-if($type <= 2){
-$link = mysqli_connect($localhost, $databaseuser, $dbpassword, $databasename);
-if ($link === false) {
-    die("ERROR: Could not connect. " . mysqli_connect_error());
-}
-}else{
-    $link = dbConnect();
+if (!isset($type) || empty($type)) {
+    if (isset($dev) && !empty($dev)) {
+        echo phpinfo();
+    }
+    exit();
 }
 
+if ($type <= 2) {
+    $link = mysqli_connect($localhost, $databaseuser, $dbpassword, $databasename);
+    if ($link === false) {
+        die("ERROR: Could not connect. " . mysqli_connect_error());
+    }
+} else {
+    $link = Connection::dbConnect();
+}
+
+$functions = new Functions($link);
 
 if ($type == 0) {
-    
-    $sql = file_get_contents ('sql-tables.sql');
-    
+    $sql = file_get_contents('sql-tables.sql');
     if (mysqli_multi_query($link, $sql)) {
         echo 2;
     } else {
@@ -37,11 +44,11 @@ if ($type == 0) {
     $link   = mysqli_connect($localhost, $databaseuser, $dbpassword, $databasename);
     if ($link) {
         $codeid = 1;
-        if ($result = $link->query("SHOW TABLES LIKE 'MyGameDB'")) {
+        if ($result = $link->query("SHOW TABLES LIKE '" . PLAYERS_DB . "'")) {
             if ($result->num_rows == 1) {
                 $codeid = 2;
-                $link2=TrydbConnect();
-                if($link2){
+                $link2  = Connection::dbConnect();
+                if ($link2) {
                     $codeid = 3;
                     mysqli_close($link2);
                 }
@@ -53,32 +60,26 @@ if ($type == 0) {
         $codeid = -1;
     }
     echo $codeid;
-}
-else if($type == 3)
-{
-    $query = "SHOW TABLES LIKE 'MyGameDB'";
-    $result = mysqli_query($link,$query) or die(mysqli_error($link));
+} else if ($type == 3) {
+    $query = "SHOW TABLES LIKE '" . PLAYERS_DB . "'";
+    $result = mysqli_query($link, $query) or die(mysqli_error($link));
     $num = mysqli_num_rows($result);
-    if($num >= 1)
-    {
-     echo "yes";
-    }else{
+    if ($num >= 1) {
+        echo "yes";
+    } else {
         echo "no";
     }
-}else if($type == 4)
-{
-    $sql = file_get_contents ('sql-tables.sql');   
-    if (mysqli_multi_query($link, $sql) or die(mysqli_error($link))) {
+} else if ($type == 4) {
+    $sql = file_get_contents('sql-tables.sql');
+    if ($functions->multiple_query($sql)) {
         echo "done";
     }
-}else if($type == 5)
-{
-    $sql = file_get_contents ('clan-sql.sql');   
-    if (mysqli_multi_query($link, $sql) or die(mysqli_error($link))) {
+} else if ($type == 5) {
+    $sql = file_get_contents('clan-sql.sql');
+    if ($functions->multiple_query($sql)) {
         echo "done";
     }
-}
- else {
+} else {
     die('request id not defined');
 }
 mysqli_close($link);

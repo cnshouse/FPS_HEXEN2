@@ -24,7 +24,7 @@ public class InspectorButtonPropertyDrawer : PropertyDrawer
 {
     public override void OnGUI(Rect position, SerializedProperty prop, GUIContent label)
     {
-        prop.intValue = EditorGUI.Popup(position, prop.name, prop.intValue, bl_GameData.Instance.AllWeaponStringList(), EditorStyles.toolbarDropDown);
+        prop.intValue = EditorGUI.Popup(position, prop.displayName, prop.intValue, bl_GameData.Instance.AllWeaponStringList(), EditorStyles.toolbarDropDown);
     }
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

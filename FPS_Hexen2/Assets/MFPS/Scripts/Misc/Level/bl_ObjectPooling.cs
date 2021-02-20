@@ -1,50 +1,64 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class bl_ObjectPooling : MonoBehaviour
 {
-    [SerializeField]private PreRegister[] RegistreOnStart;
+    [SerializeField, FormerlySerializedAs("RegistreOnStart")]
+    private PreRegister[] pooledPrefabs;
 
-    private List<PoolObject> PoolObjectList = new List<PoolObject>();
+    private List<PoolObject> m_poolList = new List<PoolObject>();
 
     /// <summary>
     /// 
     /// </summary>
     private void Awake()
     {
-        for (int i = 0; i < RegistreOnStart.Length; i++)
+        for (int i = 0; i < pooledPrefabs.Length; i++)
         {
-            RegisterObject(RegistreOnStart[i].Name, RegistreOnStart[i].Prefab, RegistreOnStart[i].Lenght);
+            RegisterObject(pooledPrefabs[i].Name, pooledPrefabs[i].Prefab, pooledPrefabs[i].Lenght);
         }
     }
 
-    public void RegisterObject(string _name, GameObject _prefab, int count)
+    /// <summary>
+    /// Add a new pooled prefab
+    /// </summary>
+    /// <param name="poolName">Identifier of this pool</param>
+    /// <param name="prefab"></param>
+    /// <param name="count"></param>
+    public void RegisterObject(string poolName, GameObject prefab, int count)
     {
-        if(_prefab == null)
+        if(prefab == null)
         {
-            Debug.LogWarning("Can't pooled the prefab for: " + _name + " because the prefab has not been assigned.");
+            Debug.LogWarning("Can't pooled the prefab for: " + poolName + " because the prefab has not been assigned.");
             return;
         }
+
         PoolObject p = new PoolObject();
-        p.Name = _name;
-        p.Prefab = _prefab;
+        p.Name = poolName;
+        p.Prefab = prefab;
         GameObject g = null;
         p.PoolList = new List<GameObject>();
 
         for (int i = 0; i < count; i++)
         {
-            g = Instantiate(_prefab) as GameObject;
+            g = Instantiate(prefab) as GameObject;
             p.PoolList.Add(g);
             g.transform.parent = transform;
             g.SetActive(false);
         }
-        PoolObjectList.Add(p);
+        m_poolList.Add(p);
     }
 
+    /// <summary>
+    /// Instantiate a pooled prefab
+    /// use this instead of GameObject.Instantiate(...)
+    /// </summary>
+    /// <returns></returns>
     public GameObject Instantiate(string objectName, Vector3 position, Quaternion rotation)
     {
-        PoolObject p = PoolObjectList.Find(x => x.Name == objectName);
+        PoolObject p = m_poolList.Find(x => x.Name == objectName);
         if(p != null)
         {
             GameObject g = p.GetCurrent;

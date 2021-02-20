@@ -10,10 +10,12 @@ public class bl_OfflineRoom : MonoBehaviour, IConnectionCallbacks
 {
     [Header("Offline Room")]
     public GameMode gameMode = GameMode.FFA;
-    public bool withBots = false;
-    public bool autoTeamSelection = true;
+    [LovattoToogle] public bool forceOffline = false;
+    [LovattoToogle] public bool withBots = false;
+    [LovattoToogle] public bool autoTeamSelection = true;
     [Range(1, 10)] public int maxPlayers = 1;
-
+    public int MatchTime = 9989;
+    public RoundStyle roundStyle = RoundStyle.OneMacht;
     [Header("References")]
     public GameObject PhotonObject;
 
@@ -25,7 +27,7 @@ public class bl_OfflineRoom : MonoBehaviour, IConnectionCallbacks
         PhotonNetwork.AddCallbackTarget(this);
         if (!bl_PhotonNetwork.IsConnectedInRoom)
         {
-            if (bl_GameData.Instance.offlineMode)
+            if (bl_GameData.Instance.offlineMode || forceOffline)
             {
 #if CLASS_CUSTOMIZER
                 bl_ClassManager.Instance.Init();
@@ -35,6 +37,7 @@ public class bl_OfflineRoom : MonoBehaviour, IConnectionCallbacks
 #endif
                 PhotonNetwork.OfflineMode = true;
                 PhotonNetwork.NickName = "Offline Player";
+                if(bl_PhotonNetwork.Instance == null)
                 Instantiate(PhotonObject);
             }
             else
@@ -59,10 +62,10 @@ public class bl_OfflineRoom : MonoBehaviour, IConnectionCallbacks
     {
         Debug.Log("Offline Connected to Master");
         Hashtable roomOption = new ExitGames.Client.Photon.Hashtable();
-        roomOption[PropertiesKeys.TimeRoomKey] = 9989;
+        roomOption[PropertiesKeys.TimeRoomKey] = MatchTime;
         roomOption[PropertiesKeys.GameModeKey] = gameMode.ToString();
         roomOption[PropertiesKeys.SceneNameKey] = bl_GameData.Instance.AllScenes[0].RealSceneName;
-        roomOption[PropertiesKeys.RoomRoundKey] = RoundStyle.OneMacht;
+        roomOption[PropertiesKeys.RoomRoundKey] = roundStyle;
         roomOption[PropertiesKeys.TeamSelectionKey] = autoTeamSelection;
         roomOption[PropertiesKeys.CustomSceneName] = bl_GameData.Instance.AllScenes[0].ShowName;
         roomOption[PropertiesKeys.RoomGoal] = 100;
@@ -101,5 +104,15 @@ public class bl_OfflineRoom : MonoBehaviour, IConnectionCallbacks
 
     public void OnRegionListReceived(RegionHandler regionHandler)
     {      
+    }
+
+    private static bl_OfflineRoom _instance;
+    public static bl_OfflineRoom Instance
+    {
+        get
+        {
+            if (_instance == null) { _instance = FindObjectOfType<bl_OfflineRoom>(); }
+            return _instance;
+        }
     }
 }

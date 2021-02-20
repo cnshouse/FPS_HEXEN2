@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using MFPSEditor;
+using UnityEngine.Networking;
 
 public class ULoginDocumentation : TutorialWizard
 {
 
     //required//////////////////////////////////////////////////////
     private const string ImagesFolder = "login-pro/editor/";
-    private NetworkImages[] ServerImages = new NetworkImages[]
+    private NetworkImages[] m_ServerImages = new NetworkImages[]
     {
         new NetworkImages{Name = "https://www.awardspace.com/images/web_hosting_v2_04.jpg",Type = NetworkImages.ImageType.Custom},
         new NetworkImages{Name = "img-1.jpg", Image = null},
         new NetworkImages{Name = "img-2.jpg", Image = null},
-        new NetworkImages{Name = "img-3.jpg", Image = null},
+        new NetworkImages{Name = "img-3.png", Image = null},
         new NetworkImages{Name = "img-5.jpg", Image = null},
         new NetworkImages{Name = "img-6.jpg", Image = null},
         new NetworkImages{Name = "img-7.jpg", Image = null},
@@ -27,42 +28,49 @@ public class ULoginDocumentation : TutorialWizard
         new NetworkImages{Name = "img-14.png", Image = null},
         new NetworkImages{Name = "img-15.png", Image = null},
         new NetworkImages{Name = "img-16.png", Image = null},
+        new NetworkImages{Name = "img-17.png", Image = null},//16
+        new NetworkImages{Name = "img-18.png", Image = null},
+        new NetworkImages{Name = "img-19.png", Image = null},
+        new NetworkImages{Name = "img-20.png", Image = null},
+        new NetworkImages{Name = "img-21.png", Image = null},
+        new NetworkImages{Name = "img-22.png", Image = null},
     };
+    private readonly GifData[] AnimatedImages = new GifData[]
+   {
+        new GifData{ Path = "lsp-cd-1.gif" },
+        new GifData{ Path = "lsp-uffz-2.gif" },
+   };
     private Steps[] AllSteps = new Steps[] {
-     new Steps { Name = "Require", StepsLenght = 0 },
-    new Steps { Name = "Hosting", StepsLenght = 4 },
-    new Steps { Name = "ULogin", StepsLenght = 4 },
-    new Steps { Name = "Admin Panel", StepsLenght = 0 },
-    new Steps { Name = "Version Checking", StepsLenght = 0 },
-    new Steps { Name = "Email Confirmation", StepsLenght = 0 },
-    new Steps { Name = "Common Problems", StepsLenght = 0 },
+     new Steps { Name = "Require", StepsLenght = 0 , DrawFunctionName = nameof(DrawRequire)},
+    new Steps { Name = "Hosting", StepsLenght = 3  , DrawFunctionName = nameof(DrawHosting)},
+    new Steps { Name = "ULogin", StepsLenght = 4  , DrawFunctionName = nameof(DrawULogin)},
+    new Steps { Name = "Admin Panel", StepsLenght = 0  , DrawFunctionName = nameof(DrawAdminPanel)},
+    new Steps { Name = "Version Checking", StepsLenght = 0 , DrawFunctionName = nameof(DrawVersionChecking) },
+    new Steps { Name = "Email Confirmation", StepsLenght = 0  , DrawFunctionName = nameof(DrawEmailConfirmation)},
+    new Steps { Name = "Security", StepsLenght = 0  , DrawFunctionName = nameof(SecurityDoc)},
+    new Steps { Name = "Common Problems", StepsLenght = 0  , DrawFunctionName = nameof(DrawCommonProblems)},
+    new Steps { Name = "Installation Service", StepsLenght = 0  , DrawFunctionName = nameof(InstallationServiceDoc)},
     };
     //final required////////////////////////////////////////////////
 
     EditorWWW www = new EditorWWW();
+   // public ULoginFileUploader fileUploader;
 
     public override void OnEnable()
     {
         base.OnEnable();
-        base.Initizalized(ServerImages, AllSteps, ImagesFolder);
+        base.Initizalized(m_ServerImages, AllSteps, ImagesFolder, AnimatedImages);
         GUISkin gs = Resources.Load<GUISkin>("content/MFPSEditorSkin") as GUISkin;
         if (gs != null)
         {
             base.SetTextStyle(gs.customStyles[2]);
         }
+        FetchWebTutorials("login-pro/tuts/");
     }
 
     public override void WindowArea(int window)
     {
-       if(window == 0)
-        {
-            DrawRequire();
-        }else if(window == 1) { DrawHosting(); }
-       else if(window == 2) { DrawULogin(); }
-       else if (window == 3) { DrawAdminPanel(); }
-        else if (window == 4) { DrawVersionChecking(); }
-        else if (window == 5) { DrawEmailConfirmation(); }
-        else if (window == 6) { DrawCommonProblems(); }
+        AutoDrawWindows();
     }
 
     void DrawRequire()
@@ -103,12 +111,11 @@ public class ULoginDocumentation : TutorialWizard
             DrawText("Now you need to register a domain, for it go to (in the site dashboard) Hosting Tools -> Domain Manager:");
             DrawImage(GetServerImage(2));
             DownArrow();
-            DrawText("Now if you have the a free plan you need to select <b>Register a Free Domain</b> (dx.am) or if you have a free plan but wanna have a custom domain like .com,.net,.uk, etc... (Recommended) you can" +
-                "use <b>Register a Domain</b> and buy it, but in this tutorial I will use only free alternatives, is all up to you, so write your domain in the field like for example: <i>mygamedomain</i> and click Register");
+            DrawText("Now if you have the a free plan you need to select <b>Register a Free Subdomain</b> or if you have a free plan but wanna have a custom domain like .com,.net,.uk, etc... <i>(Recommended)</i> you can use <b>Register a Domain</b> option and purchase it, but in this tutorial I will use only free alternatives, it is all up to you. So write your domain name in the input field like for example: <i>mygametest</i> and click on <b>Create</b>.");
             DrawImage(GetServerImage(3));
             DrawText("if the domain if available to register, you will see other steps to finish with the registration, so just follow it, just be sure to not select any pay feature that they will offer (if you don't want it of course)");
             DownArrow();
-        }else if(subStep == 2)
+        }/*else if(subStep == 2)
         {
             DrawText("Now we have the hosting and the domain name ready, let's create a directory to store our ulogin files, so go to <b>Hosting Tools -> File Manager</b>");
             DownArrow();
@@ -117,9 +124,9 @@ public class ULoginDocumentation : TutorialWizard
             DrawImage(GetServerImage(4));
             DownArrow();
             DrawText("Open the new folder, and if you want can create other folder to store only the php script, example called it \"php\" so the directory will be like: \"game-name\\php\\\".");          
-        }else if(subStep == 3)
+        }*/else if(subStep == 2)
         {
-            DrawText("Right, so now we have the hosting space, domain name and our the directory to upload the ulogin files, now you need create a Database");
+            DrawText("Right, so now we have the hosting and domain name and our the directory to upload the ulogin files, now you need create a Database");
             DownArrow();
             DrawText("Go to <b>Hosting Tools -> MySQL DataBases</b>, in the loaded page you will see a simply form for create the database, just set the database name and a password, \nfor the name you" +
                 " can simple set something like \"game\" and a secure password, and then click on <b>Create DataBase</b> button");
@@ -148,25 +155,48 @@ public class ULoginDocumentation : TutorialWizard
             DrawImage(GetServerImage(8));
             DownArrow();
             DrawText("Now in <b>bl_Common.php</b> you need set the database information like this");
-            DrawHorizontalColumn("$hostName", "The name of your host, get it from the database info in the hosting page");
-            DrawHorizontalColumn("$dbName", "The name the database, get it from the database info in the hosting page");
-            DrawHorizontalColumn("$dbUser", "The user name of the database, in Awardspace this is the same as the database name");
-            DrawHorizontalColumn("$dbPassworld", "The password that you set when create the database");
-            DrawHorizontalColumn("$secretKey", "Set a custom 'password' key, that just work as a extra layer of security to prevent others can execute the php code, is <b>Highly recommended that you set your own secret key</b>, just make sure to remember it since you will need it in the next step.");
-            DrawHorizontalColumn("$base_url", "The URL / Address where the php scripts are located in your server, including the domain name and http, for example: <i>http://www.mygamedomain.com/game/php/</i>");
-            DrawHorizontalColumn("$emailFrom", "Your server email from where 'Register confirmation' will be send (Only require if you want use confirmation for register), <b>NOTE:</b> this email need to be configure in your hosting, in Awardspace you can create a " +
+            DrawHorizontalColumn("HOST_NAME", "The name of your host, get it from the database info in the hosting page");
+            DrawHorizontalColumn("DATA_BASE_NAME", "The name the database, get it from the database info in the hosting page");
+            DrawHorizontalColumn("DATA_BASE_USER", "The user name of the database, in Awardspace this is the same as the database name");
+            DrawHorizontalColumn("DATA_BASE_PASSWORLD", "The password that you set when create the database");
+            DrawHorizontalColumn("SECRET_KEY", "Set a custom 'password' key, that just work as a extra layer of security to prevent others can execute the php code, is <b>Highly recommended that you set your own secret key</b>, just make sure to remember it since you will need it in the next step.");
+            DrawHorizontalColumn("ADMIN_EMAIL", "Your server email from where 'Register confirmation' will be send (Only require if you want use confirmation for register), <b>NOTE:</b> this email need to be configure in your hosting, in Awardspace you can create a " +
                 "email account in <b>Hosting Tools -> E-mail Account</b>.");
             DrawText("So after you set all the info, your script should look like this (with your own info of course)");
-            DrawImage(GetServerImage(9));
+            DrawImage(GetServerImage(21));
             DrawText("Don't forget to save the changes in the script.");
         }
         else if (subStep == 1)
         {
-            /*DrawText("Now you need upload the scripts, in order to upload the php scripts you need have your FTP client ready with the directory where you wanna store the files, if you are using Awardspace hosting, simple go to:" +
-    " <b>Hosting Tools -> File Manager</b> -> open the folder with your domain -> open the directory / folder where you will store the files, then click on the button <b>Upload</b>");*/
-            DrawText("Now the next step is upload the server side scripts (.php, .sql and .xml) to your server domain directory.\n\nLets explain first in what consist a directory first, very short, let say your registered domain is <color=#79D3FFFF>myexampledomain.com</color>, that is the root of your domain address/URL, now you can create subfolders in that domain to extend the address, so if you create a folder called <i>phpfiles</i> then the address to point to that folder will be <color=#79D3FFFF>myexampldomain.com/phpfiles/</color> if you create another folder inside this you simple add the folder name plus a right-slash at the end.\n\nNow to manage your folders/domain directory and upload files to it you need a FTP Client, but if you are not familiar with what an FTP client is or what it does, I recommend use the Hosting provided <b>File Manager</b>, if you are using Awardspace you can open the File Manager dashboard in: <b>Hosting Tools -> File Manager.</b>\n");
+           /* if (fileUploader == null) fileUploader = new ULoginFileUploader(this);
 
-            DrawServerImage(14, TextAlignment.Center);
+            fileUploader.DrawGUI();*/
+
+            DrawText("Now the next step is upload the server side scripts (.php, .sql and .xml) to your server domain directory.\n\nLets explain first in what consist a directory first, very short, let say your registered domain is <color=#79D3FFFF>myexampledomain.com</color>, that is the root of your domain address/URL, now you can create subfolders in that domain to extend the address, so if you create a folder called <i>phpfiles</i> then the address to point to that folder will be <color=#79D3FFFF>myexampldomain.com/phpfiles/</color> if you create another folder inside this you simple add the folder name plus a right-slash at the end.");
+
+            DrawHyperlinkText("Now to manage your folders/domain directory and upload files to it you need an FTP Client, since some web hosting file uploaders don't support nested folders uploads we have to use <b>FileZilla FTP Client</b> to upload our files to our server, FileZilla is free software, you can download it here: <link=https://filezilla-project.org/>https://filezilla-project.org/</link> or using your preferred FTP Client program.\n\n<b>Download the FTP Client</b> not the FTP Server.\n\nOnce you download it -> install it following the installation wizard of the program -> then <b>Open</b> it.\n\nNow to be able to upload the files using this tools you need to set your FTP Credentials, all web hostings provide these credentials in their panel/dashboard, in Awardspace you can find these credentials in: <b>Hosting Tools -> FTP Manager</b>");
+            DrawServerImage(16);
+             DownArrow();
+            DrawText("There you will see a form to create a FTP account, fill the required info and click on <b>Create FTP Account</b> button");
+            DrawServerImage(17);
+            DownArrow();
+            DrawText("After this below that box you'll see the FTP Account section, there you should see the FTP account that you just create, click on the <i><b>settings</b></i> button on the right side of your FTP account -> then select the <b>Information</b> tab, there you will see your FTP account credentials with which you can access to your server:");
+            DrawServerImage(18);
+            DrawText("Now open FileZilla and at the top of the menu you will see the fields to insert your FTP credentials, insert the credentials showing in your hosting, in Awardspace, they are the ones that you just open above, once you insert the credentials click on the <b>Quickconnect</b> button, if the credentials are correct you should see a message like <i><b>Directory listing of \"/\" successful</b></i>, if that's so then you are ready to upload the files.");
+            DrawServerImage(19);
+            DownArrow();
+            DrawText("So now on the FileZilla in the <b>Remote Site side panel</b> you should see a directory folder with at least a folder in it, open the folder <b>that has your domain name</b> -> now with the root directory open you have two options: upload the scripts files right there in the root or created a sub directory to be more organized, I recommend create a subfolder , for it simple right click on the window -> Create directory -> in the popup window that will appear set the folder name as you want, for this tutorial I will create two nested folders: <b>mygame -> php</b> <i>where I'll upload my files)</i>");
+            DrawAnimatedImage(0);
+            DrawText("With the created folder open you have to upload the ULogin Pro server files, for it in the Unity Editor go to the folder located at: <i><b>Assets -> Addons -> ULoginSystemPro -> Content -> Scripts-> Php</b></i> select one of the script on that folder -> Right Mouse Click over it -> Show on Explorer.");
+            DrawServerImage(15, TextAlignment.Center);
+            DrawText("Now in the OS window explorer <b>select all the files including the phpseclib folder</b> <i><size=10><color=#76767694>(without the .meta files)</color></size></i> and drag them in the <b>Remote Site</b> panel on <b>FileZilla</b>");
+            DrawAnimatedImage(1);
+            DownArrow();
+            DrawText("Once all scripts are uploaded, copy the URL from the <b>Remote Site</b> directory field <i>(on FileZilla)</i>");
+            DrawServerImage(20);
+            DrawText("This is just the directory to your files folder container, you have to format it to a working URL <i>(add the HTTP prefix)</i>, for it simple paste the copied url bellow and click on <b>Format</b> button, after formated it -> click on the <b>Assign URL</b> button.");
+
+           /* DrawServerImage(14, TextAlignment.Center);
 
             DrawText("In the new page you should see a directory panel with at least a folder in it, open the folder <b>that has your domain name</b> -> now with the root directory open you have two options: upload the scripts files right there in the root or created a sub directory to be more organized, I recommend create a subfolder , for it simple click on the button Create and in the popup window that will appear set the folder name as you want, for this tutorial I will call it as: <b>php</b> -> after creating the folder open it and click on the <b>Upload</b> button -> in the popup window that will show, drag all the scripts of the PHP folder from ULogin Pro as follow:\n\nIn the Unity Editor go to the folder located at: <i>Assets->Addons->ULoginSystemPro->Content->Scripts->Php</i> select one of the script on that folder -> Right Mouse Click over it -> Show on Explorer.\n");
             DrawServerImage(15, TextAlignment.Center);
@@ -177,7 +207,7 @@ public class ULoginDocumentation : TutorialWizard
             DrawText("Once all scripts are uploaded, copy the URL from the panel field <i>(<b>NOT</b> the browser search field)</i>");
             DrawImage(GetServerImage(10));
             DownArrow();
-            DrawText("Now this is just the directory to your files folder container, you have to convert to a working URL <i>(add the HTTP prefix)</i>, for it simple paste the copied url bellow and click on <b>Format</b> button, after formated click on the <b>Assign URL</b> button.");
+            DrawText("Now this is just the directory to your files folder container, you have to convert to a working URL <i>(add the HTTP prefix)</i>, for it simple paste the copied url bellow and click on <b>Format</b> button, after formated click on the <b>Assign URL</b> button.");*/
 
             GUILayout.BeginHorizontal();
             {
@@ -226,7 +256,7 @@ public class ULoginDocumentation : TutorialWizard
             }
             GUILayout.EndHorizontal();
             DownArrow();
-            DrawText("Now in the Inspector Window of the Unity Editor you should see the fields of LoginDataBasePro <i>(otherwise click the button bellow)</i>, if everything work correctly you should see your URL assigned in the <b>PhpHostPath</b> field.\n\n-Remember from the last step the <b>SecretKey</b> that was in <b>bl_Common.php -> $secretKey</b>, if you have change it in bl_Common.php you have to set the same Key in the field <b>Secret Key</b> of LoginDataBasePro.");
+            DrawHyperlinkText("Now in the Inspector Window of the Unity Editor you should see the fields of <link=asset:Assets/Addons/ULoginSystemPro/Content/Resources/LoginDataBasePro.asset>LoginDataBasePro</link> <i>(otherwise click the button bellow)</i>, if everything work correctly you should see your URL assigned in the <b>PhpHostPath</b> field.\n\n-Remember from the last step the <b>SecretKey</b> that was in <b>bl_Common.php -> SECRET_KEY</b>, if you have change it in <b>bl_Common.php</b> you have to set the same Key in the field <b>Secret Key</b> of <link=asset:Assets/Addons/ULoginSystemPro/Content/Resources/LoginDataBasePro.asset>LoginDataBasePro</link>.");
             DrawImage(GetServerImage(11));
             if (DrawButton("LoginDataBasePro"))
             {
@@ -270,9 +300,10 @@ public class ULoginDocumentation : TutorialWizard
                 GUILayout.Space(5);
                 if (DrawButton("Create Tables"))
                 {
-                    WWWForm wf = new WWWForm();
-                    wf.AddField("type", 4);
-                    www.SendRequest(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Creator), wf, CheckCreation);
+                    /* WWWForm wf = new WWWForm();
+                     wf.AddField("type", 4);
+                     www.SendRequest(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Creator), wf, CheckCreation);*/
+                    EditorCoroutines.StartBackgroundTask(DoCreateTables());
                     checkID = 4;
                 }
                 GUI.enabled = true;
@@ -300,6 +331,43 @@ public class ULoginDocumentation : TutorialWizard
         }
     }
 
+    IEnumerator DoCreateTables()
+    {
+        WWWForm wf = new WWWForm();
+        wf.AddField("type", 4);
+        var url = bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Creator);
+        using (UnityWebRequest w = UnityWebRequest.Post(url, wf))
+        {
+            w.SendWebRequest();
+            while (!w.isDone) { yield return null; }
+
+            if(!w.isNetworkError && !w.isHttpError)
+            {
+                var text = w.downloadHandler.text;
+                if (text.Contains("done"))
+                {
+                    checkLog = "Tables created successfully";
+                    checkID = 5;
+                }
+                else
+                {
+                    checkLog = text;
+                    checkID = 6;
+                }
+                Repaint();
+            }
+            else
+            {
+                if(w.error.Contains("destination host"))
+                {
+                    Debug.LogError($"{w.error}\nTry removing the www. from the URL in LoginDataBasePro->PhpHostPath");
+                }else
+                Debug.LogError($"{w.error}\n{url} - {w.responseCode}");
+                checkID = 3;
+            }
+        }
+    }
+    
     void DrawAdminPanel()
     {
         DrawText("ULogin comes with a handy scene that allow the admin/dev and their game moderators make some basic management like Ban, Ascend,etc... to the users right in the game");
@@ -330,9 +398,30 @@ public class ULoginDocumentation : TutorialWizard
         DrawText("Ok, now that the email is created you have to assign it in <b>bl_Common.php</b> script <i>(the one that you upload in your server)</i> -> $emailFrom.\n\nNow your email confirmation system will be ready!\n");
     }
 
+    void SecurityDoc()
+    {
+        DrawText("ULogin Pro uses many security measures in both clients and server-side to prevent common attacks/exploits to make sure that the user data is safe and also to protect the game database.\n\nJust to enums some of them:\n\n■ SQL sanitize to prevent SQL injection from the user input.\n■ Custom hash required to execute functions on server-side.\n■ P2P encryption using RSA and AES algorithms on all sensitivity requests using the latest phpseclib functions.\n■  Max login attempts.\n■ Password hashed and encrypted.\n■ Email verification.\n■ None sensitivity data is serialized in the game build.\n\nBut by default some of those features are disabled, here is a list of things that you should do to use ULogin with the maximum security measures:\n\n<size=16>1. Set a custom and secure <b>Secret Key</b>:</size>");
+
+        DrawHyperlinkText("- You have to set this key in two places in <link=asset:Assets/Addons/ULoginSystemPro/Content/Resources/LoginDataBasePro.asset>LoginProDataBase</link> ➔ Secret Key and in the PHP script bl_Common.php ➔ SECRET_KEY (the one that you upload to your server), it has to be the same key, make sure it is at least 16 chars long and includes letters, digits, and symbols.");
+        Space(25);
+        DrawHyperlinkText("<size=16>2 - Enable PeerToPeer encryption:</size>\n\n- This feature is disabled by default because it uses RSA encryption on the server-side which is a little bit slower and at a large scale requires more server resources.\n\nTo enable it simply turn on the toggle '<b>PeerToPeer Encryption</b>' in <link=asset:Assets/Addons/ULoginSystemPro/Content/Resources/LoginDataBasePro.asset>LoginDataBasePro</link> and in <b>bl_Common.php</b> <i>(the script in your server)</i> set the const '<b>PER_TO_PER_ENCRYPTION</b>' = true.");
+        Space(25);
+
+        DrawHyperlinkText("<size=16>3 - Use HTTPS</size>\n\n- This feature is external to ULogin but is a highly recommended and some times required feature that your server should have, <b>many platforms like iOS and Android required the use of secure https</b> request so if you are planning release your game on one of those platforms you must have a valid SSL certificated for your domain.\n\nTo get an SSL certificate <i>(and be able to use HTTPS instead of HTTP)</i>\nyou need to buy it, if you don't know how to install an SSL certificate on your server your best option is contact to your server hosting provider since more likely they self sell and install certificates.\n\nOnce you have a valid SSL certificated installed in your domain, you simply have to use HTTPS instead of HTTP in the URL that you set in <link=asset:Assets/Addons/ULoginSystemPro/Content/Resources/LoginDataBasePro.asset>LoginDataBasePro</link> ➔ <b>PhpHostPath</b>, e.g: <i>http://www.mydomain.com/files/</i> ➔ should be: <i>https://www.mydomain.com/files/</i>");
+    }
+
     void DrawCommonProblems()
     {
 
+    }
+
+    void InstallationServiceDoc()
+    {
+        DrawText("If you are having trouble or just want to save time setting up the server-side database, we offer the installation service upon requests for a small fee.\n");
+        if(Buttons.FlowButton("Contact Us"))
+        {
+            Application.OpenURL("https://www.lovattostudio.com/en/select-support/index.html");
+        }
     }
 
     string checkLog = "";

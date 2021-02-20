@@ -2371,10 +2371,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 779b895a4f24cf244ad0ec55ab4ccb4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  updateBotsLookAtEach: 35
   AllBotsTransforms: []
   BotsStatistics: []
-  Team1PlayersSlots: []
-  Team2PlayersSlots: []
   hasMasterInfo: 0
 --- !u!114 &114219092054572608
 MonoBehaviour:
@@ -2406,6 +2405,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
+  observableSearch: 0
   Synchronization: 0
   OwnershipTransfer: 0
   ObservedComponents: []

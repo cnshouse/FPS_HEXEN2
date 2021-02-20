@@ -14,6 +14,7 @@ public class bl_WaitingRoomUI : bl_PhotonHelper
     public GameObject LoadingMapUI;
     public GameObject StartScreen;
     public GameObject LeaveConfirmUI;
+    public GameObject waitingRequiredPlayersUI;
     public RectTransform PlayerListPanel;
     public Text RoomNameText;
     public Text MapNameText;
@@ -56,6 +57,7 @@ public class bl_WaitingRoomUI : bl_PhotonHelper
         LeaveConfirmUI.SetActive(false);
         StartScreen.SetActive(false);
         Content.SetActive(false);
+        bl_LobbyUI.Instance.blackScreenFader.FadeOut(0.5f);
     }
 
     /// <summary>
@@ -152,11 +154,15 @@ public class bl_WaitingRoomUI : bl_PhotonHelper
         int required = GetGameModeUpdated.GetGameModeInfo().RequiredPlayersToStart;
         if(required > 1)
         {
+            bool allRequired = (PhotonNetwork.PlayerList.Length >= required);
             readyButtons[0].interactable = (PhotonNetwork.IsMasterClient && PhotonNetwork.PlayerList.Length >= required);
             PlayerCountText.text = string.Format("{0} OF {2} PLAYERS ({1} MAX)", PhotonNetwork.PlayerList.Length, PhotonNetwork.CurrentRoom.MaxPlayers, required);
+            waitingRequiredPlayersUI?.SetActive(!allRequired);
         }
         else
         {
+            readyButtons[0].interactable = true;
+            waitingRequiredPlayersUI?.SetActive(false);
             PlayerCountText.text = string.Format("{0} PLAYERS ({1} MAX)", PhotonNetwork.PlayerList.Length, PhotonNetwork.CurrentRoom.MaxPlayers);
         }
     }
@@ -193,13 +199,13 @@ public class bl_WaitingRoomUI : bl_PhotonHelper
     {
         if (comfirmed)
         {
-            bl_LobbyUI.Instance.DoBlackFade(true, 0.5f);
+            bl_LobbyUI.Instance.blackScreenFader.FadeIn(0.5f);
             PhotonNetwork.LeaveRoom();
         }
         else
         {
             LeaveConfirmUI.SetActive(true);
-        }
+        }      
     }
 
     private static bl_WaitingRoomUI _instance;

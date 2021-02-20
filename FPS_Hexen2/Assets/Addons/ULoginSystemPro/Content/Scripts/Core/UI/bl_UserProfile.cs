@@ -2,8 +2,9 @@
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using MFPS.ULogin;
 
-public class bl_UserProfile : MonoBehaviour
+public class bl_UserProfile : bl_LoginProBase
 {
 
     [Header("References")]
@@ -21,7 +22,8 @@ public class bl_UserProfile : MonoBehaviour
     [SerializeField]private GameObject SettingsWindow = null;
     [SerializeField]private GameObject ChangeNameWindow = null;
     [SerializeField]private GameObject SuccessWindow = null;
-    [SerializeField]private GameObject ChangeNameButton = null;  
+    [SerializeField]private GameObject ChangeNameButton = null;
+    [SerializeField] private GameObject ChangePassButton = null;
     [SerializeField]private InputField CurrentPassNick = null;
     [SerializeField]private InputField NewNickInput = null;
     [SerializeField]private InputField CurrentPassInput = null;
@@ -43,16 +45,27 @@ public class bl_UserProfile : MonoBehaviour
         ChangeNameButton.SetActive(bl_LoginProDataBase.Instance.PlayerCanChangeNick);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void OnEnable()
     {
         bl_DataBase.OnUpdateData += OnUpdateData;
+        SetupButtons();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void OnDisable()
     {
         bl_DataBase.OnUpdateData -= OnUpdateData;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="userInfo"></param>
     void OnUpdateData(LoginUserInfo userInfo)
     {
         OnLogin();
@@ -89,6 +102,7 @@ public class bl_UserProfile : MonoBehaviour
 #endif
         PlayTimeText.text = bl_DataBaseUtils.TimeFormat(bl_DataBase.Instance.LocalUser.PlayTime);
         gameObject.SetActive(true);
+        SetupButtons();
     }
 
     /// <summary>
@@ -100,6 +114,9 @@ public class bl_UserProfile : MonoBehaviour
         SettingsWindow.SetActive(isSettingOpen);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void OnProfile()
     {
         isOpen = !isOpen;
@@ -115,6 +132,9 @@ public class bl_UserProfile : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void ChangeName()
     {
         if (bl_DataBase.Instance == null) return;
@@ -140,27 +160,30 @@ public class bl_UserProfile : MonoBehaviour
         StartCoroutine(SetChangeName(nick));
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     IEnumerator SetChangeName(string nick)
-    {      
-        WWWForm wf = new WWWForm();
-        string hash = bl_DataBaseUtils.Md5Sum(bl_DataBase.Instance.LocalUser.LoginName + bl_LoginProDataBase.Instance.SecretKey).ToLower();
-        wf.AddField("name", bl_DataBase.Instance.LocalUser.LoginName);
-        wf.AddField("nick", nick);
-        wf.AddField("typ", 4);
-        wf.AddField("hash", hash);
+    {
+        WWWForm wf = CreateForm(false, true);
+        wf.AddSecureField("id", bl_DataBase.Instance.LocalUser.LoginName);
+        wf.AddSecureField("data", nick);
+        wf.AddSecureField("type", 4);
+        wf.AddSecureField("hash", bl_DataBaseUtils.CreateSecretHash(bl_DataBase.Instance.LocalUser.LoginName));
 
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.DataBase), wf))
+        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Account), wf))
         {
             yield return www.SendWebRequest();
 
             if (www.error == null && !www.isNetworkError)
             {
-                if (www.downloadHandler.text.Contains("successcn"))
+                if (www.downloadHandler.text.Contains("success"))
                 {
                     bl_DataBase.Instance.LocalUser.NickName = nick;
                     ProfileNameText.text = bl_DataBase.Instance.LocalUser.NickName;
                     NameText.text = bl_DataBase.Instance.LocalUser.NickName;
-                    Debug.Log("Change nick name!");
+                    Debug.Log("Changed nick name!");
                     SuccessWindow.SetActive(true);
                 }
                 else
@@ -207,17 +230,16 @@ public class bl_UserProfile : MonoBehaviour
 
     IEnumerator SetChangePass(string pass, string newpass)
     {
-        //Used for security check for authorization to modify database
-        string hash = bl_DataBaseUtils.Md5Sum(bl_DataBase.Instance.LocalUser.ID + bl_LoginProDataBase.Instance.SecretKey).ToLower();
         // Create instance of WWWForm
-        WWWForm wf = new WWWForm();
+        WWWForm wf = CreateForm(FormHashParm.ID, true);
         //sets the mySQL query to the amount of rows to load
-        wf.AddField("id", bl_DataBase.Instance.LocalUser.ID);
-        wf.AddField("password", pass);
-        wf.AddField("newpassword", newpass);
-        wf.AddField("hash", hash);
+        wf.AddSecureField("id", bl_DataBase.Instance.LocalUser.ID);
+        wf.AddSecureField("type", 1);
+        wf.AddSecureField("password", pass);
+        wf.AddSecureField("data", newpass);
+
         //Creates instance to run the php script to access the mySQL database
-        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.ChangePassword), wf))
+        using (UnityWebRequest www = UnityWebRequest.Post(bl_LoginProDataBase.Instance.GetUrl(bl_LoginProDataBase.URLType.Account), wf))
         {
             //Wait for server response...
             yield return www.SendWebRequest();
@@ -252,12 +274,27 @@ public class bl_UserProfile : MonoBehaviour
         Invoke("CleanLog", 5);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void SignOut()
     {
         if(bl_DataBase.Instance != null)
         bl_DataBase.Instance.LocalUser = new LoginUserInfo();
         if(bl_Lobby.Instance != null) { bl_Lobby.Instance.SignOut(); }
+        if (bl_PhotonNetwork.Instance != null) bl_PhotonNetwork.LocalPlayer.NickName = string.Empty;
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void SetupButtons()
+    {
+        if (bl_DataBase.IsUserLogged)
+        {
+            ChangePassButton.SetActive(bl_DataBase.LocalUserInstance.authenticationType == AuthenticationType.ULogin);
+        }
     }
 
     public void OpenRanking()

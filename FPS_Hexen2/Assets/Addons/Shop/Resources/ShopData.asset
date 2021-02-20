@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1971806352d56f341837bd0e5a8fbc37, type: 3}
+  m_Name: ShopData
+  m_EditorClassIdentifier: 
+  ShopPayment: 0
+  CoinsPacks:
+  - Name: 1000 COINS
+    ID: mfps.1000.coins
+    Amount: 1000
+    Price: 1.99
+  - Name: 5000 COINS
+    ID: mfps.5000.coins
+    Amount: 5000
+    Price: 4.99
+  - Name: 10000 COINS
+    ID: mfps.10000.coins
+    Amount: 10200
+    Price: 9.99
+  - Name: 25000 COINS
+    ID: mfps.25000.coins
+    Amount: 25500
+    Price: 19.99
+  categorys:
+  - Name: Weapons
+    itemType: 0
+  - Name: Player Skins
+    itemType: 2
+  - Name: Weapon Camos
+    itemType: 1
+  PricePrefix: $
+  ShowFreeItems: 1
+  randomizeItemsInShop: 1
+  purchaseOverrideLevelLock: 1

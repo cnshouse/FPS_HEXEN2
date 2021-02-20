@@ -1,27 +1,47 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class bl_AICovertPointManager : MonoBehaviour
 {
     public float MaxDistance = 50;
     public float UsageTime = 10;
-    public bool ShowGizmos = true;
+    [LovattoToogle] public bool ShowGizmos = true;
 
     public static List<bl_AICoverPoint> AllCovers = new List<bl_AICoverPoint>();
 
-    public static void Register(bl_AICoverPoint co)
-    {
-        AllCovers.Add(co);
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
     private void OnDestroy()
     {
         AllCovers.Clear();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public static void Register(bl_AICoverPoint co)
+    {
+        AllCovers.Add(co);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="target"></param>
+    /// <returns></returns>
     public bl_AICoverPoint GetCloseCover(Transform target)
     {
+        if (AllCovers == null || AllCovers.Count <= 0)
+        {
+            Debug.LogWarning("There is no Cover Points for bots in this scene, bots behave will be limited.");
+            return null;
+        }
+
         bl_AICoverPoint cover = null;
         float d = MaxDistance;
         for(int i = 0; i < AllCovers.Count; i++)
@@ -37,8 +57,20 @@ public class bl_AICovertPointManager : MonoBehaviour
         return cover;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="radius"></param>
+    /// <returns></returns>
     public bl_AICoverPoint GetCoverOnRadius(Transform target, float radius)
     {
+        if(AllCovers == null || AllCovers.Count <= 0)
+        {
+            Debug.LogWarning("There is no Cover Points for bots in this scene, bots behave will be limited.");
+            return null;
+        }
+
         List<bl_AICoverPoint> list = new List<bl_AICoverPoint>();
         for (int i = 0; i < AllCovers.Count; i++)
         {
@@ -58,8 +90,19 @@ public class bl_AICovertPointManager : MonoBehaviour
         return cp;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="target"></param>
+    /// <returns></returns>
     public bl_AICoverPoint GetCloseCoverForced(Transform target)
     {
+        if (AllCovers == null || AllCovers.Count <= 0)
+        {
+            Debug.LogWarning("There is no Cover Points for bots in this scene, bots behave will be limited.");
+            return null;
+        }
+
         bl_AICoverPoint cover = null;
         float d = 100000;
         for (int i = 0; i < AllCovers.Count; i++)
@@ -75,6 +118,12 @@ public class bl_AICovertPointManager : MonoBehaviour
         return cover;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="overrdidePoint"></param>
+    /// <returns></returns>
     public bl_AICoverPoint GetCloseCover(Transform target, bl_AICoverPoint overrdidePoint)
     {
         bl_AICoverPoint cover = null;
@@ -92,9 +141,15 @@ public class bl_AICovertPointManager : MonoBehaviour
         return cover;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="coverSource"></param>
+    /// <returns></returns>
     public bl_AICoverPoint CheckCoverUsage(bl_AICoverPoint coverSource)
     {
         if (coverSource == null) return null;
+        if (coverSource.NeighbordPoints == null || coverSource.NeighbordPoints.Count <= 0) return coverSource;
 
         if ((Time.time - coverSource.lastUseTime) <= UsageTime && coverSource.NeighbordPoints.Count > 0)
         {
@@ -106,7 +161,7 @@ public class bl_AICovertPointManager : MonoBehaviour
 
 #if UNITY_EDITOR
     [ContextMenu("Fix Points")]
-    private void Fixed()
+    public void FixedFloorPos()
     {
         bl_AICoverPoint[] sp = FindObjectsOfType<bl_AICoverPoint>();
         RaycastHit r;
@@ -122,7 +177,7 @@ public class bl_AICovertPointManager : MonoBehaviour
     }
 
     [ContextMenu("Calculate Neighbors")]
-    private void CalcuNeighbords()
+    public void CalcuNeighbords()
     {
         bl_AICoverPoint[] sp = FindObjectsOfType<bl_AICoverPoint>();
         for (int i = 0; i < sp.Length; i++)
@@ -142,3 +197,32 @@ public class bl_AICovertPointManager : MonoBehaviour
     }
 #endif
 }
+
+#if UNITY_EDITOR
+[CustomEditor(typeof(bl_AICovertPointManager))]
+public class bl_AICovertPointManagerEditor : Editor
+{
+    bl_AICovertPointManager script;
+
+    private void OnEnable()
+    {
+        script = (bl_AICovertPointManager)target;
+    }
+
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+        GUILayout.Space(10);
+
+        if(GUILayout.Button("Bake Neighbors points"))
+        {
+            script.CalcuNeighbords();
+        }
+        if (GUILayout.Button("Align points to floors"))
+        {
+            script.FixedFloorPos();
+        }
+    }
+
+}
+#endif

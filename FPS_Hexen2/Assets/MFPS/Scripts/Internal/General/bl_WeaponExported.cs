@@ -78,6 +78,20 @@ namespace MFPSEditor
                 GUILayout.EndHorizontal();
 
                 GUILayout.EndVertical();
+              /*  if(GUILayout.Button("Update Info"))
+                {
+                    var old = script.WeaponInfo;
+                    var newInfoID = bl_GameData.Instance.AllWeapons.FindIndex(x => x.Name == old.Name);
+                    if(newInfoID == -1)
+                    {
+                        Debug.Log("Can't find");
+                        return;
+                    }
+
+                    script.WeaponInfo = bl_GameData.Instance.AllWeapons[newInfoID];
+                    serializedObject.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(target);
+                }*/
             }
         }
     }

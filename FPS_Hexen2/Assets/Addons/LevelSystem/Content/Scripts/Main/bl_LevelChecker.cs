@@ -4,85 +4,88 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 
-public class bl_LevelChecker : MonoBehaviour
+namespace MFPS.Addon.LevelManager
 {
-    public float showTime = 5;
-
-    [Header("References")]
-    public GameObject ContentUI;
-    public Text levelText;
-    public Animator animator;
-    public AnimationClip showClip;
-    public AudioClip newLevelSound;
-
-    private int actualLevel = 0;
-    private AudioSource aSource;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private void OnEnable()
+    public class bl_LevelChecker : MonoBehaviour
     {
-        bl_EventHandler.onLocalKill += OnLocalKill;
-        actualLevel = bl_LevelManager.Instance.GetLevelID();
-        ContentUI.SetActive(false);
-        aSource = GetComponent<AudioSource>();
-    }
+        public float showTime = 5;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private void OnDisable()
-    {
-        bl_EventHandler.onLocalKill -= OnLocalKill;
-    }
+        [Header("References")]
+        public GameObject ContentUI;
+        public Text levelText;
+        public Animator animator;
+        public AnimationClip showClip;
+        public AudioClip newLevelSound;
 
-    /// <summary>
-    /// Check the score each time that the local player kill someone
-    /// </summary>
-    void OnLocalKill(KillInfo info)
-    {
-        Check();
-    }
+        private int actualLevel = 0;
+        private AudioSource aSource;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Check()
-    {
-        //get the current level taking in account the score earning in this match.
-        int levelID = bl_LevelManager.Instance.GetRuntimeLevelID();
-        //if this is a new level
-        if(levelID > actualLevel)
+        /// <summary>
+        /// 
+        /// </summary>
+        private void OnEnable()
         {
-            CancelInvoke();
-            levelText.text = levelID.ToString();
-            ContentUI.SetActive(true);
-            animator.Play("show", 0, 0);
-            actualLevel = levelID;
-            Invoke("Hide", showClip.length + showTime);
-            if(newLevelSound != null)
+            bl_EventHandler.onLocalKill += OnLocalKill;
+            actualLevel = bl_LevelManager.Instance.GetLevelID();
+            ContentUI.SetActive(false);
+            aSource = GetComponent<AudioSource>();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void OnDisable()
+        {
+            bl_EventHandler.onLocalKill -= OnLocalKill;
+        }
+
+        /// <summary>
+        /// Check the score each time that the local player kill someone
+        /// </summary>
+        void OnLocalKill(KillInfo info)
+        {
+            Check();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Check()
+        {
+            //get the current level taking in account the score earning in this match.
+            int levelID = bl_LevelManager.Instance.GetRuntimeLevelID();
+            //if this is a new level
+            if (levelID > actualLevel)
             {
-                aSource.clip = newLevelSound;
-                aSource.Play();
+                CancelInvoke();
+                levelText.text = levelID.ToString();
+                ContentUI.SetActive(true);
+                animator.Play("show", 0, 0);
+                actualLevel = levelID;
+                Invoke("Hide", showClip.length + showTime);
+                if (newLevelSound != null)
+                {
+                    aSource.clip = newLevelSound;
+                    aSource.Play();
+                }
             }
         }
-    }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    void Hide()
-    {
-        animator.Play("hide", 0, 0);
-        Invoke("Disable", showClip.length);
-    }
+        /// <summary>
+        /// 
+        /// </summary>
+        void Hide()
+        {
+            animator.Play("hide", 0, 0);
+            Invoke("Disable", showClip.length);
+        }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    void Disable()
-    {
-        ContentUI.SetActive(false);
+        /// <summary>
+        /// 
+        /// </summary>
+        void Disable()
+        {
+            ContentUI.SetActive(false);
+        }
     }
 }

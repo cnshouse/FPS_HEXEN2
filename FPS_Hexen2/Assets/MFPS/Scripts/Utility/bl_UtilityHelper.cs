@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -7,12 +6,12 @@ using UnityEngine.SceneManagement;
 #if UNITY_EDITOR && !UNITY_WEBGL
 using System.IO;
 #endif
-using Photon.Pun;
 using Photon.Realtime;
 using System.Linq;
+using UnityEngine.Animations;
 
 public static class bl_UtilityHelper
-{ 
+{
 
     public static void LoadLevel(string scene)
     {
@@ -57,35 +56,22 @@ public static class bl_UtilityHelper
         return Mathf.Clamp(ang, min, max);
     }
 
-    public static GameObject GetGameObjectView(PhotonView m_view)
-    {
-        GameObject go = PhotonView.Find(m_view.ViewID).gameObject;
-        return go;
-    }
     /// <summary>
-    /// obtain only the first two values
+    /// Get string in time format
     /// </summary>
-    /// <param name="f"></param>
-    /// <returns></returns>
-    public static string GetDoubleChar(float f)
-    {
-        return f.ToString("00");
-    }
-    /// <summary>
-    /// obtain only the first three values
-    /// </summary>
-    /// <param name="f"></param>
-    /// <returns></returns>
-    public static string GetThreefoldChar(float f)
-    {
-        return f.ToString("000");
-    }
-
     public static string GetTimeFormat(float m, float s)
     {
         return string.Format("{0:00}:{1:00}", m, s);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public static string GetTimeFormat(int seconds)
+    {
+        int minutes = seconds > 60 ? seconds / 60 : 0;
+        return string.Format("{0:00}:{1:00}", minutes, seconds);
+    }
 
     /// <summary>
     /// 
@@ -142,6 +128,9 @@ public static class bl_UtilityHelper
         }
     }
 
+    /// <summary>
+    /// Are we currently playing in a mobile build or using Unity Remote in editor
+    /// </summary>
     public static bool isMobile
     {
         get
@@ -157,7 +146,10 @@ public static class bl_UtilityHelper
         }
     }
 
-    // The angle between dirA and dirB around axis
+    /// <summary>
+    /// The angle between dirA and dirB around axis
+    /// </summary>
+    /// <returns></returns>
     public static float AngleAroundAxis(Vector3 dirA, Vector3 dirB, Vector3 axis)
     {
         // Project A and B onto the plane orthogonal target axis
@@ -171,7 +163,10 @@ public static class bl_UtilityHelper
         return angle * (Vector3.Dot(axis, Vector3.Cross(dirA, dirB)) < 0 ? -1 : 1);
     }
 
-    public static void PlayClipAtPoint(AudioClip clip,Vector3 position,float volume,AudioSource sourc)
+    /// <summary>
+    /// 
+    /// </summary>
+    public static void PlayClipAtPoint(AudioClip clip, Vector3 position, float volume, AudioSource sourc)
     {
         GameObject obj2 = new GameObject("One shot audio")
         {
@@ -226,8 +221,8 @@ public static class bl_UtilityHelper
     {
         T asset = ScriptableObject.CreateInstance<T>();
 
-        if(string.IsNullOrEmpty(path))
-        path = AssetDatabase.GetAssetPath(Selection.activeObject);
+        if (string.IsNullOrEmpty(path))
+            path = AssetDatabase.GetAssetPath(Selection.activeObject);
 
         if (string.IsNullOrEmpty(path))
         {
@@ -254,7 +249,7 @@ public static class bl_UtilityHelper
     }
 #endif
 
-        public static Vector3 CalculateCenter(params Transform[] aObjects)
+    public static Vector3 CalculateCenter(params Transform[] aObjects)
     {
         Bounds b = new Bounds();
         foreach (var o in aObjects)
@@ -290,5 +285,110 @@ public static class bl_UtilityHelper
     public static ExitGames.Client.Photon.Hashtable CreatePhotonHashTable()
     {
         return new ExitGames.Client.Photon.Hashtable();
+    }
+
+    public static float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
+    {
+        Vector3 AB = b - a;
+        Vector3 AV = value - a;
+        return Vector3.Dot(AV, AB) / Vector3.Dot(AB, AB);
+    }
+
+    //Use this instead of Vector3.forward since that return a new Vector3 each time that is called
+    private static Vector3 m_VectorForward = Vector3.forward;
+    public static Vector3 VectorForward => m_VectorForward;
+
+    public static string GenerateKey(int length = 7)
+    {
+        string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghlmnopqrustowuvwxyz";
+        string key = "";
+        for (int i = 0; i < length; i++)
+        {
+            key += chars[Random.Range(0, chars.Length)];
+        }
+        return key;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public static Quaternion ClampRotationAroundAxis(Quaternion q, float minimun, float maximun, Axis axis)
+    {
+        q.x /= q.w;
+        q.y /= q.w;
+        q.z /= q.w;
+        q.w = 1.0f;
+
+        float angle = 0;
+        if (axis == Axis.X)
+        {
+            angle = 2.0f * Mathf.Rad2Deg * Mathf.Atan(q.x);
+            angle = Mathf.Clamp(angle, minimun, maximun);
+            q.x = Mathf.Tan(0.5f * Mathf.Deg2Rad * angle);
+        }
+        else
+        {
+            angle = 2.0f * Mathf.Rad2Deg * Mathf.Atan(q.y);
+            angle = Mathf.Clamp(angle, minimun, maximun);
+            q.y = Mathf.Tan(0.5f * Mathf.Deg2Rad * angle);
+        }
+
+        return q;
+    }
+
+    /// <summary>
+    /// Clamp a value in 0-360 where the min can be > to the max angle
+    /// </summary>
+    /// <param name="angle"></param>
+    /// <param name="min"></param>
+    /// <param name="max"></param>
+    /// <returns></returns>
+    public static float Clamp360Angle(float angle, float min, float max)
+    {
+        if (angle <= min)
+        {
+            if (min > max)
+            {
+                if (angle > max)
+                {
+                    angle = GetNearestBetweenTwo(angle, min, max);
+                }
+            }
+            else
+            {
+                angle = min;
+            }
+        }
+        if (angle >= max)
+        {
+            if (min > max)
+            {
+                if (angle < min)
+                {
+                    angle = GetNearestBetweenTwo(angle, min, max);
+                }
+            }
+            else
+            {
+                angle = max;
+            }
+        }
+        return angle;
+    }
+
+    /// <summary>
+    /// Returns the value from where the val is nearest two between the min max
+    /// </summary>
+    /// <param name="val">Value to check</param>
+    /// <param name="min">First value</param>
+    /// <param name="max">Second value</param>
+    /// <returns></returns>
+    public static float GetNearestBetweenTwo(float val, float min, float max)
+    {
+        float v1 = min - val;
+        float v2 = max - val;
+        if (Mathf.Abs(v1) < Mathf.Abs(v2)) return min;
+        return max;
     }
 }

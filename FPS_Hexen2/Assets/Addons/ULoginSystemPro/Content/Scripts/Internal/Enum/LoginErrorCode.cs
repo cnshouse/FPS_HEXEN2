@@ -20,4 +20,11 @@
         RememberSession = 1,
         NoRemember = 2,
     }
+
+    public enum FormHashParm
+    {
+        ID,
+        Name,
+        None,
+    }
 }

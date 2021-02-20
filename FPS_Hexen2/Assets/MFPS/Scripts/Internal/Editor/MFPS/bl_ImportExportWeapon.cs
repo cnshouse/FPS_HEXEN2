@@ -152,7 +152,10 @@ namespace MFPSEditor
                     GUILayout.Space(50);
                     GUILayout.Label(icon, GUILayout.Width(100), GUILayout.Height(icon.height * aspet));
                     GUILayout.Space(10);
-                    GUILayout.Label(EditorGUIUtility.IconContent("TimelineContinue").image, GUILayout.Width(20));
+                    var tlcIcons = EditorGUIUtility.IconContent("TimelineContinue");
+                    if(tlcIcons != null)
+                    GUILayout.Label(tlcIcons.image, GUILayout.Width(20));
+
                     GUILayout.Space(10);
                     GUILayout.Label(Player.gameObject.name, GUILayout.Width(150));
                     GUILayout.FlexibleSpace();

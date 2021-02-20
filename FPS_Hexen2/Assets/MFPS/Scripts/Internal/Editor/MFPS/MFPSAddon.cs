@@ -63,6 +63,7 @@ namespace MFPSEditor.Addons
                     EditorUtility.SetDirty(MFPSAddonsData.Instance);
                     AssetDatabase.SaveAssets();
                     AssetDatabase.Refresh();
+                    LovattoStats.SetStat($"aa-{script.Name}", 1);
                 }
             }          
         }
@@ -71,28 +72,35 @@ namespace MFPSEditor.Addons
         {
             if (!editMode && !string.IsNullOrEmpty(script.Name))
             {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField(string.Format("<size=30>{0}</size>", script.Name.ToUpper()), TextStyle);
-                GUILayout.FlexibleSpace();
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button("", GUILayout.Width(10), GUILayout.Height(25)))
+                Rect r = EditorGUILayout.BeginVertical();
                 {
-                    editMode = !editMode;
-                }
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField(string.Format("<size=14>VERSION: <b>{0}</b></size>", script.Version), TextStyleFlat);
-                GUILayout.Space(10);
-                EditorGUILayout.LabelField(string.Format("<size=14>MIN MFPS: <b>{0}</b></size>", script.MinMFPSVersion), TextStyleFlat);
-                EditorGUILayout.EndHorizontal();
-                if (!string.IsNullOrEmpty(script.TutorialScript))
-                {
-                    if (GUILayout.Button("<color=#FFE300FF>OPEN TUTORIAL</color>", TextStyleFlat))
+                    EditorGUI.DrawRect(r, Color.black);
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(string.Format("<size=30>{0}</size>", script.Name.ToUpper()), TextStyle);
+                    GUILayout.FlexibleSpace();
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button("", GUILayout.Width(10), GUILayout.Height(25)))
                     {
-                        EditorWindow.GetWindow(System.Type.GetType(string.Format("{0}, Assembly-CSharp-Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", script.TutorialScript)));
+                        editMode = !editMode;
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(string.Format("<size=14>VERSION: <b>{0}</b></size>", script.Version), TextStyleFlat);
+                    GUILayout.Space(10);
+                    EditorGUILayout.LabelField(string.Format("<size=14>MIN MFPS: <b>{0}</b></size>", script.MinMFPSVersion), TextStyleFlat);
+                    EditorGUILayout.EndHorizontal();
+                    if (!string.IsNullOrEmpty(script.TutorialScript))
+                    {
+                        GUILayout.Space(5);
+                        if (MFPSEditorStyles.ButtonOutline("DOCUMENTATION", Color.yellow))
+                        {
+                            EditorWindow.GetWindow(System.Type.GetType(string.Format("{0}, Assembly-CSharp-Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", script.TutorialScript)));
+                        }
                     }
                 }
-                GUILayout.Space(20);
+                GUILayout.Space(10);
+                EditorGUILayout.EndVertical();
+                GUILayout.Space(10);
                 EditorGUILayout.TextArea(script.Instructions, TextStyleFlat);
             }
             else

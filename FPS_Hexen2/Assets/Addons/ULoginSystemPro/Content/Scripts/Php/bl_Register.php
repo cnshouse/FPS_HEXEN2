@@ -1,93 +1,92 @@
 <?php
 include("bl_Common.php");
-$link = dbConnect();
+Utils::check_session($_POST['sid']);
 
-$name              = safe($_POST['name']);
-$nick              = safe($_POST['nick']);
-$password          = safe($_POST['password']);
-$kills             = safe($_POST['kills']);
-$deaths            = safe($_POST['deaths']);
-$score             = safe($_POST['score']);
-$coins             = safe($_POST['coins']);
-$email             = $_POST['email'];
-$mIP               = $_POST['uIP'];
-$hash              = safe($_POST['hash']);
-$multiemail        = safe($_POST['multiemail']);
-$emailVerification = safe($_POST['emailVerification']);
+$link = Connection::dbConnect();
+
+$sid               = Utils::sanitaze_var($_POST['sid'], $link);
+$name              = Utils::sanitaze_var($_POST['name'], $link, $sid);
+$nick              = Utils::sanitaze_var($_POST['nick'], $link, $sid);
+$password          = Utils::sanitaze_var($_POST['password'], $link, $sid);
+$coins             = Utils::sanitaze_var($_POST['coins'], $link, $sid);
+$email             = Utils::sanitaze_var($_POST['email'], $link, $sid);
+$mIP               = Utils::sanitaze_var($_POST['uIP'], $link, $sid);
+$hash              = Utils::sanitaze_var($_POST['hash'], $link, $sid);
+$multiemail        = Utils::sanitaze_var($_POST['multiemail'], $link, $sid);
+$emailVerification = Utils::sanitaze_var($_POST['emailVerification'], $link, $sid);
 
 if (isset($email)) {
-$email    = stripslashes($email);
-$email    = mysqli_real_escape_string($link, $email);
+    $email = Utils::sanitaze_var($email, $link);
 }
-$name     = stripslashes($name);
-$name     = mysqli_real_escape_string($link, $name);
-$nick     = stripslashes($nick);
-$nick     = mysqli_real_escape_string($link, $nick);
-$password = stripslashes($password);
-$password = mysqli_real_escape_string($link, $password);
-$mIP      = stripslashes($mIP);
-$mIP      = mysqli_real_escape_string($link, $mIP);
-$coins    = stripslashes($coins);
-$coins    = mysqli_real_escape_string($link, $coins);
-
+if (isset($mIP)) {
+    $mIP = Utils::sanitaze_var($mIP, $link);
+}
 
 if (isset($email)) {
-    if ($multiemail == "0" && $emailVerification == "0") {
-        $emailcount = mysqli_query($link, "SELECT * FROM MyGameDB WHERE email='$email'");
+    if ($multiemail == "0" && $emailVerification == 0) {
+        $emailcount = mysqli_query($link, "SELECT * FROM " . PLAYERS_DB . " WHERE email='$email'");
         if (mysqli_num_rows($emailcount) != 0) {
             die("005"); //already exist email
         }
     }
+} else {
+    $email = "";
 }
 
-$real_hash = md5($name . $password . $secretKey);
-if ($real_hash == $hash) {
-    $check   = mysqli_query($link, "SELECT * FROM MyGameDB WHERE name='$name'");
-    $numrows = mysqli_num_rows($check);
+$real_hash = Utils::get_secret_hash($name . $password);
+if ($real_hash != $hash)
+{
+    http_response_code(401);
+    exit();
+}
+    $result  = mysqli_query($link, "SELECT * FROM " . PLAYERS_DB . " WHERE name='$name'");
+    $numrows = mysqli_num_rows($result);
+    mysqli_free_result($result);
     
-    if ($numrows == 0) {
-        
-        $check2   = mysqli_query($link, "SELECT * FROM MyGameDB WHERE nick='$nick'");
-        $numrows2 = mysqli_num_rows($check2);
-        if ($numrows2 == 0) {
-            
-            $password    = md5($password);
-            $random_hash = md5(uniqid(rand()));
-            
-            $ins = mysqli_query($link, "INSERT INTO  `MyGameDB` (`name` , `nick` , `password` , `uIP`, `email`, `verify`, `active`, `coins` ) VALUES ('" . $name . "' ,  '" . $nick . "' ,  '" . $password . "' ,  '" . $mIP . "',  '" . $email . "',  '" . $random_hash . "',  '" . $emailVerification . "',  '" . $coins . "') ") or die(mysqli_error($link));
-            
-            if ($ins) {
-                if ($emailVerification == "0") {
-                    //send verification email           
-                    $to      = $email;
-                    $subject = "Activation Code For " . $GameName;
-                    $from    = $emailFrom;
-                    $body    = 'Hi ' . $name . '<br/>Your Account has been create, to sign in please verify your email.<br/> <br/> Please Click On This link or paste in your browser: <a href="' . $base_url . 'Activation.php?code=' . $random_hash . '">' . $base_url . 'Activation.php?=' . $random_hash . '</a> to activate  your account.';
-                    $headers = "From:" . $from . "\r\n";
-                    $headers .= "Reply-To: " . $from . "\r\n";
-                    $headers .= "MIME-Version: 1.0\r\n";
-                    $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                    $sendemail = mail($to, $subject, $body, $headers);
-                    
-                    if ($sendemail) {
-                        die("success");
-                    } else {
-                        die("006"); //email not send
-                    }
-                } else {
-                    die("success");
-                }
+    //if the login name is already used
+    if ($numrows != 0) {
+        die("003");
+    }
+    
+    $result   = mysqli_query($link, "SELECT * FROM " . PLAYERS_DB . " WHERE nick='$nick'");
+    $numrows2 = mysqli_num_rows($result);
+    mysqli_free_result($result);
+    
+    //if the nickname is already taken
+    if ($numrows2 != 0) {
+        die("008");
+    }
+    
+    $password = password_hash($password, PASSWORD_BCRYPT, array('cost'=>10));
+    $random_hash = "";
+    if ($emailVerification == 0) {
+        $random_hash = md5(uniqid(rand()));
+    }
+    
+    $result = mysqli_query($link, "INSERT INTO  " . PLAYERS_DB . " (`name` , `nick` , `password` , `ip`, `email`, `verify`, `active`, `coins` ) VALUES ('" . $name . "' ,  '" . $nick . "' ,  '" . $password . "' ,  '" . $mIP . "',  '" . $email . "',  '" . $random_hash . "',  '" . $emailVerification . "',  '" . $coins . "') ") or die(mysqli_error($link));
+    
+    if ($result) {
+        if ($emailVerification == 0) {
+            //send verification email          
+            $to      = $email;
+            $subject = "Activation Code for your " . GAME_NAME . " account";
+            $from    = ADMIN_EMAIL;
+            $burl = Utils::get_current_file_url();
+            $body    = 'Hi ' . $name . '<br/>Your Account has been create, to sign in please verify your email.<br/> <br/> Please Click On This link or paste in your browser: <a href="' . $burl . 'Activation.php?code=' . $random_hash . '">' . $burl . 'Activation.php?=' . $random_hash . '</a> to activate  your account.';
+            $headers = "From:" . $from . "\r\n";
+            $headers .= "Reply-To: " . $from . "\r\n";
+            $headers .= "MIME-Version: 1.0\r\n";
+            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+            $sendemail = mail($to, $subject, $body, $headers);
+
+            if ($sendemail) {
+                die("success");
             } else {
-                die("Query Error: " . mysqli_error($link));
+                die("006"); //email not send
             }
         } else {
-            die("008"); //user nick name exist
+            die("success");
         }
-    } else {
-        die("003"); //user exist
     }
-} else {
-    die("You don't have permission for this");
-}
 mysqli_close($link);
 ?>

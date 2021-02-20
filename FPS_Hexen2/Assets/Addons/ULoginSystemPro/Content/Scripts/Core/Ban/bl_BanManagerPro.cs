@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Text;
 using UnityEngine.Networking;
+using MFPS.ULogin;
 
 public class bl_BanManagerPro : MonoBehaviour
 {
@@ -60,7 +61,7 @@ public class bl_BanManagerPro : MonoBehaviour
         WWWForm wf = new WWWForm();
         wf.AddField("name", user);
         wf.AddField("type", 2);
-        using (UnityWebRequest w = UnityWebRequest.Post(DataBase.GetUrl(bl_LoginProDataBase.URLType.RequestUser), wf))
+        using (UnityWebRequest w = UnityWebRequest.Post(DataBase.GetUrl(bl_LoginProDataBase.URLType.Account), wf))
         {
             yield return w.SendWebRequest();
 
@@ -156,7 +157,7 @@ public class bl_BanManagerPro : MonoBehaviour
         wf.AddField("type", 1);
         wf.AddField("hash", hash);
 
-        using (UnityWebRequest w = UnityWebRequest.Post(DataBase.GetUrl(bl_LoginProDataBase.URLType.Ban), wf))
+        using (UnityWebRequest w = UnityWebRequest.Post(DataBase.GetUrl(bl_LoginProDataBase.URLType.BanList), wf))
         {
             yield return w.SendWebRequest();
 
@@ -218,7 +219,7 @@ public class bl_BanManagerPro : MonoBehaviour
         wf.AddField("type", 2);
         wf.AddField("hash", hash);
 
-        using (UnityWebRequest w = UnityWebRequest.Post(DataBase.GetUrl(bl_LoginProDataBase.URLType.Ban), wf))
+        using (UnityWebRequest w = UnityWebRequest.Post(DataBase.GetUrl(bl_LoginProDataBase.URLType.BanList), wf))
         {
 
             yield return w.SendWebRequest();
@@ -266,7 +267,7 @@ public class bl_BanManagerPro : MonoBehaviour
         wf.AddField("type", 3);
         wf.AddField("hash", hash);
 
-        using (UnityWebRequest w = UnityWebRequest.Post(DataBase.GetUrl(bl_LoginProDataBase.URLType.Ban), wf))
+        using (UnityWebRequest w = UnityWebRequest.Post(DataBase.GetUrl(bl_LoginProDataBase.URLType.BanList), wf))
         {
             yield return w.SendWebRequest();
 

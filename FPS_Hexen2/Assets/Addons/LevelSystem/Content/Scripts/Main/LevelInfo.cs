@@ -1,11 +1,15 @@
-﻿using System;
+﻿using MFPSEditor;
+using System;
 using UnityEngine;
 
-[System.Serializable]
-public class LevelInfo
+namespace MFPS.Addon.LevelManager
 {
-    public string Name = "Level";
-    public int ScoreNeeded = 0;
-    public Sprite Icon;
-    [HideInInspector] public int LevelID;
+    [System.Serializable]
+    public class LevelInfo
+    {
+        public string Name = "Level";
+        public int ScoreNeeded = 0;
+        [SpritePreview(50)] public Sprite Icon;
+        [HideInInspector] public int LevelID;
+    }
 }

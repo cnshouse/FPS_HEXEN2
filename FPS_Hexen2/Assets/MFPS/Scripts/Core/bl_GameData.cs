@@ -1,11 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System;
-using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 using MFPSEditor;
+using UnityEngine.Serialization;
+using MFPS.Runtime.Settings;
+using MFPS.Internal.Structures;
 
 public class bl_GameData : ScriptableObject
 {
@@ -30,6 +32,7 @@ public class bl_GameData : ScriptableObject
     [LovattoToogle] public bool ShowWeaponLoadout = true;
     [LovattoToogle] public bool useCountDownOnStart = true;
     [LovattoToogle] public bool showCrosshair = true;
+    [LovattoToogle] public bool showDamageIndicator = true;
     [LovattoToogle] public bool doSpawnHandMeshEffect = true;
     [LovattoToogle] public bool playerCameraWiggle = true;
 #if MFPSM
@@ -42,19 +45,23 @@ public class bl_GameData : ScriptableObject
     public KillFeedWeaponShowMode killFeedWeaponShowMode = KillFeedWeaponShowMode.WeaponIcon;
     public LobbyJoinMethod lobbyJoinMethod = LobbyJoinMethod.WaitingRoom;
     public bl_KillCam.KillCameraType killCameraType = bl_KillCam.KillCameraType.ObserveDeath;
-
+    public bl_KillFeed.LocalKillDisplay localKillsShowMode = bl_KillFeed.LocalKillDisplay.Queqe;
+    public bl_GunManager.AutoChangeOnPickup switchToPickupWeapon = bl_GunManager.AutoChangeOnPickup.OnlyOnEmptySlots;
+    
     [Header("Rewards")]
     public ScoreRewards ScoreReward;
     public VirtualCoin VirtualCoins;
 
     [Header("Settings")]
     public string GameVersion = "1.0";
+    public string guestNameFormat = "Guest {0}";
     [Range(0, 10)] public int SpawnProtectedTime = 5;
     [Range(1, 60)] public int CountDownTime = 7;
     [Range(1, 10)] public float PlayerRespawnTime = 5.0f;
     [Range(1, 100)] public int MaxFriendsAdded = 25;
     public float AFKTimeLimit = 60;
     public int MaxChangeTeamTimes = 3;
+    public int maxSuicideAttempts = 3;
     public string MainMenuScene = "MainMenu";
     public string OnDisconnectScene = "MainMenu";
     public Color highLightColor = Color.green;
@@ -68,10 +75,10 @@ public class bl_GameData : ScriptableObject
     public List<bl_GunInfo> AllWeapons = new List<bl_GunInfo>();
 
     [Header("Default Settings")]
-    public DefaultSettingsData DefaultSettings;
+    [ScriptableDrawer, SerializeField] private bl_RuntimeSettingsProfile defaultSettings;
 
-    [Header("Game Modes Available"), Reorderable]
-    public List<GameModesEnabled> gameModes = new List<GameModesEnabled>();
+    [Header("Game Modes Available"), Reorderable, FormerlySerializedAs("AllGameModes")]
+    public List<GameModeSettings> gameModes = new List<GameModeSettings>();
 
     [Header("Teams")]
     public string Team1Name = "Team1";
@@ -85,8 +92,10 @@ public class bl_GameData : ScriptableObject
     public bl_PlayerNetwork Player2;
 
     [Header("Bots")]
-    public bl_AIShooterAgent BotTeam1;
-    public bl_AIShooterAgent BotTeam2;
+    public bl_AIShooter BotTeam1;
+    public bl_AIShooter BotTeam2;
+
+    [ScriptableDrawer]public bl_WeaponSlotRuler weaponSlotRuler;
 
     [Header("Game Team")]
     public List<GameTeamInfo> GameTeam = new List<GameTeamInfo>();
@@ -97,28 +106,60 @@ public class bl_GameData : ScriptableObject
     [HideInInspector] public string _MFPSLicense = string.Empty;
     [HideInInspector] public int _MFPSFromStore = 2;
     [HideInInspector] public string _keyToken = "";
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void OnDisable()
+    {
+        isDataCached = false;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void ResetInstance()
+    {
+        m_settingProfile = null;
+        isDataCached = false;
+    }
+
+    #region Getters
+    /// <summary>
+    /// Get a weapon info by they ID
+    /// </summary>
+    /// <param name="ID">the id of the weapon, this ID is the indexOf the weapon info in GameData</param>
+    /// <returns></returns>
     public bl_GunInfo GetWeapon(int ID)
     {
         if (ID < 0 || ID > AllWeapons.Count - 1)
             return AllWeapons[0];
-        
+
         return AllWeapons[ID];
     }
 
-    public string[] AllWeaponStringList()
-    {
-        return AllWeapons.Select(x => x.Name).ToList().ToArray();
-    }
-    
+    /// <summary>
+    /// Get a weapon info by they Name
+    /// </summary>
+    /// <param name="gunName"></param>
+    /// <returns></returns>
     public int GetWeaponID(string gunName)
     {
         int id = -1;
-        if(AllWeapons.Exists(x => x.Name == gunName))
+        if (AllWeapons.Exists(x => x.Name == gunName))
         {
             id = AllWeapons.FindIndex(x => x.Name == gunName);
         }
         return id;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public string[] AllWeaponStringList()
+    {
+        return AllWeapons.Select(x => x.Name).ToList().ToArray();
     }
 
     /// <summary>
@@ -150,7 +191,7 @@ public class bl_GameData : ScriptableObject
         {
             if (PName == GameTeam[i].UserName)
             {
-               if(Pass == GameTeam[i].Password)
+                if (Pass == GameTeam[i].Password)
                 {
                     CurrentTeamUser = GameTeam[i];
                     return true;
@@ -197,25 +238,57 @@ public class bl_GameData : ScriptableObject
 
     }
 
-    void OnDisable()
+    private bl_RuntimeSettingsProfile m_settingProfile;
+    public bl_RuntimeSettingsProfile RuntimeSettings
     {
-        isDataCached = false;
-    }
-
-    [System.Serializable]
-    public class GameTeamInfo
-    {
-        public string UserName;
-        public Role m_Role = Role.Moderator;
-        public string Password;
-        public Color m_Color;
-
-        public enum Role
+        get
         {
-            Admin = 0,
-            Moderator = 1,
+            if (m_settingProfile == null) m_settingProfile = Instantiate(defaultSettings);
+            return m_settingProfile;
         }
     }
+
+
+    private static bl_PhotonNetwork PhotonGameInstance = null;
+    public static bool isDataCached = false;
+    private static bool isCaching = false;
+    private static bl_GameData m_instance;
+    public static bl_GameData Instance
+    {
+        get
+        {
+            if (m_instance == null && !isCaching)
+            {
+                if (!isDataCached && Application.isPlaying)
+                {
+                    Debug.Log("GameData was cached synchronous, that could cause bottleneck on load, try caching it asynchronous with AsyncLoadData()");
+                    isDataCached = true;
+                }
+                m_instance = Resources.Load("GameData", typeof(bl_GameData)) as bl_GameData;
+            }
+
+            //check that there's an instance of the Photon object in scene
+            if (PhotonGameInstance == null && Application.isPlaying)
+            {
+                if (bl_RoomMenu.Instance != null && bl_RoomMenu.Instance.isApplicationQuitting) return m_instance;
+
+                PhotonGameInstance = bl_PhotonNetwork.Instance;
+                if (PhotonGameInstance == null)
+                {
+                    try
+                    {
+                        var pgo = new GameObject("PhotonGame");
+                        PhotonGameInstance = pgo.AddComponent<bl_PhotonNetwork>();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
+            return m_instance;
+        }
+    }
+    #endregion
 
     /// <summary>
     /// cache the GameData from Resources asynchronous to avoid overhead and freeze the main thread the first time we access to the instance
@@ -223,63 +296,15 @@ public class bl_GameData : ScriptableObject
     /// <returns></returns>
     public static IEnumerator AsyncLoadData()
     {
-        if (m_Data == null)
+        if (m_instance == null)
         {
             isCaching = true;
             ResourceRequest rr = Resources.LoadAsync("GameData", typeof(bl_GameData));
             while (!rr.isDone) { yield return null; }
-            m_Data = rr.asset as bl_GameData;
+            m_instance = rr.asset as bl_GameData;
             isCaching = false;
         }
         isDataCached = true;
-    }
-
-    public static bool isDataCached = false;
-    private static bool isCaching = false;
-    private static bl_GameData m_Data;
-    public static bl_GameData Instance
-    {
-        get
-        {
-            if (m_Data == null && !isCaching)
-            {
-                m_Data = Resources.Load("GameData", typeof(bl_GameData)) as bl_GameData;
-            }
-            return m_Data;
-        }
-    }
-
-    [System.Serializable]
-    public class ScoreRewards
-    {
-        public int ScorePerKill = 50;
-        public int ScorePerHeadShot = 25;
-        public int ScoreForWinMatch = 100;
-        [Tooltip("Per minute played")]
-        public int ScorePerTimePlayed = 3;
-    }
-
-    [System.Serializable]
-    public class VirtualCoin
-    {
-        public int InitialCoins = 1000;
-        [Tooltip("how much score/xp worth one coin")]
-        public int CoinScoreValue = 1000;//how much score/xp worth one coin
-
-        public int UserCoins { get; set; }
-
-        public void LoadCoins(string userName)
-        {
-            UserCoins = PlayerPrefs.GetInt(string.Format("{0}.{1}", userName, PropertiesKeys.UserCoins), InitialCoins);
-        }
-
-        public void SetCoins(int coins, string userName)
-        {
-            LoadCoins(userName);
-            int total = UserCoins + coins;
-            PlayerPrefs.SetInt(string.Format("{0}.{1}", userName, PropertiesKeys.UserCoins), total);
-            UserCoins = total;
-        }
     }
 
 #if UNITY_EDITOR
@@ -293,6 +318,7 @@ public class bl_GameData : ScriptableObject
     }
 #endif
 
+    #region Local Classes
     [Serializable]
     public class SceneInfo
     {
@@ -318,35 +344,65 @@ public class bl_GameData : ScriptableObject
         public int defaultFrameRate = 2;
     }
 
-    [Serializable]
-    public class GameModesEnabled
+    [System.Serializable]
+    public class ScoreRewards
     {
-        public string ModeName;
-        public GameMode gameMode;
-        public bool isEnabled = true;
+        public int ScorePerKill = 50;
+        public int ScorePerHeadShot = 25;
+        public int ScoreForWinMatch = 100;
+        [Tooltip("Per minute played")]
+        public int ScorePerTimePlayed = 3;
 
-        [Header("Settings")]
-        public bool AutoTeamSelection = false;
-        [Range(1,16)] public int RequiredPlayersToStart = 1;
-        public int[] GameGoalsOptions = new int[] { 50, 100, 150, 200 };
-        public string GoalName = "Kills";
-        public OnRoundStartedSpawn onRoundStartedSpawn = OnRoundStartedSpawn.SpawnAfterSelectTeam;
-        public OnPlayerDie onPlayerDie = OnPlayerDie.SpawnAfterDelay;
-
-        public string GetGoalFullName(int goalID) { return string.Format("{0} {1}", GameGoalsOptions[goalID], GoalName); }
-
-        [System.Serializable]
-        public enum OnRoundStartedSpawn
+        public int GetScorePerTimePlayed(int time)
         {
-            SpawnAfterSelectTeam,
-            WaitUntilRoundFinish,
-        }
-
-        [System.Serializable]
-        public enum OnPlayerDie
-        {
-            SpawnAfterDelay,
-            SpawnAfterRoundFinish,
+            if (ScorePerTimePlayed <= 0) return 0;
+            return time * ScorePerTimePlayed;
         }
     }
+
+    [System.Serializable]
+    public class VirtualCoin
+    {
+        public int InitialCoins = 1000;
+        [Tooltip("how much score/xp worth one coin")]
+        public int CoinScoreValue = 1000;//how much score/xp worth one coin
+
+        public int UserCoins { get; set; }
+
+        public void LoadCoins(string userName)
+        {
+            UserCoins = PlayerPrefs.GetInt(string.Format("{0}.{1}", userName, PropertiesKeys.UserCoins), InitialCoins);
+        }
+
+        public void SetCoins(int coins, string userName)
+        {
+            LoadCoins(userName);
+            int total = UserCoins + coins;
+            PlayerPrefs.SetInt(string.Format("{0}.{1}", userName, PropertiesKeys.UserCoins), total);
+            UserCoins = total;
+        }
+
+        public int GetCoinsPerScore(int score)
+        {
+            if (score <= 0 || score < CoinScoreValue || CoinScoreValue <= 0) return 0;
+
+            return score / CoinScoreValue;
+        }
+    }
+
+    [System.Serializable]
+    public class GameTeamInfo
+    {
+        public string UserName;
+        public Role m_Role = Role.Moderator;
+        public string Password;
+        public Color m_Color;
+
+        public enum Role
+        {
+            Admin = 0,
+            Moderator = 1,
+        }
+    }
+    #endregion
 }

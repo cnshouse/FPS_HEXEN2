@@ -1,19 +1,22 @@
 ﻿using System;
 using UnityEngine;
 
-public class bl_AnimatorReloadEvent : StateMachineBehaviour
+namespace MFPS.Internal
 {
-    public static Action<bool, Animator, AnimatorStateInfo> OnTPReload;
-
-    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public class bl_AnimatorReloadEvent : StateMachineBehaviour
     {
-        if (layerIndex != 1) return;
-        OnTPReload?.Invoke(true, animator, stateInfo);
-    }
+        public static Action<bool, Animator, AnimatorStateInfo> OnTPReload;
 
-    override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        if (layerIndex != 1) return;
-        OnTPReload?.Invoke(false, animator, stateInfo);
+        override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+        {
+            if (layerIndex != 1) return;
+            OnTPReload?.Invoke(true, animator, stateInfo);
+        }
+
+        override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+        {
+            if (layerIndex != 1) return;
+            OnTPReload?.Invoke(false, animator, stateInfo);
+        }
     }
 }

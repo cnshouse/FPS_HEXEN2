@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using MFPS.Addon.Customizer;
 
 public class bl_CustomizerData : ScriptableObject
 {
@@ -46,10 +47,12 @@ public class bl_CustomizerData : ScriptableObject
     public int[] LoadAttachmentsForWeapon(string weapon)
     {
         int[] array = new int[5] { 0, 0, 0, 0, 0 };
-        if (PlayerPrefs.HasKey(GetWeaponKey(weapon)))
+        var key = GetWeaponKey(weapon);
+        if (PlayerPrefs.HasKey(key))
         {
-            string t = PlayerPrefs.GetString(GetWeaponKey(weapon));
+            string t = PlayerPrefs.GetString(key);
             array = DecompileLine(t);
+            Debug.Log("Line: " + t);
         }
         return array;
     }
@@ -82,7 +85,7 @@ public class bl_CustomizerData : ScriptableObject
 
     public string GetWeaponKey(string wname)
     {
-        string t = string.Format("cmz.att.{0}", wname);
+        string t = string.Format("{0}.{1}.cmz.att.{2}", Application.companyName, Application.productName, wname);
         return t;
     }
 

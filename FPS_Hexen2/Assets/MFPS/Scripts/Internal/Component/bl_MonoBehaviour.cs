@@ -1,4 +1,7 @@
-﻿public class bl_MonoBehaviour : bl_PhotonHelper
+﻿using MFPS.Internal;
+using UnityEngine;
+
+public class bl_MonoBehaviour : bl_PhotonHelper
 {
     private bool isRegister = false;
 
@@ -46,4 +49,14 @@
     public virtual void OnLateUpdate() { }
 
     public virtual void OnSlowUpdate() { }
+
+    private Transform m_cachedTransform = null;
+    public Transform CachedTransform
+    {
+        get
+        {
+            if (m_cachedTransform == null) m_cachedTransform = transform;
+            return m_cachedTransform;
+        }
+    }
 }

@@ -2,8 +2,9 @@
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using MFPS.Internal.Interfaces;
 
-public class bl_GameFinish : bl_PhotonHelper
+public class bl_GameFinish : bl_PhotonHelper, IMFPSResumeScreen
 {
 
     [SerializeField] private Text PlayerNameText;
@@ -20,6 +21,14 @@ public class bl_GameFinish : bl_PhotonHelper
 #if ULSP
     private bl_DataBase DataBase;
 #endif
+
+    /// <summary>
+    /// 
+    /// </summary>
+    void OnEnable()
+    {
+        bl_UIReferences.Instance.ResumeScreen = this;
+    }
 
     /// <summary>
     /// 
@@ -72,7 +81,7 @@ public class bl_GameFinish : bl_PhotonHelper
         if (DataBase != null)
         {
             Player p = PhotonNetwork.LocalPlayer;
-            DataBase.SaveData(tscore, p.GetKills(), p.GetDeaths());
+            bl_ULoginMFPS.SaveLocalPlayerKDS();
             DataBase.StopAndSaveTime();
             if (coins > 0)
             {
@@ -90,15 +99,13 @@ public class bl_GameFinish : bl_PhotonHelper
 #endif
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void Show()
     {
         Content.SetActive(true);
-        Invoke("AutoLeave", 60);//maximum time out to leave.
-    }
-
-    void AutoLeave()
-    {
-        GoToLobby();
+        Invoke(nameof(GoToLobby), 60);//maximum time out to leave.
     }
 
     /// <summary>

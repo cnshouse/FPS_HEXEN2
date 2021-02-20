@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-namespace MFPS.PlayerSelector
+namespace MFPS.Addon.PlayerSelector
 {
     public class bl_PlayerSelectorUI : MonoBehaviour
     {
@@ -33,7 +33,7 @@ namespace MFPS.PlayerSelector
                 HealthText.fillAmount = pdm.health / 125;
                 SpeedText.fillAmount = fpc.WalkSpeed / 5;
                 RegenerationText.fillAmount = pdm.RegenerationSpeed / 5;
-                NoiseText.fillAmount = fpc.FootStepVolume / 1;
+                NoiseText.fillAmount = 0.9f;
             }
 #if SHOP && ULSP
             if (info.Price > 0 && bl_DataBase.Instance != null)
