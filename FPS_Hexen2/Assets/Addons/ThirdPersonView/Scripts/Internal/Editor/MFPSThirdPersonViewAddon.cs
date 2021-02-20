@@ -27,8 +27,8 @@ public class MFPSThirdPersonViewAddon
     [MenuItem("MFPS/Addons/Third Person/Integrate")]
     private static void Instegrate()
     {
-        SetupPlayer(bl_GameData.Instance.Player1.gameObject);
-        SetupPlayer(bl_GameData.Instance.Player2.gameObject);
+        //SetupPlayer(bl_GameData.Instance.Player1.gameObject);
+        //SetupPlayer(bl_GameData.Instance.Player2.gameObject);
 
 #if PSELECTOR
         var allPlayers = bl_PlayerSelector.Data.AllPlayers;
