@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GameData
   m_EditorClassIdentifier: 
   offlineMode: 0
-  UseLobbyChat: 0
+  UseLobbyChat: 1
   UseVoiceChat: 1
   BulletTracer: 1
   DropGunOnDeath: 1
@@ -121,7 +121,7 @@ MonoBehaviour:
     FireRate: 2
     ReloadTime: 2
     Range: 125
-    Accuracy: 0
+    Accuracy: 1
     Weight: 1
     Price: 0
     LevelUnlock: 0
@@ -147,7 +147,7 @@ MonoBehaviour:
     FireRate: 0.7
     ReloadTime: 1
     Range: 2
-    Accuracy: 0
+    Accuracy: 1
     Weight: 1
     Price: 0
     LevelUnlock: 0
@@ -160,7 +160,7 @@ MonoBehaviour:
     FireRate: 1
     ReloadTime: 1.2
     Range: 300
-    Accuracy: 0
+    Accuracy: 1
     Weight: 0
     Price: 0
     LevelUnlock: 0
@@ -173,7 +173,7 @@ MonoBehaviour:
     FireRate: 2
     ReloadTime: 3
     Range: 100
-    Accuracy: 0
+    Accuracy: 1
     Weight: 2
     Price: 0
     LevelUnlock: 0
