@@ -55,6 +55,50 @@ namespace MFPS.ClassCustomization
                 }
             }
         }
+
+        //For Lobby intergration and use against heros as a their own unique class
+        public void UpdateLobbyList(Lobby_Hero_Class_Customizer target)
+        {
+            List<bl_GunInfo> all = bl_GameData.Instance.AllWeapons;
+            for (int i = 0; i < all.Count; i++)
+            {
+                int index = AllWeapons.FindIndex(x => x.Name == all[i].Name);
+                if (index < 0)
+                {
+                    WeaponItemData wid = new WeaponItemData()
+                    {
+                        Name = all[i].Name,
+                        GunID = i,
+                    };
+                    AllWeapons.Add(wid);
+#if UNITY_EDITOR
+                    EditorUtility.SetDirty(target);
+#endif
+                }
+                else
+                {
+                    if (AllWeapons[index].GunID != i)
+                    {
+                        AllWeapons[index].GunID = i;
+#if UNITY_EDITOR
+                        EditorUtility.SetDirty(target);
+#endif
+                    }
+                }
+            }
+            //clean non existing fields
+            for (int i = 0; i < AllWeapons.Count; i++)
+            {
+                int index = all.FindIndex(x => x.Name == AllWeapons[i].Name);
+                if (index < 0)
+                {
+                    AllWeapons.RemoveAt(i);
+#if UNITY_EDITOR
+                    EditorUtility.SetDirty(target);
+#endif
+                }
+            }
+        }
     }
 
     [Serializable]

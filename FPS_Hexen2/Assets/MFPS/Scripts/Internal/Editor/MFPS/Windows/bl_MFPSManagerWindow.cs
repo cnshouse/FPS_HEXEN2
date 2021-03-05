@@ -436,6 +436,11 @@ public class bl_MFPSManagerWindow : EditorWindow
         gun = loadout.GetLetalGunInfo();
         DrawSlot(gun, "LETAL", loadout, 3);
         GUILayout.Space(10);
+        //gun = loadout.GetKnifeGunInfo();
+        //DrawSlot(gun, "KNIFE", loadout, 4);
+        //GUILayout.Space(10);
+        //gun = loadout.GetSpecialGunInfo();
+        //DrawSlot(gun, "SPECIAL", loadout, 5);
     }
 
     void DrawSlot(bl_GunInfo gun, string Title, bl_PlayerClassLoadout loadout, int slotID)

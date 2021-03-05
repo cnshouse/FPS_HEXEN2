@@ -21,6 +21,12 @@ public class bl_ClassManager : ScriptableObject {
     public bl_PlayerClassLoadout DefaultReconClass;
     [Header("Dragos")]
     public bl_PlayerClassLoadout DefaultDragosClass;
+    [Header("Angel")]
+    public bl_PlayerClassLoadout DefaultAngelClass;
+    [Header("Shogun")]
+    public bl_PlayerClassLoadout DefaultShogunClass;
+    [Header("Scarlett")]
+    public bl_PlayerClassLoadout DefaultScarlettClass;
 
 #if UNITY_EDITOR
     [Space(10)]
@@ -32,6 +38,11 @@ public class bl_ClassManager : ScriptableObject {
     public bl_PlayerClassLoadout SupportClass { get; set; }
     public bl_PlayerClassLoadout ReconClass { get; set; }
     public bl_PlayerClassLoadout DragosClass { get; set; }
+    public bl_PlayerClassLoadout AngelClass { get; set; }
+    public bl_PlayerClassLoadout ShogunClass { get; set; }
+    public bl_PlayerClassLoadout ScarlettClass { get; set; }
+
+
     [HideInInspector] public int ClassKit = 0;
     public const string LOADOUT_KEY_FORMAT = "mfps.loadout.{0}";
 
@@ -45,6 +56,9 @@ public class bl_ClassManager : ScriptableObject {
         PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Recon));
         PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Support));
         PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Dragos));
+        PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Angel));
+        PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Shogun));
+        PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Scarlett));
     }
 
     /// <summary>
@@ -87,6 +101,15 @@ public class bl_ClassManager : ScriptableObject {
             case 4:
                 m_Class = PlayerClass.Dragos;
                 break;
+            case 5:
+                m_Class = PlayerClass.Angel;
+                break;
+            case 6:
+                m_Class = PlayerClass.Shogun;
+                break;
+            case 7:
+                m_Class = PlayerClass.Scarlett;
+                break;
         }
 
 #if ULSP
@@ -110,6 +133,15 @@ public class bl_ClassManager : ScriptableObject {
 
                 DragosClass = Instantiate(DefaultDragosClass);
                 DragosClass.FromString(dbData, 4);
+
+                AngelClass = Instantiate(DefaultAngelClass);
+                AngelClass.FromString(dbData, 4);
+
+                ShogunClass = Instantiate(DefaultShogunClass);
+                ShogunClass.FromString(dbData, 5);
+
+                ScarlettClass = Instantiate(DefaultScarlettClass);
+                ScarlettClass.FromString(dbData, 6);
                 return;
             }
         }
@@ -148,6 +180,21 @@ public class bl_ClassManager : ScriptableObject {
         DragosClass = Instantiate(DefaultDragosClass);
         DragosClass.FromString(data);
 
+        key = string.Format(format, PlayerClass.Angel);
+        data = PlayerPrefs.GetString(key, DefaultAngelClass.ToString());
+        AngelClass = Instantiate(DefaultAngelClass);
+        AngelClass.FromString(data);
+
+        key = string.Format(format, PlayerClass.Shogun);
+        data = PlayerPrefs.GetString(key, DefaultShogunClass.ToString());
+        ShogunClass = Instantiate(DefaultShogunClass);
+        ShogunClass.FromString(data);
+
+        key = string.Format(format, PlayerClass.Scarlett);
+        data = PlayerPrefs.GetString(key, DefaultScarlettClass.ToString());
+        ScarlettClass = Instantiate(DefaultScarlettClass);
+        ScarlettClass.FromString(data);
+
     }
 
     public void SetUpClasses(bl_GunManager gm)
@@ -172,6 +219,15 @@ public class bl_ClassManager : ScriptableObject {
             case PlayerClass.Dragos:
                 pcl = DragosClass;
                 break;
+            case PlayerClass.Angel:
+                pcl = AngelClass;
+                break;
+            case PlayerClass.Shogun:
+                pcl = ShogunClass;
+                break;
+            case PlayerClass.Scarlett:
+                pcl = ScarlettClass;
+                break;
         }
 
         if (pcl == null)
@@ -194,7 +250,7 @@ public class bl_ClassManager : ScriptableObject {
 #if ULSP
         if (bl_DataBase.Instance != null)
         {
-            string dbdata = $"{AssaultClass.ToString()},{EngineerClass.ToString()},{ReconClass.ToString()},{SupportClass.ToString()},{DragosClass.ToString()}";
+            string dbdata = $"{AssaultClass.ToString()},{EngineerClass.ToString()},{ReconClass.ToString()},{SupportClass.ToString()},{DragosClass.ToString()},{AngelClass.ToString()},{ShogunClass.ToString()},{ScarlettClass.ToString()}";
             bl_DataBase.Instance.LocalUser.metaData.rawData.WeaponsLoadouts = dbdata;
             bl_DataBase.Instance.LocalUser.metaData.rawData.ClassKit = ClassKit;
             bl_DataBase.Instance.SaveUserMetaData(() => { callBack?.Invoke(); });
@@ -224,6 +280,18 @@ public class bl_ClassManager : ScriptableObject {
         data = DragosClass.ToString();
         PlayerPrefs.SetString(key, data);
 
+        key = string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Angel);
+        data = AngelClass.ToString();
+        PlayerPrefs.SetString(key, data);
+
+        key = string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Shogun);
+        data = ShogunClass.ToString();
+        PlayerPrefs.SetString(key, data);
+
+        key = string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Scarlett);
+        data = ScarlettClass.ToString();
+        PlayerPrefs.SetString(key, data);
+
         PlayerPrefs.SetInt(ClassKey.ClassKit, ClassKit);
     }
 
@@ -241,6 +309,12 @@ public class bl_ClassManager : ScriptableObject {
                 return (SupportClass.Primary == gunID || SupportClass.Secondary == gunID || SupportClass.Perks == gunID || SupportClass.Letal == gunID);
             case PlayerClass.Dragos:
                 return (DragosClass.Primary == gunID || DragosClass.Secondary == gunID || DragosClass.Perks == gunID || DragosClass.Letal == gunID);
+            case PlayerClass.Angel:
+                return (AngelClass.Primary == gunID || AngelClass.Secondary == gunID ||AngelClass.Perks == gunID || AngelClass.Letal == gunID);
+            case PlayerClass.Shogun:
+                return (ShogunClass.Primary == gunID || ShogunClass.Secondary == gunID || ShogunClass.Perks == gunID || ShogunClass.Letal == gunID);
+            case PlayerClass.Scarlett:
+                return (ScarlettClass.Primary == gunID || ScarlettClass.Secondary == gunID || ScarlettClass.Perks == gunID || ScarlettClass.Letal == gunID);
         }
         return false;
     }

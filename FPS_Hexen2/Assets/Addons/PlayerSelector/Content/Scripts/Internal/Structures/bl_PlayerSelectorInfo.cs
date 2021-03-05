@@ -8,6 +8,8 @@ namespace MFPS.Addon.PlayerSelector
         public int Price;
         public Sprite Preview;
         public GameObject Prefab;
+        //Lobby prefab;
+        public GameObject LobbyPrefab;
 
         [HideInInspector] public int ID;
         [HideInInspector] public Team team;

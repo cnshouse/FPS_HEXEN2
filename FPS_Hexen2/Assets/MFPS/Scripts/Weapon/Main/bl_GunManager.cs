@@ -14,7 +14,7 @@ public class bl_GunManager : bl_MonoBehaviour
     #region Public members
     [Header("Weapons List")]
     public List<bl_Gun> AllGuns = new List<bl_Gun>();
-    [HideInInspector] public List<bl_Gun> PlayerEquip = new List<bl_Gun>() { null, null, null, null };
+    [HideInInspector] public List<bl_Gun> PlayerEquip = new List<bl_Gun>() { null, null, null, null, null, null};
 
     [Header("Player Class")]
     public bl_PlayerClassLoadout m_AssaultClass;
@@ -146,11 +146,14 @@ public class bl_GunManager : bl_MonoBehaviour
             Debug.LogError($"Player Class Loadout has not been assigned for the class {currentClass.ToString()}");
             return;
         }
+        Debug.LogError("WEAPON COUNT: " + PlayerEquip.Count);
 
         PlayerEquip[0] = GetGunOnListById(pcl.Primary);
         PlayerEquip[1] = GetGunOnListById(pcl.Secondary);
         PlayerEquip[2] = GetGunOnListById(pcl.Letal);
         PlayerEquip[3] = GetGunOnListById(pcl.Perks);
+        //PlayerEquip[4] = GetGunOnListById(pcl.Knife);
+        //PlayerEquip[5] = GetGunOnListById(pcl.Special);
 #endif
         for (int i = 0; i < PlayerEquip.Count; i++)
         {
@@ -713,6 +716,14 @@ public class bl_GunManager : bl_MonoBehaviour
             if (bl_Input.isButtonDown("Weapon4"))
             {
                ChangeCurrentWeaponTo(3);
+            }
+            if (bl_Input.isButtonDown("Weapon5"))
+            {
+                ChangeCurrentWeaponTo(4);
+            }
+            if (bl_Input.isButtonDown("Weapon6"))
+            {
+                ChangeCurrentWeaponTo(5);
             }
         }
 

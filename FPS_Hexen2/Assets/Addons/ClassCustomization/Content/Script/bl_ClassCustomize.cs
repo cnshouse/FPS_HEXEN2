@@ -17,6 +17,9 @@ namespace MFPS.ClassCustomization
         public ClassWeapons supportWeapons;
         public ClassWeapons reconWeapons;
         public ClassWeapons dragosWeapons;
+        public ClassWeapons angelWeapons;
+        public ClassWeapons shogunWeapons;
+        public ClassWeapons scarlettWeapons;
 
         [Header("Slots Rules")]
         public ClassAllowedWeaponsType PrimaryAllowedWeapons;
@@ -24,9 +27,10 @@ namespace MFPS.ClassCustomization
         public ClassAllowedWeaponsType KnifeAllowedWeapons;
         public ClassAllowedWeaponsType GrenadesAllowedWeapons;
 
-        private bl_ClassManager ClassManager;
+        public bl_ClassManager ClassManager;
         private int CurrentSlot = 0;
-        private bl_ClassCustomizationUI UI;
+        public ClassPanel_UI UI;
+        //private bl_ClassCustomizationUI UI;
 
         /// <summary>
         /// 
@@ -36,9 +40,9 @@ namespace MFPS.ClassCustomization
             //Fix issue
             if (PhotonNetwork.IsConnected)
             {
-                PhotonNetwork.Disconnect();
+                //PhotonNetwork.Disconnect();
             }
-            UI = FindObjectOfType<bl_ClassCustomizationUI>();
+            //UI = FindObjectOfType<ClassPanel_UI>();
             ClassManager = bl_ClassManager.Instance;
             ClassManager.Init();
         }
@@ -49,8 +53,7 @@ namespace MFPS.ClassCustomization
         /// </summary>
         void Start()
         {
-            TakeCurrentClass(bl_ClassManager.Instance.m_Class);
-            SelectClassButton();
+            //TakeCurrentClass(Lobby_Hero_Weapon_Loadout.Instance.m_Class);
         }
 
         /// <summary>
@@ -79,6 +82,15 @@ namespace MFPS.ClassCustomization
                         case PlayerClass.Dragos:
                             ClassManager.DragosClass.Primary = id;
                             break;
+                        case PlayerClass.Angel:
+                            ClassManager.AngelClass.Primary = id;
+                            break;
+                        case PlayerClass.Shogun:
+                            ClassManager.ShogunClass.Primary = id;
+                            break;
+                        case PlayerClass.Scarlett:
+                            ClassManager.ScarlettClass.Primary = id;
+                            break;
                     }
 
                     break;
@@ -100,6 +112,15 @@ namespace MFPS.ClassCustomization
                         case PlayerClass.Dragos:
                             ClassManager.DragosClass.Secondary = id;
                             break;
+                        case PlayerClass.Angel:
+                            ClassManager.AngelClass.Secondary = id;
+                            break;
+                        case PlayerClass.Shogun:
+                            ClassManager.ShogunClass.Secondary = id;
+                            break;
+                        case PlayerClass.Scarlett:
+                            ClassManager.ScarlettClass.Secondary = id;
+                            break;
                     }
                     break;
                 case 2:
@@ -119,6 +140,15 @@ namespace MFPS.ClassCustomization
                             break;
                         case PlayerClass.Dragos:
                             ClassManager.DragosClass.Perks = id;
+                            break;
+                        case PlayerClass.Angel:
+                            ClassManager.AngelClass.Perks = id;
+                            break;
+                        case PlayerClass.Shogun:
+                            ClassManager.ShogunClass.Perks = id;
+                            break;
+                        case PlayerClass.Scarlett:
+                            ClassManager.ScarlettClass.Perks = id;
                             break;
                     }
                     break;
@@ -140,16 +170,51 @@ namespace MFPS.ClassCustomization
                         case PlayerClass.Dragos:
                             ClassManager.DragosClass.Letal = id;
                             break;
+                        case PlayerClass.Angel:
+                            ClassManager.AngelClass.Letal = id;
+                            break;
+                        case PlayerClass.Shogun:
+                            ClassManager.ShogunClass.Letal = id;
+                            break;
+                        case PlayerClass.Scarlett:
+                            ClassManager.ScarlettClass.Letal = id;
+                            break;
                     }
                     break;
 
             }
+            SetSlotNameUI(slot);
             UpdateClassUI(listid, slot);
             if (CloseListOnChangeWeapon)
             {
                 CleanList();
             }
-            UI.SaveButton.SetActive(true);
+            //UI.SaveButton.SetActive(true);
+        }
+
+        
+        void SetSlotNameUI(int slot)
+		{
+            if(slot == 0)
+			{
+                UI.Slot_Name.text = "PRIMARY";
+            }
+            if (slot == 1)
+            {
+                UI.Slot_Name.text = "SECONDARY";
+            }
+            if (slot == 2)
+            {
+                UI.Slot_Name.text = "PERK";
+            }
+            if (slot == 3)
+            {
+                UI.Slot_Name.text = "LETHAL";
+            }
+            if (slot == 4)
+            {
+                UI.Slot_Name.text = "PRIMARY";
+            }
         }
 
         void UpdateClassUI(int id, int slot)
@@ -159,33 +224,41 @@ namespace MFPS.ClassCustomization
                 case PlayerClass.Assault:
                     switch (slot)
                     {
-                        case 0:                           
-                            UI.PrimaryHUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.PrimaryHUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.PrimaryHUD.AccuracySlider.value = assaultWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.PrimaryHUD.DamageSlider.value = assaultWeapons.AllWeapons[id].Info.Damage;
-                            UI.PrimaryHUD.RateSlider.value = assaultWeapons.AllWeapons[id].Info.FireRate;
-                            break;
+                        case 0:
+                            UI.Primary_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Primary_HUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = assaultWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = assaultWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = assaultWeapons.AllWeapons[id].Info.FireRate;
+                           break;
                         case 1:
-                            UI.SecundaryHUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.SecundaryHUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.SecundaryHUD.AccuracySlider.value = assaultWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.SecundaryHUD.DamageSlider.value = assaultWeapons.AllWeapons[id].Info.Damage;
-                            UI.SecundaryHUD.RateSlider.value = assaultWeapons.AllWeapons[id].Info.FireRate;
+                            UI.Secondary_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Secondary_HUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = assaultWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = assaultWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = assaultWeapons.AllWeapons[id].Info.FireRate;
                             break;
                         case 2:
-                            UI.KnifeHUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.KnifeHUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.KnifeHUD.AccuracySlider.value = assaultWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.KnifeHUD.DamageSlider.value = assaultWeapons.AllWeapons[id].Info.Damage;
-                            UI.KnifeHUD.RateSlider.value = assaultWeapons.AllWeapons[id].Info.FireRate;
+                            UI.Perk_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Perk_HUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = assaultWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = assaultWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = assaultWeapons.AllWeapons[id].Info.FireRate;
                             break;
                         case 3:
-                            UI.GrenadeHUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.GrenadeHUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.GrenadeHUD.AccuracySlider.value = assaultWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.GrenadeHUD.DamageSlider.value = assaultWeapons.AllWeapons[id].Info.Damage;
-                            UI.GrenadeHUD.RateSlider.value = assaultWeapons.AllWeapons[id].Info.FireRate;
+                            UI.Lethal_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Lethal_HUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = assaultWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = assaultWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = assaultWeapons.AllWeapons[id].Info.FireRate;
                             break;
                     }
                     break;
@@ -193,134 +266,179 @@ namespace MFPS.ClassCustomization
                 case PlayerClass.Engineer:
                     switch (slot)
                     {
-                        case 0:
-                            UI.PrimaryHUD.Icon.sprite = engineerWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.PrimaryHUD.WeaponNameText.text = engineerWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.PrimaryHUD.AccuracySlider.value = engineerWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.PrimaryHUD.DamageSlider.value = engineerWeapons.AllWeapons[id].Info.Damage;
-                            UI.PrimaryHUD.RateSlider.value = engineerWeapons.AllWeapons[id].Info.FireRate;
-                            break;
-                        case 1:
-                            UI.SecundaryHUD.Icon.sprite = engineerWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.SecundaryHUD.WeaponNameText.text = engineerWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.SecundaryHUD.AccuracySlider.value = engineerWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.SecundaryHUD.DamageSlider.value = engineerWeapons.AllWeapons[id].Info.Damage;
-                            UI.SecundaryHUD.RateSlider.value = engineerWeapons.AllWeapons[id].Info.FireRate;
-                            break;
-                        case 2:
-                            UI.KnifeHUD.Icon.sprite = engineerWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.KnifeHUD.WeaponNameText.text = engineerWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.KnifeHUD.AccuracySlider.value = engineerWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.KnifeHUD.DamageSlider.value = engineerWeapons.AllWeapons[id].Info.Damage;
-                            UI.KnifeHUD.RateSlider.value = engineerWeapons.AllWeapons[id].Info.FireRate;
-                            break;
-                        case 3:
-                            UI.GrenadeHUD.Icon.sprite = engineerWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.GrenadeHUD.WeaponNameText.text = engineerWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.GrenadeHUD.AccuracySlider.value = engineerWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.GrenadeHUD.DamageSlider.value = engineerWeapons.AllWeapons[id].Info.Damage;
-                            UI.GrenadeHUD.RateSlider.value = engineerWeapons.AllWeapons[id].Info.FireRate;
-                            break;
                     }
                     break;
                 case PlayerClass.Support:
                     switch (slot)
                     {
-                        case 0:
-                            UI.PrimaryHUD.Icon.sprite = supportWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.PrimaryHUD.WeaponNameText.text = supportWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.PrimaryHUD.AccuracySlider.value = supportWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.PrimaryHUD.DamageSlider.value = supportWeapons.AllWeapons[id].Info.Damage;
-                            UI.PrimaryHUD.RateSlider.value = supportWeapons.AllWeapons[id].Info.FireRate;
-                            break;
-                        case 1:
-                            UI.SecundaryHUD.Icon.sprite = supportWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.SecundaryHUD.WeaponNameText.text = supportWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.SecundaryHUD.AccuracySlider.value = supportWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.SecundaryHUD.DamageSlider.value = supportWeapons.AllWeapons[id].Info.Damage;
-                            UI.SecundaryHUD.RateSlider.value = supportWeapons.AllWeapons[id].Info.FireRate;
-                            break;
-                        case 2:
-                            UI.KnifeHUD.Icon.sprite = supportWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.KnifeHUD.WeaponNameText.text = supportWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.KnifeHUD.AccuracySlider.value = supportWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.KnifeHUD.DamageSlider.value = supportWeapons.AllWeapons[id].Info.Damage;
-                            UI.KnifeHUD.RateSlider.value = supportWeapons.AllWeapons[id].Info.FireRate;
-                            break;
-                        case 3:
-                            UI.GrenadeHUD.Icon.sprite = supportWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.GrenadeHUD.WeaponNameText.text = supportWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.GrenadeHUD.AccuracySlider.value = supportWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.GrenadeHUD.DamageSlider.value = supportWeapons.AllWeapons[id].Info.Damage;
-                            UI.GrenadeHUD.RateSlider.value = supportWeapons.AllWeapons[id].Info.FireRate;
-                            break;
                     }
                     break;
                 case PlayerClass.Recon:
                     switch (slot)
                     {
-                        case 0:
-                            UI.PrimaryHUD.Icon.sprite = reconWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.PrimaryHUD.WeaponNameText.text = reconWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.PrimaryHUD.AccuracySlider.value = reconWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.PrimaryHUD.DamageSlider.value = reconWeapons.AllWeapons[id].Info.Damage;
-                            UI.PrimaryHUD.RateSlider.value = reconWeapons.AllWeapons[id].Info.FireRate;
-                            break;
-                        case 1:
-                            UI.SecundaryHUD.Icon.sprite = reconWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.SecundaryHUD.WeaponNameText.text = reconWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.SecundaryHUD.AccuracySlider.value = reconWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.SecundaryHUD.DamageSlider.value = reconWeapons.AllWeapons[id].Info.Damage;
-                            UI.SecundaryHUD.RateSlider.value = reconWeapons.AllWeapons[id].Info.FireRate;
-                            break;
-                        case 2:
-                            UI.KnifeHUD.Icon.sprite = reconWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.KnifeHUD.Icon.sprite = reconWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.KnifeHUD.WeaponNameText.text = reconWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.KnifeHUD.AccuracySlider.value = reconWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.KnifeHUD.DamageSlider.value = reconWeapons.AllWeapons[id].Info.Damage;
-                            UI.KnifeHUD.RateSlider.value = reconWeapons.AllWeapons[id].Info.FireRate;
-                            break;
-                        case 3:
-                            UI.GrenadeHUD.Icon.sprite = reconWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.GrenadeHUD.WeaponNameText.text = reconWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.GrenadeHUD.AccuracySlider.value = reconWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.GrenadeHUD.DamageSlider.value = reconWeapons.AllWeapons[id].Info.Damage;
-                            UI.GrenadeHUD.RateSlider.value = reconWeapons.AllWeapons[id].Info.FireRate;
-                            break;
                     }
                     break;
                 case PlayerClass.Dragos:
                     switch (slot)
                     {
                         case 0:
-                            UI.PrimaryHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.PrimaryHUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.PrimaryHUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.PrimaryHUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
-                            UI.PrimaryHUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
+                            UI.Primary_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Primary_HUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
                             break;
                         case 1:
-                            UI.SecundaryHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.SecundaryHUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.SecundaryHUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.SecundaryHUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
-                            UI.SecundaryHUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
+                            UI.Secondary_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Secondary_HUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
                             break;
                         case 2:
-                            UI.KnifeHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.KnifeHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.KnifeHUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.KnifeHUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.KnifeHUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
-                            UI.KnifeHUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
+                            UI.Perk_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Perk_HUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
                             break;
                         case 3:
-                            UI.GrenadeHUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
-                            UI.GrenadeHUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
-                            UI.GrenadeHUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
-                            UI.GrenadeHUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
-                            UI.GrenadeHUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
+                            UI.Lethal_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Lethal_HUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = dragosWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = dragosWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = dragosWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                    }
+                    break;
+                case PlayerClass.Angel:
+                    switch (slot)
+                    {
+                        case 0:
+                            UI.Primary_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Primary_HUD.WeaponNameText.text = angelWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = angelWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = angelWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = angelWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = angelWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 1:
+                            UI.Secondary_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Secondary_HUD.WeaponNameText.text = angelWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = angelWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = angelWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = angelWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = angelWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 2:
+                            UI.Perk_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Perk_HUD.WeaponNameText.text = angelWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = angelWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = angelWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = angelWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = angelWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 3:
+                            UI.Lethal_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Lethal_HUD.WeaponNameText.text = angelWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = angelWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = angelWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = angelWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = angelWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                    }
+                    break;
+                case PlayerClass.Shogun:
+                    switch (slot)
+                    {
+                        case 0:
+                            UI.Primary_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Primary_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = shogunWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = shogunWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = shogunWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 1:
+                            UI.Secondary_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Secondary_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = shogunWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = shogunWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = shogunWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 2:
+                            UI.Perk_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Perk_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = shogunWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = shogunWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = shogunWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 3:
+                            UI.Lethal_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Lethal_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = shogunWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = shogunWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = shogunWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                    }
+                    break;
+                case PlayerClass.Scarlett:
+                    switch (slot)
+                    {
+                        case 0:
+                            UI.Primary_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Primary_HUD.WeaponNameText.text = scarlettWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = scarlettWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = scarlettWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = scarlettWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = scarlettWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 1:
+                            UI.Secondary_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Secondary_HUD.WeaponNameText.text = scarlettWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = scarlettWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = scarlettWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = scarlettWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = scarlettWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 2:
+                            UI.Perk_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Perk_HUD.WeaponNameText.text = scarlettWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = scarlettWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = scarlettWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = scarlettWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = scarlettWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 3:
+                            UI.Lethal_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Lethal_HUD.WeaponNameText.text = scarlettWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = scarlettWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = scarlettWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = scarlettWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = scarlettWeapons.AllWeapons[id].Info.FireRate;
                             break;
                     }
                     break;
@@ -332,9 +450,12 @@ namespace MFPS.ClassCustomization
         /// </summary>
         public void SaveClass()
         {
-            UI.loadingUI.SetActive(true);
-            bl_ClassManager.Instance.SaveClass(() => { this.InvokeAfter(1, () => { UI.loadingUI.SetActive(false); }); });
-            UI.SaveButton.SetActive(false);
+            //UI.loadingUI.SetActive(true);
+             bl_ClassManager.Instance.SaveClass(() => { this.InvokeAfter(1, () => { 
+                 //UI.loadingUI.SetActive(false); 
+                Debug.Log("Hero Data has Been Saved");
+             }); });
+            //UI.SaveButton.SetActive(false);
         }
 
         /// <summary>
@@ -357,6 +478,7 @@ namespace MFPS.ClassCustomization
                     Destroy(t.gameObject);
                 }
             }
+            SaveClass();
         }
 
         /// <summary>
@@ -397,58 +519,102 @@ namespace MFPS.ClassCustomization
                             bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
                             iui.GetInfo(assaultWeapons.AllWeapons[i], slot, i);
                             b.transform.SetParent(UI.PanelWeaponList, false);
+                            b.SetActive(true);
                         }
                     }
                     break;
                 case PlayerClass.Engineer://----------------------------------------------------------------------------------------------------
-                    for (int i = 0; i < engineerWeapons.AllWeapons.Count; i++)
-                    {
-                        if (isAllowedWeapon(engineerWeapons.AllWeapons[i].Info, slot))
-                        {
-                            if (!engineerWeapons.AllWeapons[i].isEnabled) continue;
-                            GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
-                            bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
-                            iui.GetInfo(engineerWeapons.AllWeapons[i], slot, i);
-                            b.transform.SetParent(UI.PanelWeaponList, false);
-                        }
-                    }
+                    //for (int i = 0; i < engineerWeapons.AllWeapons.Count; i++)
+                    //{
+                    //    if (isAllowedWeapon(engineerWeapons.AllWeapons[i].Info, slot))
+                    //    {
+                    //        if (!engineerWeapons.AllWeapons[i].isEnabled) continue;
+                    //        GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
+                    //        bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
+                    //        iui.GetInfo(engineerWeapons.AllWeapons[i], slot, i);
+                    //        b.transform.SetParent(UI.PanelWeaponList, false);
+                    //    }
+                    //}
                     break;
                 case PlayerClass.Support://-----------------------------------------------------------------------------------------------------
-                    for (int i = 0; i < supportWeapons.AllWeapons.Count; i++)
-                    {
-                        if (isAllowedWeapon(supportWeapons.AllWeapons[i].Info, slot))
-                        {
-                            if (!supportWeapons.AllWeapons[i].isEnabled) continue;
-                            GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
-                            bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
-                            iui.GetInfo(supportWeapons.AllWeapons[i], slot, i);
-                            b.transform.SetParent(UI.PanelWeaponList, false);
-                        }
-                    }
+                    //for (int i = 0; i < supportWeapons.AllWeapons.Count; i++)
+                    //{
+                    //    if (isAllowedWeapon(supportWeapons.AllWeapons[i].Info, slot))
+                    //    {
+                    //        if (!supportWeapons.AllWeapons[i].isEnabled) continue;
+                    //        GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
+                    //        bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
+                    //        iui.GetInfo(supportWeapons.AllWeapons[i], slot, i);
+                    //        b.transform.SetParent(UI.PanelWeaponList, false);
+                    //    }
+                    //}
                     break;
                 case PlayerClass.Recon://-----------------------------------------------------------------------------
-                    for (int i = 0; i < reconWeapons.AllWeapons.Count; i++)
-                    {
-                        if (isAllowedWeapon(reconWeapons.AllWeapons[i].Info, slot))
-                        {
-                            if (!reconWeapons.AllWeapons[i].isEnabled) continue;
-                            GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
-                            bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
-                            iui.GetInfo(reconWeapons.AllWeapons[i], slot, i);
-                            b.transform.SetParent(UI.PanelWeaponList, false);
-                        }
-                    }
+                    //for (int i = 0; i < reconWeapons.AllWeapons.Count; i++)
+                    //{
+                    //    if (isAllowedWeapon(reconWeapons.AllWeapons[i].Info, slot))
+                    //    {
+                    //        if (!reconWeapons.AllWeapons[i].isEnabled) continue;
+                    //        GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
+                    //        bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
+                    //        iui.GetInfo(reconWeapons.AllWeapons[i], slot, i);
+                    //        b.transform.SetParent(UI.PanelWeaponList, false);
+                    //    }
+                    //}
                     break;
                 case PlayerClass.Dragos://-----------------------------------------------------------------------------
-                    for (int i = 0; i < reconWeapons.AllWeapons.Count; i++)
+                    for (int i = 0; i < dragosWeapons.AllWeapons.Count; i++)
                     {
-                        if (isAllowedWeapon(reconWeapons.AllWeapons[i].Info, slot))
+                        if (isAllowedWeapon(dragosWeapons.AllWeapons[i].Info, slot))
                         {
                             if (!dragosWeapons.AllWeapons[i].isEnabled) continue;
                             GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
                             bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
                             iui.GetInfo(dragosWeapons.AllWeapons[i], slot, i);
                             b.transform.SetParent(UI.PanelWeaponList, false);
+                            b.SetActive(true);
+                        }
+                    }
+                    break;
+                case PlayerClass.Angel://-----------------------------------------------------------------------------
+                    for (int i = 0; i < angelWeapons.AllWeapons.Count; i++)
+                    {
+                        if (isAllowedWeapon(angelWeapons.AllWeapons[i].Info, slot))
+                        {
+                            if (!angelWeapons.AllWeapons[i].isEnabled) continue;
+                            GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
+                            bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
+                            iui.GetInfo(angelWeapons.AllWeapons[i], slot, i);
+                            b.transform.SetParent(UI.PanelWeaponList, false);
+                            b.SetActive(true);
+                        }
+                    }
+                    break;
+                case PlayerClass.Shogun://-----------------------------------------------------------------------------
+                    for (int i = 0; i < shogunWeapons.AllWeapons.Count; i++)
+                    {
+                        if (isAllowedWeapon(shogunWeapons.AllWeapons[i].Info, slot))
+                        {
+                            if (!shogunWeapons.AllWeapons[i].isEnabled) continue;
+                            GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
+                            bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
+                            iui.GetInfo(shogunWeapons.AllWeapons[i], slot, i);
+                            b.transform.SetParent(UI.PanelWeaponList, false);
+                            b.SetActive(true);
+                        }
+                    }
+                    break;
+                case PlayerClass.Scarlett://-----------------------------------------------------------------------------
+                    for (int i = 0; i < scarlettWeapons.AllWeapons.Count; i++)
+                    {
+                        if (isAllowedWeapon(scarlettWeapons.AllWeapons[i].Info, slot))
+                        {
+                            if (!scarlettWeapons.AllWeapons[i].isEnabled) continue;
+                            GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
+                            bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
+                            iui.GetInfo(scarlettWeapons.AllWeapons[i], slot, i);
+                            b.transform.SetParent(UI.PanelWeaponList, false);
+                            b.SetActive(true);
                         }
                     }
                     break;
@@ -458,7 +624,7 @@ namespace MFPS.ClassCustomization
         public void ChangeKit(int kit)
         {
             bl_ClassManager.Instance.ClassKit = kit;
-            UI.SaveButton.SetActive(true);
+            //UI.SaveButton.SetActive(true);
         }
 
         /// <summary>
@@ -472,7 +638,7 @@ namespace MFPS.ClassCustomization
             m_Class = newclass;
             bl_ClassManager.Instance.m_Class = newclass;
             newclass.SavePlayerClass();
-            UI.ClassText.text = (newclass.ToString() + " Class").ToUpper();
+            //UI.ClassText.text = (newclass.ToString() + " Class").ToUpper();
             ResetClassHUD();
             int i = 0;
             switch (newclass)
@@ -512,22 +678,29 @@ namespace MFPS.ClassCustomization
                     UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Perks), 2);
                     UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Letal), 3);
                     break;
+                case PlayerClass.Angel:
+                    i = 4;
+                    UpdateClassUI(GetListId(PlayerClass.Angel, ClassManager.AngelClass.Primary), 0);
+                    UpdateClassUI(GetListId(PlayerClass.Angel, ClassManager.AngelClass.Secondary), 1);
+                    UpdateClassUI(GetListId(PlayerClass.Angel, ClassManager.AngelClass.Perks), 2);
+                    UpdateClassUI(GetListId(PlayerClass.Angel, ClassManager.AngelClass.Letal), 3);
+                    break;
+                case PlayerClass.Shogun:
+                    i = 4;
+                    UpdateClassUI(GetListId(PlayerClass.Shogun, ClassManager.ShogunClass.Primary), 0);
+                    UpdateClassUI(GetListId(PlayerClass.Shogun, ClassManager.ShogunClass.Secondary), 1);
+                    UpdateClassUI(GetListId(PlayerClass.Shogun, ClassManager.ShogunClass.Perks), 2);
+                    UpdateClassUI(GetListId(PlayerClass.Shogun, ClassManager.ShogunClass.Letal), 3);
+                    break;
+                case PlayerClass.Scarlett:
+                    i = 4;
+                    UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Primary), 0);
+                    UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Secondary), 1);
+                    UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Perks), 2);
+                    UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Letal), 3);
+                    break;
             }
             PlayerPrefs.SetInt(ClassKey.ClassType, i);
-            SelectClassButton();
-        }
-
-        Vector2 defaulClassSize = Vector2.zero;
-        void SelectClassButton()
-        {
-            if(defaulClassSize == Vector2.zero) { defaulClassSize = UI.ClassButtons[0].sizeDelta; }
-            foreach (var r in UI.ClassButtons)
-            {
-                r.sizeDelta = defaulClassSize;
-            }
-            Vector2 v = defaulClassSize;
-            v.y += 10;
-            UI.ClassButtons[(int)bl_ClassManager.Instance.m_Class].sizeDelta = v;
         }
 
         /// <summary>
@@ -582,6 +755,33 @@ namespace MFPS.ClassCustomization
                         }
                     }
                     break;
+                case PlayerClass.Angel:
+                    for (int i = 0; i < angelWeapons.AllWeapons.Count; i++)
+                    {
+                        if (angelWeapons.AllWeapons[i].GunID == id)
+                        {
+                            return i;
+                        }
+                    }
+                    break;
+                case PlayerClass.Shogun:
+                    for (int i = 0; i < shogunWeapons.AllWeapons.Count; i++)
+                    {
+                        if (shogunWeapons.AllWeapons[i].GunID == id)
+                        {
+                            return i;
+                        }
+                    }
+                    break;
+                case PlayerClass.Scarlett:
+                    for (int i = 0; i < scarlettWeapons.AllWeapons.Count; i++)
+                    {
+                        if (scarlettWeapons.AllWeapons[i].GunID == id)
+                        {
+                            return i;
+                        }
+                    }
+                    break;
             }
 
             return 0;
@@ -589,84 +789,78 @@ namespace MFPS.ClassCustomization
 
         void ResetClassHUD()
         {
-            UI.PrimaryHUD.WeaponNameText.text = "None";
-            UI.PrimaryHUD.Icon.sprite = null;
-            UI.PrimaryHUD.DamageSlider.value = 0;
-            UI.PrimaryHUD.AccuracySlider.value = 0;
-            UI.PrimaryHUD.RateSlider.value = 0;
-            //
-            UI.SecundaryHUD.WeaponNameText.text = "None";
-            UI.SecundaryHUD.Icon.sprite = null;
-            UI.SecundaryHUD.DamageSlider.value = 0;
-            UI.SecundaryHUD.AccuracySlider.value = 0;
-            UI.SecundaryHUD.RateSlider.value = 0;
-            //
-            UI.KnifeHUD.WeaponNameText.text = "None";
-            UI.KnifeHUD.Icon.sprite = null;
-            UI.KnifeHUD.DamageSlider.value = 0;
-            UI.KnifeHUD.AccuracySlider.value = 0;
-            UI.KnifeHUD.RateSlider.value = 0;
-            //
-            UI.GrenadeHUD.WeaponNameText.text = "None";
-            UI.GrenadeHUD.Icon.sprite = null;
-            UI.GrenadeHUD.DamageSlider.value = 0;
-            UI.GrenadeHUD.AccuracySlider.value = 0;
-            UI.GrenadeHUD.RateSlider.value = 0;
+            //UI.PrimaryHUD.WeaponNameText.text = "None";
+            //UI.PrimaryHUD.Icon.sprite = null;
+            //UI.PrimaryHUD.DamageSlider.value = 0;
+            //UI.PrimaryHUD.AccuracySlider.value = 0;
+            //UI.PrimaryHUD.RateSlider.value = 0;
+            ////
+            //UI.SecundaryHUD.WeaponNameText.text = "None";
+            //UI.SecundaryHUD.Icon.sprite = null;
+            //UI.SecundaryHUD.DamageSlider.value = 0;
+            //UI.SecundaryHUD.AccuracySlider.value = 0;
+            //UI.SecundaryHUD.RateSlider.value = 0;
+            ////
+            //UI.KnifeHUD.WeaponNameText.text = "None";
+            //UI.KnifeHUD.Icon.sprite = null;
+            //UI.KnifeHUD.DamageSlider.value = 0;
+            //UI.KnifeHUD.AccuracySlider.value = 0;
+            //UI.KnifeHUD.RateSlider.value = 0;
+            ////
+            //UI.GrenadeHUD.WeaponNameText.text = "None";
+            //UI.GrenadeHUD.Icon.sprite = null;
+            //UI.GrenadeHUD.DamageSlider.value = 0;
+            //UI.GrenadeHUD.AccuracySlider.value = 0;
+            //UI.GrenadeHUD.RateSlider.value = 0;
         }
 
         /// <summary>
         /// Take the current class
         /// </summary>
-        void TakeCurrentClass(PlayerClass mclass)
+        public void TakeCurrentClass(PlayerClass mclass)
         {
             switch (mclass)
             {
                 case PlayerClass.Assault:
-                    foreach (WeaponItemData ci in assaultWeapons.AllWeapons)
+                    foreach (WeaponItemData ci in assaultWeapons?.AllWeapons)
                     {
-                        if (ci.GunID == ClassManager.AssaultClass.Primary)
+                        if (ci?.GunID == ClassManager?.AssaultClass?.Primary)
                         {
-                            UI.PrimaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.PrimaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.PrimaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.PrimaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.PrimaryHUD.RateSlider.value = ci.Info.FireRate;
+                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
+                            UI.Active_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.DamageSlider.value = ci.Info.Damage;
+                            UI.Active_HUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.Active_HUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
                     foreach (WeaponItemData ci in assaultWeapons.AllWeapons)
                     {
-                        if (ci.GunID == ClassManager.AssaultClass.Secondary)
+                        if (ci?.GunID == ClassManager?.AssaultClass?.Secondary)
                         {
-                            UI.SecundaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.SecundaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.SecundaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.SecundaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.SecundaryHUD.RateSlider.value = ci.Info.FireRate;
+                            UI.Secondary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Secondary_HUD.Icon.sprite = ci.Info.GunIcon;
                             break;
                         }
                     }
                     foreach (WeaponItemData ci in assaultWeapons.AllWeapons)
                     {
-                        if (ci.GunID == ClassManager.AssaultClass.Perks)
+                        if (ci?.GunID == ClassManager?.AssaultClass?.Perks)
                         {
-                            UI.KnifeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.KnifeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.KnifeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.KnifeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.KnifeHUD.RateSlider.value = ci.Info.FireRate;
+                            UI.Perk_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Perk_HUD.Icon.sprite = ci.Info.GunIcon;
                             break;
                         }
                     }
                     foreach (WeaponItemData ci in engineerWeapons.AllWeapons)
                     {
-                        if (ci.GunID == ClassManager.AssaultClass.Letal)
+                        if (ci?.GunID == ClassManager?.AssaultClass?.Letal)
                         {
-                            UI.GrenadeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.GrenadeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.GrenadeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.GrenadeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.GrenadeHUD.RateSlider.value = ci.Info.FireRate;
+                            UI.Lethal_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Lethal_HUD.Icon.sprite = ci.Info.GunIcon;
                             break;
                         }
                     }
@@ -676,11 +870,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.EngineerClass.Primary)
                         {
-                            UI.PrimaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.PrimaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.PrimaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.PrimaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.PrimaryHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.PrimaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.PrimaryHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.PrimaryHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.PrimaryHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.PrimaryHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -688,11 +882,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.EngineerClass.Secondary)
                         {
-                            UI.SecundaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.SecundaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.SecundaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.SecundaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.SecundaryHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.SecundaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.SecundaryHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.SecundaryHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.SecundaryHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.SecundaryHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -700,11 +894,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.EngineerClass.Perks)
                         {
-                            UI.KnifeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.KnifeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.KnifeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.KnifeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.KnifeHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.KnifeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.KnifeHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.KnifeHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.KnifeHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.KnifeHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -712,11 +906,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.EngineerClass.Letal)
                         {
-                            UI.GrenadeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.GrenadeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.GrenadeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.GrenadeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.GrenadeHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.GrenadeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.GrenadeHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.GrenadeHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.GrenadeHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.GrenadeHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -726,11 +920,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.ReconClass.Primary)
                         {
-                            UI.PrimaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.PrimaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.PrimaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.PrimaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.PrimaryHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.PrimaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.PrimaryHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.PrimaryHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.PrimaryHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.PrimaryHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -738,11 +932,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.ReconClass.Secondary)
                         {
-                            UI.SecundaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.SecundaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.SecundaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.SecundaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.SecundaryHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.SecundaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.SecundaryHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.SecundaryHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.SecundaryHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.SecundaryHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -750,11 +944,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.ReconClass.Perks)
                         {
-                            UI.KnifeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.KnifeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.KnifeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.KnifeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.KnifeHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.KnifeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.KnifeHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.KnifeHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.KnifeHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.KnifeHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -762,11 +956,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.ReconClass.Letal)
                         {
-                            UI.GrenadeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.GrenadeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.GrenadeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.GrenadeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.GrenadeHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.GrenadeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.GrenadeHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.GrenadeHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.GrenadeHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.GrenadeHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -776,11 +970,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.SupportClass.Primary)
                         {
-                            UI.PrimaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.PrimaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.PrimaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.PrimaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.PrimaryHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.PrimaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.PrimaryHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.PrimaryHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.PrimaryHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.PrimaryHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -788,11 +982,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.SupportClass.Secondary)
                         {
-                            UI.SecundaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.SecundaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.SecundaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.SecundaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.SecundaryHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.SecundaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.SecundaryHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.SecundaryHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.SecundaryHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.SecundaryHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -800,11 +994,11 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.SupportClass.Perks)
                         {
-                            UI.KnifeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.KnifeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.KnifeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.KnifeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.KnifeHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.KnifeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.KnifeHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.KnifeHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.KnifeHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.KnifeHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
@@ -812,61 +1006,187 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci.GunID == ClassManager.SupportClass.Letal)
                         {
-                            UI.GrenadeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.GrenadeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.GrenadeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.GrenadeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.GrenadeHUD.RateSlider.value = ci.Info.FireRate;
+                            //UI.GrenadeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            //UI.GrenadeHUD.Icon.sprite = ci.Info.GunIcon;
+                            //UI.GrenadeHUD.DamageSlider.value = ci.Info.Damage;
+                            //UI.GrenadeHUD.AccuracySlider.value = ci.Info.Accuracy;
+                            //UI.GrenadeHUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
                     break;
                 case PlayerClass.Dragos://--------------------------------------------------------------------------------------
-                    foreach (WeaponItemData ci in dragosWeapons.AllWeapons)
+                    foreach (WeaponItemData ci in dragosWeapons?.AllWeapons)
                     {
-                        if (ci.GunID == ClassManager.DragosClass.Primary)
+                        if (ci?.GunID == ClassManager?.DragosClass?.Primary)
                         {
-                            UI.PrimaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.PrimaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.PrimaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.PrimaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.PrimaryHUD.RateSlider.value = ci.Info.FireRate;
+                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
+                            UI.Active_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.DamageSlider.value = ci.Info.Damage;
+                            UI.Active_HUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.Active_HUD.RateSlider.value = ci.Info.FireRate;
                             break;
                         }
                     }
-                    foreach (WeaponItemData ci in dragosWeapons.AllWeapons)
+                    foreach (WeaponItemData ci in dragosWeapons?.AllWeapons)
                     {
-                        if (ci.GunID == ClassManager.DragosClass.Secondary)
+                        if (ci?.GunID == ClassManager?.DragosClass?.Secondary)
                         {
-                            UI.SecundaryHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.SecundaryHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.SecundaryHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.SecundaryHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.SecundaryHUD.RateSlider.value = ci.Info.FireRate;
+                            UI.Secondary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Secondary_HUD.Icon.sprite = ci.Info.GunIcon;
                             break;
                         }
                     }
-                    foreach (WeaponItemData ci in dragosWeapons.AllWeapons)
+                    foreach (WeaponItemData ci in dragosWeapons?.AllWeapons)
                     {
-                        if (ci.GunID == ClassManager.DragosClass.Perks)
+                        if (ci?.GunID == ClassManager?.DragosClass?.Perks)
                         {
-                            UI.KnifeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.KnifeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.KnifeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.KnifeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.KnifeHUD.RateSlider.value = ci.Info.FireRate;
+                            UI.Perk_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Perk_HUD.Icon.sprite = ci.Info.GunIcon;
                             break;
                         }
                     }
-                    foreach (WeaponItemData ci in dragosWeapons.AllWeapons)
+                    foreach (WeaponItemData ci in dragosWeapons?.AllWeapons)
                     {
-                        if (ci.GunID == ClassManager.DragosClass.Letal)
+                        if (ci?.GunID == ClassManager?.DragosClass?.Letal)
                         {
-                            UI.GrenadeHUD.WeaponNameText.text = ci.Info.Name.ToUpper();
-                            UI.GrenadeHUD.Icon.sprite = ci.Info.GunIcon;
-                            UI.GrenadeHUD.DamageSlider.value = ci.Info.Damage;
-                            UI.GrenadeHUD.AccuracySlider.value = ci.Info.Accuracy;
-                            UI.GrenadeHUD.RateSlider.value = ci.Info.FireRate;
+                            UI.Lethal_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Lethal_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    break;
+                case PlayerClass.Angel://--------------------------------------------------------------------------------------
+                    foreach (WeaponItemData ci in angelWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.AngelClass?.Primary)
+                        {
+                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
+                            UI.Active_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.DamageSlider.value = ci.Info.Damage;
+                            UI.Active_HUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.Active_HUD.RateSlider.value = ci.Info.FireRate;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in angelWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.AngelClass?.Secondary)
+                        {
+                            UI.Secondary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Secondary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in angelWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.AngelClass?.Perks)
+                        {
+                            UI.Perk_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Perk_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in angelWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.AngelClass?.Letal)
+                        {
+                            UI.Lethal_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Lethal_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    break;
+                case PlayerClass.Shogun://--------------------------------------------------------------------------------------
+                    foreach (WeaponItemData ci in shogunWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.ShogunClass?.Primary)
+                        {
+                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
+                            UI.Active_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.DamageSlider.value = ci.Info.Damage;
+                            UI.Active_HUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.Active_HUD.RateSlider.value = ci.Info.FireRate;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in shogunWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.ShogunClass?.Secondary)
+                        {
+                            UI.Secondary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Secondary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in shogunWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.ShogunClass?.Perks)
+                        {
+                            UI.Perk_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Perk_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in shogunWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.ShogunClass?.Letal)
+                        {
+                            UI.Lethal_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Lethal_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    break;
+                case PlayerClass.Scarlett://--------------------------------------------------------------------------------------
+                    foreach (WeaponItemData ci in scarlettWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.ScarlettClass?.Primary)
+                        {
+                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
+                            UI.Active_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.DamageSlider.value = ci.Info.Damage;
+                            UI.Active_HUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.Active_HUD.RateSlider.value = ci.Info.FireRate;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in scarlettWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.ScarlettClass?.Secondary)
+                        {
+                            UI.Secondary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Secondary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in scarlettWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.ScarlettClass?.Perks)
+                        {
+                            UI.Perk_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Perk_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in scarlettWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.ScarlettClass?.Letal)
+                        {
+                            UI.Lethal_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Lethal_HUD.Icon.sprite = ci.Info.GunIcon;
                             break;
                         }
                     }
@@ -894,6 +1214,9 @@ namespace MFPS.ClassCustomization
             supportWeapons.UpdateList(this);
             reconWeapons.UpdateList(this);
             dragosWeapons.UpdateList(this);
+            angelWeapons.UpdateList(this);
+            shogunWeapons.UpdateList(this);
+            scarlettWeapons.UpdateList(this);
         }
 
         private void OnValidate()

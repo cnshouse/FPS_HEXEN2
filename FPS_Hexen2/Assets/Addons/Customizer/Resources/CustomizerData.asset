@@ -261,7 +261,13 @@ MonoBehaviour:
       GlobalID: 8
       ID: 2
       Camo: {fileID: 2100000, guid: 98f307ae79ba3ad47838b267b02ec5a8, type: 2}
-      OverridePreview: {fileID: 2800000, guid: cd419051581e25942b9d4e33fa5854c6, type: 3}
+      OverridePreview: {fileID: 2800000, guid: 7b74293556a0dea4dbe82c5948d019be, type: 3}
+      ofWeaponID: 5
+    - Name: Gold
+      GlobalID: 11
+      ID: 3
+      Camo: {fileID: 2100000, guid: 20b284430ee2b8e488ee5a9e57dee5bb, type: 2}
+      OverridePreview: {fileID: 2800000, guid: 1841c7889eb056d4193d2771ae2886d6, type: 3}
       ofWeaponID: 5
     Attachments:
       Suppressers:
@@ -295,6 +301,38 @@ MonoBehaviour:
       Camo: {fileID: 2100000, guid: e73c881640356414f89f16df5e682f55, type: 2}
       OverridePreview: {fileID: 2800000, guid: cd419051581e25942b9d4e33fa5854c6, type: 3}
       ofWeaponID: 6
+    Attachments:
+      Suppressers:
+      - Name: No Suppressor
+        ID: 0
+        Description: 
+      Sights:
+      - Name: Iron Sight
+        ID: 0
+        Description: 
+      Foregrips: []
+      Magazines:
+      - Name: Normal
+        ID: 0
+        Description: 
+      - Name: Hydro-Mag
+        ID: 9
+        Description: 
+  - WeaponName: Celina
+    GunID: 1
+    Camos:
+    - Name: Default
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 2100000, guid: 1dc0b62d5e8be5e488d432f9d9bad737, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 7
+    - Name: Celina_B
+      GlobalID: 10
+      ID: 1
+      Camo: {fileID: 2100000, guid: f38dc27bceac5884abccf1518a65d9b7, type: 2}
+      OverridePreview: {fileID: 2800000, guid: cd419051581e25942b9d4e33fa5854c6, type: 3}
+      ofWeaponID: 7
     Attachments:
       Suppressers:
       - Name: No Suppressor
@@ -360,6 +398,16 @@ MonoBehaviour:
     m_sprite: {fileID: 0}
   - Name: Dragos Red
     Preview: {fileID: 2800000, guid: cb3d4d8c3882bdf44ad5a83146b0c3f7, type: 3}
+    Price: 0
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Celina_B
+    Preview: {fileID: 2800000, guid: cb3d4d8c3882bdf44ad5a83146b0c3f7, type: 3}
+    Price: 0
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Gold
+    Preview: {fileID: 2800000, guid: 9d9fed4687c0a5748a125147a54885d5, type: 3}
     Price: 0
     Description: 
     m_sprite: {fileID: 0}

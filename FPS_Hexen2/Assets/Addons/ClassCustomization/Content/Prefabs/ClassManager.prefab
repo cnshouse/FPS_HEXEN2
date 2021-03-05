@@ -258,6 +258,9 @@ MonoBehaviour:
     - Name: Machinegun
       GunID: 9
       isEnabled: 1
+    - Name: Angel
+      GunID: 10
+      isEnabled: 1
   engineerWeapons:
     AllWeapons:
     - Name: Rifle
@@ -289,6 +292,9 @@ MonoBehaviour:
       isEnabled: 0
     - Name: Machinegun
       GunID: 9
+      isEnabled: 1
+    - Name: Angel
+      GunID: 10
       isEnabled: 1
   supportWeapons:
     AllWeapons:
@@ -322,6 +328,9 @@ MonoBehaviour:
     - Name: Machinegun
       GunID: 9
       isEnabled: 1
+    - Name: Angel
+      GunID: 10
+      isEnabled: 1
   reconWeapons:
     AllWeapons:
     - Name: Rifle
@@ -354,6 +363,9 @@ MonoBehaviour:
     - Name: Machinegun
       GunID: 9
       isEnabled: 1
+    - Name: Angel
+      GunID: 10
+      isEnabled: 1
   dragosWeapons:
     AllWeapons:
     - Name: Rifle
@@ -385,6 +397,9 @@ MonoBehaviour:
       isEnabled: 1
     - Name: Machinegun
       GunID: 9
+      isEnabled: 1
+    - Name: Angel
+      GunID: 10
       isEnabled: 1
   PrimaryAllowedWeapons:
     AllowMachineGuns: 1
