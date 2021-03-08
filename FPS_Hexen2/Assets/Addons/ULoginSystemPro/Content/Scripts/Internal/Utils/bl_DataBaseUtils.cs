@@ -223,6 +223,11 @@ public static class bl_DataBaseUtils
             wf.AddField(key, value);
     }
 
+    public static void AddNonSecureField(this WWWForm wf, string key, string value)
+	{
+        wf.AddField(key, value);
+	}
+
     /// <summary>
     /// 
     /// </summary>

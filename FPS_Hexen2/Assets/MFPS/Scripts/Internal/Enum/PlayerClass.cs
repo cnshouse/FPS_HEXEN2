@@ -7,7 +7,8 @@
     Dragos = 4,
     Angel = 5,
     Shogun = 6,
-    Scarlett = 7
+    Scarlett = 7,
+    Celina = 8
 }
 
 

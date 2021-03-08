@@ -193,7 +193,7 @@ MonoBehaviour:
     PickUpPrefab: {fileID: 6553476045170373605, guid: a948126ce5af6724e97809860392b4b7,
       type: 3}
     GunIcon: {fileID: 21300000, guid: 67817f6c38715a64a8074a1940d6b966, type: 3}
-  - Name: Machinegun
+  - Name: Johnny
     Type: 1
     Damage: 20
     FireRate: 0.09
@@ -219,6 +219,32 @@ MonoBehaviour:
     PickUpPrefab: {fileID: 6093322561488042215, guid: 2a2715a9713a43f40a852144e1a9a391,
       type: 3}
     GunIcon: {fileID: 21300000, guid: 19516943777febc499922c851560f17c, type: 3}
+  - Name: Celina
+    Type: 3
+    Damage: 20
+    FireRate: 0.12
+    ReloadTime: 1.2
+    Range: 200
+    Accuracy: 3
+    Weight: 2
+    Price: 0
+    LevelUnlock: 0
+    PickUpPrefab: {fileID: 6093322561488042215, guid: 2a2715a9713a43f40a852144e1a9a391,
+      type: 3}
+    GunIcon: {fileID: 21300000, guid: 437b365f7ba4fe346b8d32374821574d, type: 3}
+  - Name: Scarlett
+    Type: 3
+    Damage: 20
+    FireRate: 0.12
+    ReloadTime: 1.2
+    Range: 200
+    Accuracy: 3
+    Weight: 2
+    Price: 0
+    LevelUnlock: 0
+    PickUpPrefab: {fileID: 6093322561488042215, guid: 2a2715a9713a43f40a852144e1a9a391,
+      type: 3}
+    GunIcon: {fileID: 21300000, guid: d93ed57c9dab7204d99271ee30de9ecb, type: 3}
   defaultSettings: {fileID: 11400000, guid: 5fadfa78dabe7f6429f21e8ed3cc747b, type: 2}
   gameModes:
   - ModeName: Team DeathMatch

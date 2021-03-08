@@ -6,11 +6,18 @@ using UnityEngine;
 public class LobbyWeapon:MonoBehaviour
 {
 	public string _WeaponName;
+    public RuntimeAnimatorController _animationController;
 	public GameObject _Weapon;
+    
 	public MFPS.Addon.Customizer.CustomizerCamoRender _Mesh;
     private int _Camo;
 
 	public void Start()
+	{
+        LoadAttachmentsForWeapon(_WeaponName);
+    }
+
+	private void OnEnable()
 	{
         LoadAttachmentsForWeapon(_WeaponName);
     }
@@ -53,5 +60,15 @@ public class LobbyWeapon:MonoBehaviour
         _Mesh.ApplyCamo(_WeaponName, _int);
     }
 
+    public void SetAnimation()
+	{
+        GameObject LobbyPlayer = FindObjectOfType<Animator>().gameObject;
+        RuntimeAnimatorController _curAC = LobbyPlayer.GetComponent<Animator>().runtimeAnimatorController;
+        Debug.Log("Player is : " + LobbyPlayer.name);
+        if (_animationController != null && _curAC != _animationController)
+        {
+            LobbyPlayer.GetComponent<Animator>().runtimeAnimatorController = _animationController;
+        }
+    }
 
 }

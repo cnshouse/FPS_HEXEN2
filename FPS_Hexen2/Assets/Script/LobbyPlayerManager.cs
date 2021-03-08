@@ -110,7 +110,7 @@ public class LobbyPlayerManager : MonoBehaviour
                 CurrentlyDisplayedHero = Instantiate(CurrentLobbyModel, gameObject.transform.position, gameObject.transform.rotation);
                 mClass = PlayerClass.Assault;
                 bl_ClassManager.Instance.m_Class = mClass;
-                GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(0);
+                GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(PlayerClass.Assault);
                 Set();
                 SavePlayerClass(1);
                 break;
@@ -119,7 +119,7 @@ public class LobbyPlayerManager : MonoBehaviour
                 CurrentLobbyModel = MFPS.Addon.PlayerSelector.bl_PlayerSelectorData.Instance.AllPlayers[2].LobbyPrefab;
                 Info = MFPS.Addon.PlayerSelector.bl_PlayerSelectorData.Instance.GetPlayer(Team.All, 2);
                 CurrentlyDisplayedHero = Instantiate(CurrentLobbyModel, gameObject.transform.position, gameObject.transform.rotation);
-                mClass = PlayerClass.Assault;
+                mClass = PlayerClass.Angel;
                 bl_ClassManager.Instance.m_Class = mClass;
                 GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(PlayerClass.Angel);
                 Set();
@@ -152,6 +152,9 @@ public class LobbyPlayerManager : MonoBehaviour
                 CurrentLobbyModel = MFPS.Addon.PlayerSelector.bl_PlayerSelectorData.Instance.AllPlayers[5].LobbyPrefab;
                 Info = MFPS.Addon.PlayerSelector.bl_PlayerSelectorData.Instance.GetPlayer(Team.All, 5);
                 CurrentlyDisplayedHero = Instantiate(CurrentLobbyModel, gameObject.transform.position, gameObject.transform.rotation);
+                mClass = PlayerClass.Celina;
+                bl_ClassManager.Instance.m_Class = mClass;
+                GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(PlayerClass.Celina);
                 Set();
                 SavePlayerClass(5);
                 break;

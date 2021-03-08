@@ -281,8 +281,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3618031453008389478}
+  - component: {fileID: 409455131380673398}
   m_Layer: 0
-  m_Name: Angel_Gun
+  m_Name: Angel_Gun_lobby
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -304,6 +305,32 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &409455131380673398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4327510791822667652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d460d7dc2e8e0d345b06c0ca81d3e1d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _WeaponName: Angel
+  _animationController: {fileID: 9100000, guid: 73b6a852dff45df4e83b920c6fdecfc8,
+    type: 2}
+  _Weapon: {fileID: 1023522380393246806}
+  _Mesh:
+    MaterialID: 0
+    Render: {fileID: 6632626462307914196}
+    Info:
+      Name: 
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 0}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 0
 --- !u!1 &7795842360317264408
 GameObject:
   m_ObjectHideFlags: 0

@@ -319,7 +319,7 @@ MonoBehaviour:
         ID: 9
         Description: 
   - WeaponName: Celina
-    GunID: 1
+    GunID: 11
     Camos:
     - Name: Default
       GlobalID: 0
@@ -333,6 +333,44 @@ MonoBehaviour:
       Camo: {fileID: 2100000, guid: f38dc27bceac5884abccf1518a65d9b7, type: 2}
       OverridePreview: {fileID: 2800000, guid: cd419051581e25942b9d4e33fa5854c6, type: 3}
       ofWeaponID: 7
+    Attachments:
+      Suppressers:
+      - Name: No Suppressor
+        ID: 0
+        Description: 
+      Sights:
+      - Name: Iron Sight
+        ID: 0
+        Description: 
+      Foregrips: []
+      Magazines:
+      - Name: Normal
+        ID: 0
+        Description: 
+      - Name: Hydro-Mag
+        ID: 9
+        Description: 
+  - WeaponName: Scarlett
+    GunID: 12
+    Camos:
+    - Name: Default
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 2100000, guid: c38913a890014ee42b21ccd8110cae33, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 8
+    - Name: Scarlett Two
+      GlobalID: 12
+      ID: 1
+      Camo: {fileID: 2100000, guid: 8b58f1fad6c4212439d79ad17e7ede0d, type: 2}
+      OverridePreview: {fileID: 2800000, guid: a274e5b232f8749409d8133709e77dee, type: 3}
+      ofWeaponID: 8
+    - Name: Gold
+      GlobalID: 11
+      ID: 2
+      Camo: {fileID: 2100000, guid: bf7a67ba164713649a54b74c36070d48, type: 2}
+      OverridePreview: {fileID: 2800000, guid: a091e86d366f13e4eae361fae91033fa, type: 3}
+      ofWeaponID: 8
     Attachments:
       Suppressers:
       - Name: No Suppressor
@@ -407,6 +445,11 @@ MonoBehaviour:
     Description: 
     m_sprite: {fileID: 0}
   - Name: Gold
+    Preview: {fileID: 2800000, guid: 9d9fed4687c0a5748a125147a54885d5, type: 3}
+    Price: 0
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Scarlett Two
     Preview: {fileID: 2800000, guid: 9d9fed4687c0a5748a125147a54885d5, type: 3}
     Price: 0
     Description: 

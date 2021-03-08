@@ -399,6 +399,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1156645815833325155}
+  - component: {fileID: 4834670018202125398}
   m_Layer: 15
   m_Name: Celina_Pistol
   m_TagString: Untagged
@@ -427,3 +428,29 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4834670018202125398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8836459841653661926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d460d7dc2e8e0d345b06c0ca81d3e1d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _WeaponName: Celina
+  _animationController: {fileID: 9100000, guid: 7fb389e6921b74045a9be8e969af9533,
+    type: 2}
+  _Weapon: {fileID: 131677214830380983}
+  _Mesh:
+    MaterialID: 0
+    Render: {fileID: 5030983200242566242}
+    Info:
+      Name: 
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 0}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 0

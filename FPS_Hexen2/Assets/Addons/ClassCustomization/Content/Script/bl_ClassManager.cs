@@ -27,6 +27,8 @@ public class bl_ClassManager : ScriptableObject {
     public bl_PlayerClassLoadout DefaultShogunClass;
     [Header("Scarlett")]
     public bl_PlayerClassLoadout DefaultScarlettClass;
+    [Header("Celenia")]
+    public bl_PlayerClassLoadout DefaultCelinaClass;
 
 #if UNITY_EDITOR
     [Space(10)]
@@ -41,6 +43,7 @@ public class bl_ClassManager : ScriptableObject {
     public bl_PlayerClassLoadout AngelClass { get; set; }
     public bl_PlayerClassLoadout ShogunClass { get; set; }
     public bl_PlayerClassLoadout ScarlettClass { get; set; }
+    public bl_PlayerClassLoadout CelinaClass { get; set; }
 
 
     [HideInInspector] public int ClassKit = 0;
@@ -59,6 +62,7 @@ public class bl_ClassManager : ScriptableObject {
         PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Angel));
         PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Shogun));
         PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Scarlett));
+        PlayerPrefs.DeleteKey(string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Celina));
     }
 
     /// <summary>
@@ -110,13 +114,21 @@ public class bl_ClassManager : ScriptableObject {
             case 7:
                 m_Class = PlayerClass.Scarlett;
                 break;
+            case 8:
+                m_Class = PlayerClass.Celina;
+                break;
         }
 
 #if ULSP
         if(bl_DataBase.Instance != null)
         {
             ClassKit = bl_DataBase.Instance.LocalUser.metaData.rawData.ClassKit;
-            string dbData = bl_DataBase.Instance.LocalUser.metaData.rawData.WeaponsLoadouts;
+
+            //Moved to local until after serverless support
+
+            //string dbData = bl_DataBase.Instance.LocalUser.metaData.rawData.WeaponsLoadouts;
+            string dbData = PlayerPrefs.GetString("WeaponsLoadouts");
+            
             if (!string.IsNullOrEmpty(dbData))
             {
                 AssaultClass = Instantiate(DefaultAssaultClass);
@@ -135,13 +147,16 @@ public class bl_ClassManager : ScriptableObject {
                 DragosClass.FromString(dbData, 4);
 
                 AngelClass = Instantiate(DefaultAngelClass);
-                AngelClass.FromString(dbData, 4);
+                AngelClass.FromString(dbData, 5);
 
                 ShogunClass = Instantiate(DefaultShogunClass);
-                ShogunClass.FromString(dbData, 5);
+                ShogunClass.FromString(dbData, 6);
 
                 ScarlettClass = Instantiate(DefaultScarlettClass);
-                ScarlettClass.FromString(dbData, 6);
+                ScarlettClass.FromString(dbData, 7);
+                
+                CelinaClass = Instantiate(DefaultCelinaClass);
+                CelinaClass.FromString(dbData, 8);
                 return;
             }
         }
@@ -195,6 +210,11 @@ public class bl_ClassManager : ScriptableObject {
         ScarlettClass = Instantiate(DefaultScarlettClass);
         ScarlettClass.FromString(data);
 
+        key = string.Format(format, PlayerClass.Celina);
+        data = PlayerPrefs.GetString(key, DefaultCelinaClass.ToString());
+        CelinaClass = Instantiate(DefaultCelinaClass);
+        CelinaClass.FromString(data);
+
     }
 
     public void SetUpClasses(bl_GunManager gm)
@@ -228,6 +248,9 @@ public class bl_ClassManager : ScriptableObject {
             case PlayerClass.Scarlett:
                 pcl = ScarlettClass;
                 break;
+            case PlayerClass.Celina:
+                pcl = CelinaClass;
+                break;
         }
 
         if (pcl == null)
@@ -250,10 +273,13 @@ public class bl_ClassManager : ScriptableObject {
 #if ULSP
         if (bl_DataBase.Instance != null)
         {
-            string dbdata = $"{AssaultClass.ToString()},{EngineerClass.ToString()},{ReconClass.ToString()},{SupportClass.ToString()},{DragosClass.ToString()},{AngelClass.ToString()},{ShogunClass.ToString()},{ScarlettClass.ToString()}";
-            bl_DataBase.Instance.LocalUser.metaData.rawData.WeaponsLoadouts = dbdata;
-            bl_DataBase.Instance.LocalUser.metaData.rawData.ClassKit = ClassKit;
-            bl_DataBase.Instance.SaveUserMetaData(() => { callBack?.Invoke(); });
+            string dbdata = $"{AssaultClass.ToString()},{EngineerClass.ToString()},{ReconClass.ToString()},{SupportClass.ToString()},{DragosClass.ToString()},{AngelClass.ToString()},{ShogunClass.ToString()},{ScarlettClass.ToString()},{CelinaClass.ToString()}";
+
+            PlayerPrefs.SetString("WeaponsLoadouts", dbdata);
+            Debug.Log("Saved: " + dbdata);
+            //bl_DataBase.Instance.LocalUser.metaData.rawData.WeaponsLoadouts = dbdata;
+            //bl_DataBase.Instance.LocalUser.metaData.rawData.ClassKit = ClassKit;
+            //bl_DataBase.Instance.SaveUserMetaData(() => { callBack?.Invoke(); });
         }
         else
             callBack?.Invoke();
@@ -292,6 +318,10 @@ public class bl_ClassManager : ScriptableObject {
         data = ScarlettClass.ToString();
         PlayerPrefs.SetString(key, data);
 
+        key = string.Format(LOADOUT_KEY_FORMAT, PlayerClass.Celina);
+        data = CelinaClass.ToString();
+        PlayerPrefs.SetString(key, data);
+
         PlayerPrefs.SetInt(ClassKey.ClassKit, ClassKit);
     }
 
@@ -315,6 +345,8 @@ public class bl_ClassManager : ScriptableObject {
                 return (ShogunClass.Primary == gunID || ShogunClass.Secondary == gunID || ShogunClass.Perks == gunID || ShogunClass.Letal == gunID);
             case PlayerClass.Scarlett:
                 return (ScarlettClass.Primary == gunID || ScarlettClass.Secondary == gunID || ScarlettClass.Perks == gunID || ScarlettClass.Letal == gunID);
+            case PlayerClass.Celina:
+                return (CelinaClass.Primary == gunID || CelinaClass.Secondary == gunID || CelinaClass.Perks == gunID || CelinaClass.Letal == gunID);
         }
         return false;
     }

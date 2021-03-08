@@ -20,6 +20,7 @@ namespace MFPS.ClassCustomization
         public ClassWeapons angelWeapons;
         public ClassWeapons shogunWeapons;
         public ClassWeapons scarlettWeapons;
+        public ClassWeapons celinaWeapons;
 
         [Header("Slots Rules")]
         public ClassAllowedWeaponsType PrimaryAllowedWeapons;
@@ -91,6 +92,9 @@ namespace MFPS.ClassCustomization
                         case PlayerClass.Scarlett:
                             ClassManager.ScarlettClass.Primary = id;
                             break;
+                        case PlayerClass.Celina:
+                            ClassManager.CelinaClass.Primary = id;
+                            break;
                     }
 
                     break;
@@ -121,6 +125,9 @@ namespace MFPS.ClassCustomization
                         case PlayerClass.Scarlett:
                             ClassManager.ScarlettClass.Secondary = id;
                             break;
+                        case PlayerClass.Celina:
+                            ClassManager.CelinaClass.Secondary = id;
+                            break;
                     }
                     break;
                 case 2:
@@ -150,6 +157,9 @@ namespace MFPS.ClassCustomization
                         case PlayerClass.Scarlett:
                             ClassManager.ScarlettClass.Perks = id;
                             break;
+                        case PlayerClass.Celina:
+                            ClassManager.CelinaClass.Perks = id;
+                            break;
                     }
                     break;
                 case 3:
@@ -178,6 +188,9 @@ namespace MFPS.ClassCustomization
                             break;
                         case PlayerClass.Scarlett:
                             ClassManager.ScarlettClass.Letal = id;
+                            break;
+                        case PlayerClass.Celina:
+                            ClassManager.CelinaClass.Letal = id;
                             break;
                     }
                     break;
@@ -219,6 +232,11 @@ namespace MFPS.ClassCustomization
 
         void UpdateClassUI(int id, int slot)
         {
+            //Debug.Log("Class: " + m_Class + " Weapon slot: " + slot + " weapon ID: " + id);
+            LobbyWeaponsManager lm = FindObjectOfType<LobbyWeaponsManager>();
+            if(slot == 0)
+                lm?.ChangePrimarySlot(assaultWeapons.AllWeapons[id].Name);
+
             switch (bl_ClassManager.Instance.m_Class)
             {
                 case PlayerClass.Assault:
@@ -363,7 +381,7 @@ namespace MFPS.ClassCustomization
                 case PlayerClass.Shogun:
                     switch (slot)
                     {
-                        case 0:
+                        case 0:                     
                             UI.Primary_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
                             UI.Primary_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
                             UI.Active_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
@@ -442,6 +460,47 @@ namespace MFPS.ClassCustomization
                             break;
                     }
                     break;
+                case PlayerClass.Celina:
+                    switch (slot)
+                    {
+                        case 0:
+                            UI.Primary_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Primary_HUD.WeaponNameText.text = celinaWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = celinaWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = celinaWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = celinaWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = celinaWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 1:
+                            UI.Secondary_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Secondary_HUD.WeaponNameText.text = celinaWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = celinaWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = celinaWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = celinaWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = celinaWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 2:
+                            UI.Perk_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Perk_HUD.WeaponNameText.text = celinaWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = celinaWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = celinaWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = celinaWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = celinaWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                        case 3:
+                            UI.Lethal_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Lethal_HUD.WeaponNameText.text = celinaWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = celinaWeapons.AllWeapons[id].Info.Name.ToUpper();
+                            UI.Active_HUD.AccuracySlider.value = celinaWeapons.AllWeapons[id].Info.Accuracy;
+                            UI.Active_HUD.DamageSlider.value = celinaWeapons.AllWeapons[id].Info.Damage;
+                            UI.Active_HUD.RateSlider.value = celinaWeapons.AllWeapons[id].Info.FireRate;
+                            break;
+                    }
+                    break;
             }
         }
 
@@ -450,6 +509,7 @@ namespace MFPS.ClassCustomization
         /// </summary>
         public void SaveClass()
         {
+            Debug.Log("Saving: " + m_Class);
             //UI.loadingUI.SetActive(true);
              bl_ClassManager.Instance.SaveClass(() => { this.InvokeAfter(1, () => { 
                  //UI.loadingUI.SetActive(false); 
@@ -618,6 +678,20 @@ namespace MFPS.ClassCustomization
                         }
                     }
                     break;
+                case PlayerClass.Celina://-----------------------------------------------------------------------------
+                    for (int i = 0; i < celinaWeapons.AllWeapons.Count; i++)
+                    {
+                        if (isAllowedWeapon(celinaWeapons.AllWeapons[i].Info, slot))
+                        {
+                            if (!celinaWeapons.AllWeapons[i].isEnabled) continue;
+                            GameObject b = Instantiate(UI.GunSelectPrefabs) as GameObject;
+                            bl_ClassInfoUI iui = b.GetComponent<bl_ClassInfoUI>();
+                            iui.GetInfo(celinaWeapons.AllWeapons[i], slot, i);
+                            b.transform.SetParent(UI.PanelWeaponList, false);
+                            b.SetActive(true);
+                        }
+                    }
+                    break;
             }
         }
 
@@ -699,6 +773,14 @@ namespace MFPS.ClassCustomization
                     UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Perks), 2);
                     UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Letal), 3);
                     break;
+                case PlayerClass.Celina:
+                    i = 4;
+                    UpdateClassUI(GetListId(PlayerClass.Celina, ClassManager.CelinaClass.Primary), 0);
+                    UpdateClassUI(GetListId(PlayerClass.Celina, ClassManager.CelinaClass.Secondary), 1);
+                    UpdateClassUI(GetListId(PlayerClass.Celina, ClassManager.CelinaClass.Perks), 2);
+                    UpdateClassUI(GetListId(PlayerClass.Celina, ClassManager.CelinaClass.Letal), 3);
+                    break;
+
             }
             PlayerPrefs.SetInt(ClassKey.ClassType, i);
         }
@@ -782,6 +864,15 @@ namespace MFPS.ClassCustomization
                         }
                     }
                     break;
+                case PlayerClass.Celina:
+                    for (int i = 0; i < celinaWeapons.AllWeapons.Count; i++)
+                    {
+                        if (celinaWeapons.AllWeapons[i].GunID == id)
+                        {
+                            return i;
+                        }
+                    }
+                    break;
             }
 
             return 0;
@@ -826,7 +917,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.AssaultClass?.Primary)
                         {
-                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Assault);
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
@@ -1020,7 +1111,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.DragosClass?.Primary)
                         {
-                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Dragos);
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
@@ -1064,7 +1155,8 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.AngelClass?.Primary)
                         {
-                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Angel);
+                            //Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
@@ -1108,7 +1200,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.ShogunClass?.Primary)
                         {
-                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Shogun);
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
@@ -1152,7 +1244,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.ScarlettClass?.Primary)
                         {
-                            Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
+                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Scarlett);
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
@@ -1191,6 +1283,50 @@ namespace MFPS.ClassCustomization
                         }
                     }
                     break;
+                case PlayerClass.Celina://--------------------------------------------------------------------------------------
+                    foreach (WeaponItemData ci in celinaWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.CelinaClass?.Primary)
+                        {
+                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Celina);
+                            UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
+                            UI.Active_HUD.Icon.sprite = ci.Info.GunIcon;
+                            UI.Active_HUD.DamageSlider.value = ci.Info.Damage;
+                            UI.Active_HUD.AccuracySlider.value = ci.Info.Accuracy;
+                            UI.Active_HUD.RateSlider.value = ci.Info.FireRate;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in celinaWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.CelinaClass?.Secondary)
+                        {
+                            UI.Secondary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Secondary_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in celinaWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.CelinaClass?.Perks)
+                        {
+                            UI.Perk_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Perk_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    foreach (WeaponItemData ci in celinaWeapons?.AllWeapons)
+                    {
+                        if (ci?.GunID == ClassManager?.CelinaClass?.Letal)
+                        {
+                            UI.Lethal_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
+                            UI.Lethal_HUD.Icon.sprite = ci.Info.GunIcon;
+                            break;
+                        }
+                    }
+                    break;
             }
         }
 
@@ -1217,6 +1353,7 @@ namespace MFPS.ClassCustomization
             angelWeapons.UpdateList(this);
             shogunWeapons.UpdateList(this);
             scarlettWeapons.UpdateList(this);
+            celinaWeapons.UpdateList(this);
         }
 
         private void OnValidate()

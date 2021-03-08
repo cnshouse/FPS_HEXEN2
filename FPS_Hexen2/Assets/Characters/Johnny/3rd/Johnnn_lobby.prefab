@@ -128,30 +128,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8b21feaea4b4a7458176a30d204ad18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3605780747617482838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5296803810878372007}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d460d7dc2e8e0d345b06c0ca81d3e1d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _WeaponName: Johnny
-  _Weapon: {fileID: 5296803810878372007}
-  _Mesh:
-    MaterialID: 0
-    Render: {fileID: 7512282201060425317}
-    Info:
-      Name: 
-      GlobalID: 0
-      ID: 0
-      Camo: {fileID: 0}
-      OverridePreview: {fileID: 0}
-      ofWeaponID: 0
 --- !u!1 &8659562304497537184
 GameObject:
   m_ObjectHideFlags: 0
@@ -4660,21 +4636,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8ce00bed411bd0d42a238d9d41e6e1c1, type: 3}
---- !u!23 &7512282201060425317 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 6042817425091437115, guid: 8ce00bed411bd0d42a238d9d41e6e1c1,
-    type: 3}
-  m_PrefabInstance: {fileID: 4295478237115423838}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4097861806901643709 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 234782190975374819, guid: 8ce00bed411bd0d42a238d9d41e6e1c1,
-    type: 3}
-  m_PrefabInstance: {fileID: 4295478237115423838}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &5296803810878372007 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8223183358125450489, guid: 8ce00bed411bd0d42a238d9d41e6e1c1,
     type: 3}
   m_PrefabInstance: {fileID: 4295478237115423838}
   m_PrefabAsset: {fileID: 0}

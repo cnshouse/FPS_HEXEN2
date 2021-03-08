@@ -1,29 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &8072945332990043570
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4096570735661151706}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d460d7dc2e8e0d345b06c0ca81d3e1d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _WeaponName: Celina
-  _Weapon: {fileID: 4876087448060875403}
-  _Mesh:
-    MaterialID: 0
-    Render: {fileID: 552039057643278686}
-    Info:
-      Name: 
-      GlobalID: 0
-      ID: 0
-      Camo: {fileID: 0}
-      OverridePreview: {fileID: 0}
-      ofWeaponID: 0
 --- !u!1 &4907965784672002161
 GameObject:
   m_ObjectHideFlags: 0
@@ -3631,27 +3607,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: af56fa66bc3dfbb4588bdb0229a0d5b1, type: 3}
---- !u!1 &4096570735661151706 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8836459841653661926, guid: af56fa66bc3dfbb4588bdb0229a0d5b1,
-    type: 3}
-  m_PrefabInstance: {fileID: 4789745370908497212}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5941834728767060831 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1156645815833325155, guid: af56fa66bc3dfbb4588bdb0229a0d5b1,
-    type: 3}
-  m_PrefabInstance: {fileID: 4789745370908497212}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &4876087448060875403 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 131677214830380983, guid: af56fa66bc3dfbb4588bdb0229a0d5b1,
-    type: 3}
-  m_PrefabInstance: {fileID: 4789745370908497212}
-  m_PrefabAsset: {fileID: 0}
---- !u!137 &552039057643278686 stripped
-SkinnedMeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 5030983200242566242, guid: af56fa66bc3dfbb4588bdb0229a0d5b1,
     type: 3}
   m_PrefabInstance: {fileID: 4789745370908497212}
   m_PrefabAsset: {fileID: 0}
