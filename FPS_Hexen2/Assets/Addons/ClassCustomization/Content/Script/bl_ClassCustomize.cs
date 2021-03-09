@@ -233,9 +233,8 @@ namespace MFPS.ClassCustomization
         void UpdateClassUI(int id, int slot)
         {
             //Debug.Log("Class: " + m_Class + " Weapon slot: " + slot + " weapon ID: " + id);
-            LobbyWeaponsManager lm = FindObjectOfType<LobbyWeaponsManager>();
-            if(slot == 0)
-                lm?.ChangePrimarySlot(assaultWeapons.AllWeapons[id].Name);
+            //LobbyWeaponsManager lm = FindObjectOfType<LobbyWeaponsManager>();
+            
 
             switch (bl_ClassManager.Instance.m_Class)
             {
@@ -243,6 +242,10 @@ namespace MFPS.ClassCustomization
                     switch (slot)
                     {
                         case 0:
+                            LobbyWeaponsManager lm = FindObjectOfType<LobbyWeaponsManager>();
+                            if (slot == 0)
+                                lm?.ChangePrimarySlot(assaultWeapons.AllWeapons[id].Name);
+
                             UI.Primary_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
                             UI.Primary_HUD.WeaponNameText.text = assaultWeapons.AllWeapons[id].Info.Name.ToUpper();
                             UI.Active_HUD.Icon.sprite = assaultWeapons.AllWeapons[id].Info.GunIcon;
@@ -300,6 +303,10 @@ namespace MFPS.ClassCustomization
                     switch (slot)
                     {
                         case 0:
+                            LobbyWeaponsManager lm = FindObjectOfType<LobbyWeaponsManager>();
+                            if (slot == 0)
+                                lm?.ChangePrimarySlot(dragosWeapons.AllWeapons[id].Name);
+
                             UI.Primary_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
                             UI.Primary_HUD.WeaponNameText.text = dragosWeapons.AllWeapons[id].Info.Name.ToUpper();
                             UI.Active_HUD.Icon.sprite = dragosWeapons.AllWeapons[id].Info.GunIcon;
@@ -341,6 +348,10 @@ namespace MFPS.ClassCustomization
                     switch (slot)
                     {
                         case 0:
+                            LobbyWeaponsManager lm = FindObjectOfType<LobbyWeaponsManager>();
+                            if (slot == 0)
+                                lm?.ChangePrimarySlot(angelWeapons.AllWeapons[id].Name);
+
                             UI.Primary_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
                             UI.Primary_HUD.WeaponNameText.text = angelWeapons.AllWeapons[id].Info.Name.ToUpper();
                             UI.Active_HUD.Icon.sprite = angelWeapons.AllWeapons[id].Info.GunIcon;
@@ -381,7 +392,11 @@ namespace MFPS.ClassCustomization
                 case PlayerClass.Shogun:
                     switch (slot)
                     {
-                        case 0:                     
+                        case 0:
+                            LobbyWeaponsManager lm = FindObjectOfType<LobbyWeaponsManager>();
+                            if (slot == 0)
+                                lm?.ChangePrimarySlot(shogunWeapons.AllWeapons[id].Name);
+
                             UI.Primary_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
                             UI.Primary_HUD.WeaponNameText.text = shogunWeapons.AllWeapons[id].Info.Name.ToUpper();
                             UI.Active_HUD.Icon.sprite = shogunWeapons.AllWeapons[id].Info.GunIcon;
@@ -551,7 +566,7 @@ namespace MFPS.ClassCustomization
             else if (slot == 2) { rules = KnifeAllowedWeapons; }
             else if (slot == 3) { rules = GrenadesAllowedWeapons; }
 
-            if ((rules.AllowMachineGuns && (info.Type == GunType.Machinegun || info.Type == GunType.Burst)) || (rules.AllowPistols && info.Type == GunType.Pistol) || (rules.AllowShotguns && info.Type == GunType.Shotgun)
+            if ((rules.AllowLaunchers && (info.Type == GunType.Launcher)) || (rules.AllowMachineGuns && (info.Type == GunType.Machinegun || info.Type == GunType.Burst)) || (rules.AllowPistols && info.Type == GunType.Pistol) || (rules.AllowShotguns && info.Type == GunType.Shotgun)
                 || (rules.AllowKnifes && info.Type == GunType.Knife) || (rules.AllowGrenades && (info.Type == GunType.Grenade || info.Type == GunType.Grenade)) || (rules.AllowSnipers && info.Type == GunType.Sniper))
             {
                 return true;
@@ -719,6 +734,15 @@ namespace MFPS.ClassCustomization
             {
                 case PlayerClass.Assault:
                     i = 0;
+                    if (ClassManager == null)
+                    {
+                        ClassManager = bl_ClassManager.Instance;
+                        if (ClassManager == null)
+                        {
+                            Debug.Log("Manager is null!!!");
+                            return;
+                        }
+                    }
                     UpdateClassUI(GetListId(PlayerClass.Assault, ClassManager.AssaultClass.Primary), 0);
                     UpdateClassUI(GetListId(PlayerClass.Assault, ClassManager.AssaultClass.Secondary), 1);
                     UpdateClassUI(GetListId(PlayerClass.Assault, ClassManager.AssaultClass.Perks), 2);
@@ -726,55 +750,100 @@ namespace MFPS.ClassCustomization
                     break;
                 case PlayerClass.Engineer:
                     i = 1;
-                    UpdateClassUI(GetListId(PlayerClass.Engineer, ClassManager.EngineerClass.Primary), 0);
-                    UpdateClassUI(GetListId(PlayerClass.Engineer, ClassManager.EngineerClass.Secondary), 1);
-                    UpdateClassUI(GetListId(PlayerClass.Engineer, ClassManager.EngineerClass.Perks), 2);
-                    UpdateClassUI(GetListId(PlayerClass.Engineer, ClassManager.EngineerClass.Letal), 3);
+                    //UpdateClassUI(GetListId(PlayerClass.Engineer, ClassManager.EngineerClass.Primary), 0);
+                    //UpdateClassUI(GetListId(PlayerClass.Engineer, ClassManager.EngineerClass.Secondary), 1);
+                    //UpdateClassUI(GetListId(PlayerClass.Engineer, ClassManager.EngineerClass.Perks), 2);
+                    //UpdateClassUI(GetListId(PlayerClass.Engineer, ClassManager.EngineerClass.Letal), 3);
                     break;
                 case PlayerClass.Support:
                     i = 2;
-                    UpdateClassUI(GetListId(PlayerClass.Support, ClassManager.SupportClass.Primary), 0);
-                    UpdateClassUI(GetListId(PlayerClass.Support, ClassManager.SupportClass.Secondary), 1);
-                    UpdateClassUI(GetListId(PlayerClass.Support, ClassManager.SupportClass.Perks), 2);
-                    UpdateClassUI(GetListId(PlayerClass.Support, ClassManager.SupportClass.Letal), 3);
+                    //UpdateClassUI(GetListId(PlayerClass.Support, ClassManager.SupportClass.Primary), 0);
+                    //UpdateClassUI(GetListId(PlayerClass.Support, ClassManager.SupportClass.Secondary), 1);
+                    //UpdateClassUI(GetListId(PlayerClass.Support, ClassManager.SupportClass.Perks), 2);
+                    //UpdateClassUI(GetListId(PlayerClass.Support, ClassManager.SupportClass.Letal), 3);
                     break;
                 case PlayerClass.Recon:
                     i = 3;
-                    UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Primary), 0);
-                    UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Secondary), 1);
-                    UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Perks), 2);
-                    UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Letal), 3);
+                    //UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Primary), 0);
+                    //UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Secondary), 1);
+                    //UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Perks), 2);
+                    //UpdateClassUI(GetListId(PlayerClass.Recon, ClassManager.ReconClass.Letal), 3);
                     break;
                 case PlayerClass.Dragos:
                     i = 4;
+                    if (ClassManager == null)
+                    {
+                        ClassManager = bl_ClassManager.Instance;
+                        if (ClassManager == null)
+                        {
+                            Debug.Log("Manager is null!!!");
+                            return;
+                        }
+                    }
                     UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Primary), 0);
                     UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Secondary), 1);
                     UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Perks), 2);
                     UpdateClassUI(GetListId(PlayerClass.Dragos, ClassManager.DragosClass.Letal), 3);
                     break;
                 case PlayerClass.Angel:
-                    i = 4;
+                    i = 5;
+                    if(ClassManager == null)
+					{
+                        ClassManager = bl_ClassManager.Instance;
+                        if (ClassManager == null)
+                        {
+                            Debug.Log("Manager is null!!!");
+                            return;
+                        }
+					}
                     UpdateClassUI(GetListId(PlayerClass.Angel, ClassManager.AngelClass.Primary), 0);
                     UpdateClassUI(GetListId(PlayerClass.Angel, ClassManager.AngelClass.Secondary), 1);
                     UpdateClassUI(GetListId(PlayerClass.Angel, ClassManager.AngelClass.Perks), 2);
                     UpdateClassUI(GetListId(PlayerClass.Angel, ClassManager.AngelClass.Letal), 3);
                     break;
                 case PlayerClass.Shogun:
-                    i = 4;
+                    i = 6;
+                    if (ClassManager == null)
+                    {
+                        ClassManager = bl_ClassManager.Instance;
+                        if (ClassManager == null)
+                        {
+                            Debug.Log("Manager is null!!!");
+                            return;
+                        }
+                    }
                     UpdateClassUI(GetListId(PlayerClass.Shogun, ClassManager.ShogunClass.Primary), 0);
                     UpdateClassUI(GetListId(PlayerClass.Shogun, ClassManager.ShogunClass.Secondary), 1);
                     UpdateClassUI(GetListId(PlayerClass.Shogun, ClassManager.ShogunClass.Perks), 2);
                     UpdateClassUI(GetListId(PlayerClass.Shogun, ClassManager.ShogunClass.Letal), 3);
                     break;
                 case PlayerClass.Scarlett:
-                    i = 4;
+                    i = 7;
+                    if (ClassManager == null)
+                    {
+                        ClassManager = bl_ClassManager.Instance;
+                        if (ClassManager == null)
+                        {
+                            Debug.Log("Manager is null!!!");
+                            return;
+                        }
+                    }
                     UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Primary), 0);
                     UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Secondary), 1);
                     UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Perks), 2);
                     UpdateClassUI(GetListId(PlayerClass.Scarlett, ClassManager.ScarlettClass.Letal), 3);
                     break;
                 case PlayerClass.Celina:
-                    i = 4;
+                    i = 8;
+                    if (ClassManager == null)
+                    {
+                        ClassManager = bl_ClassManager.Instance;
+                        if (ClassManager == null)
+                        {
+                            Debug.Log("Manager is null!!!");
+                            return;
+                        }
+                    }
                     UpdateClassUI(GetListId(PlayerClass.Celina, ClassManager.CelinaClass.Primary), 0);
                     UpdateClassUI(GetListId(PlayerClass.Celina, ClassManager.CelinaClass.Secondary), 1);
                     UpdateClassUI(GetListId(PlayerClass.Celina, ClassManager.CelinaClass.Perks), 2);
@@ -917,7 +986,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.AssaultClass?.Primary)
                         {
-                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Assault);
+                            //FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Assault);
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
@@ -1111,7 +1180,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.DragosClass?.Primary)
                         {
-                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Dragos);
+                            //FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Dragos);
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
@@ -1155,7 +1224,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.AngelClass?.Primary)
                         {
-                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Angel);
+                            //FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Angel);
                             //Debug.Log("Weapon ID: " + ci?.Info?.Name?.ToUpper());
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
@@ -1200,7 +1269,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.ShogunClass?.Primary)
                         {
-                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Shogun);
+                            //FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Shogun);
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
@@ -1244,7 +1313,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.ScarlettClass?.Primary)
                         {
-                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Scarlett);
+                            //FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Scarlett);
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();
@@ -1288,7 +1357,7 @@ namespace MFPS.ClassCustomization
                     {
                         if (ci?.GunID == ClassManager?.CelinaClass?.Primary)
                         {
-                            FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Celina);
+                            //FindObjectOfType<LobbyWeaponsManager>().SetInitWeapon(PlayerClass.Celina);
                             UI.Primary_HUD.WeaponNameText.text = ci.Info.Name.ToUpper();
                             UI.Primary_HUD.Icon.sprite = ci.Info.GunIcon;
                             UI.Active_HUD.WeaponNameText.text = ci?.Info?.Name?.ToUpper();

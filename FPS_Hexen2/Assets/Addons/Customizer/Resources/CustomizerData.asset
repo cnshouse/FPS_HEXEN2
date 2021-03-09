@@ -388,6 +388,44 @@ MonoBehaviour:
       - Name: Hydro-Mag
         ID: 9
         Description: 
+  - WeaponName: Shogun
+    GunID: 13
+    Camos:
+    - Name: Default
+      GlobalID: 0
+      ID: 0
+      Camo: {fileID: 2100000, guid: a6474c6b4acc66845aa2010d2ab8c064, type: 2}
+      OverridePreview: {fileID: 0}
+      ofWeaponID: 9
+    - Name: Shogun Two
+      GlobalID: 13
+      ID: 1
+      Camo: {fileID: 2100000, guid: c4451db29382e46488d058cfeb33cdf8, type: 2}
+      OverridePreview: {fileID: 2800000, guid: e3a542e32ba0e88499d8fcf4826ab60f, type: 3}
+      ofWeaponID: 9
+    - Name: Gold
+      GlobalID: 11
+      ID: 2
+      Camo: {fileID: 2100000, guid: 7d5763c21bf062c49a881d81459d4ee7, type: 2}
+      OverridePreview: {fileID: 2800000, guid: f8d7e722f1333de46aab9d196f7ab143, type: 3}
+      ofWeaponID: 9
+    Attachments:
+      Suppressers:
+      - Name: No Suppressor
+        ID: 0
+        Description: 
+      Sights:
+      - Name: Iron Sight
+        ID: 0
+        Description: 
+      Foregrips: []
+      Magazines:
+      - Name: Normal
+        ID: 0
+        Description: 
+      - Name: Hydro-Mag
+        ID: 9
+        Description: 
   GlobalCamos:
   - Name: Default
     Preview: {fileID: 2800000, guid: 104c4440614ce2341a2e47bc7244921d, type: 3}
@@ -450,6 +488,11 @@ MonoBehaviour:
     Description: 
     m_sprite: {fileID: 0}
   - Name: Scarlett Two
+    Preview: {fileID: 2800000, guid: 9d9fed4687c0a5748a125147a54885d5, type: 3}
+    Price: 0
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Shogun Two
     Preview: {fileID: 2800000, guid: 9d9fed4687c0a5748a125147a54885d5, type: 3}
     Price: 0
     Description: 

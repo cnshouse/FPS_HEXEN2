@@ -25,6 +25,11 @@ namespace MFPS.ClassCustomization
         public const string KnifeRecon = "KnifeIDRecon";
         public const string GrenadeRecon = "GrenadeIDRecon";
 
+        public const string PrimaryAngel = "PrimaryIDAngel";
+        public const string SecundaryAngel = "SecundaryIDAngel";
+        public const string KnifeAngel = "KnifeIDAngel";
+        public const string GrenadeAngel = "GrenadeIDAngel";
+
         public const string ClassType = "ClassID";
         public static readonly string ClassKit = "class.kit.id";
     }
@@ -36,7 +41,9 @@ namespace MFPS.ClassCustomization
         [LovattoToogle] public bool AllowPistols = true;
         [LovattoToogle] public bool AllowShotguns = true;
         [LovattoToogle] public bool AllowSnipers = true;
+        [LovattoToogle] public bool AllowLaunchers = true;
         [LovattoToogle] public bool AllowKnifes = true;
         [LovattoToogle] public bool AllowGrenades = true;
+
     }
 }

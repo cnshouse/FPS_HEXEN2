@@ -274,7 +274,7 @@ public class bl_ClassManager : ScriptableObject {
         if (bl_DataBase.Instance != null)
         {
             string dbdata = $"{AssaultClass.ToString()},{EngineerClass.ToString()},{ReconClass.ToString()},{SupportClass.ToString()},{DragosClass.ToString()},{AngelClass.ToString()},{ShogunClass.ToString()},{ScarlettClass.ToString()},{CelinaClass.ToString()}";
-
+            Debug.Log("Class is : " + m_Class.ToString());
             PlayerPrefs.SetString("WeaponsLoadouts", dbdata);
             Debug.Log("Saved: " + dbdata);
             //bl_DataBase.Instance.LocalUser.metaData.rawData.WeaponsLoadouts = dbdata;

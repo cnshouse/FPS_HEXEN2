@@ -1011,32 +1011,47 @@ PrefabInstance:
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: assaultWeapons.AllWeapons.Array.size
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: engineerWeapons.AllWeapons.Array.size
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: supportWeapons.AllWeapons.Array.size
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: reconWeapons.AllWeapons.Array.size
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: dragosWeapons.AllWeapons.Array.size
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: angelWeapons.AllWeapons.Array.size
-      value: 11
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.size
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.size
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.size
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
@@ -1046,12 +1061,12 @@ PrefabInstance:
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: assaultWeapons.AllWeapons.Array.data[10].Name
-      value: Angel
+      value: Johnny
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: assaultWeapons.AllWeapons.Array.data[10].GunID
-      value: 10
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
@@ -1061,12 +1076,12 @@ PrefabInstance:
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: engineerWeapons.AllWeapons.Array.data[10].Name
-      value: Angel
+      value: Johnny
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: engineerWeapons.AllWeapons.Array.data[10].GunID
-      value: 10
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
@@ -1076,12 +1091,12 @@ PrefabInstance:
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: supportWeapons.AllWeapons.Array.data[10].Name
-      value: Angel
+      value: Johnny
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: supportWeapons.AllWeapons.Array.data[10].GunID
-      value: 10
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
@@ -1091,12 +1106,12 @@ PrefabInstance:
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: reconWeapons.AllWeapons.Array.data[10].Name
-      value: Angel
+      value: Johnny
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: reconWeapons.AllWeapons.Array.data[10].GunID
-      value: 10
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
@@ -1106,12 +1121,12 @@ PrefabInstance:
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: dragosWeapons.AllWeapons.Array.data[10].Name
-      value: Angel
+      value: Johnny
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: dragosWeapons.AllWeapons.Array.data[10].GunID
-      value: 10
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
@@ -1376,12 +1391,12 @@ PrefabInstance:
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: angelWeapons.AllWeapons.Array.data[9].Name
-      value: Machinegun
+      value: Angel
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: angelWeapons.AllWeapons.Array.data[9].GunID
-      value: 9
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
@@ -1391,16 +1406,951 @@ PrefabInstance:
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: angelWeapons.AllWeapons.Array.data[10].Name
-      value: Angel
+      value: Johnny
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: angelWeapons.AllWeapons.Array.data[10].GunID
-      value: 10
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
         type: 3}
       propertyPath: angelWeapons.AllWeapons.Array.data[10].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[9].Name
+      value: Angel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[9].GunID
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[11].Name
+      value: Celina
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[11].GunID
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[11].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[12].Name
+      value: Scarlett
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[12].GunID
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[12].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[13].Name
+      value: Shogun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[13].GunID
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: assaultWeapons.AllWeapons.Array.data[13].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[9].Name
+      value: Angel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[9].GunID
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[11].Name
+      value: Celina
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[11].GunID
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[11].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[12].Name
+      value: Scarlett
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[12].GunID
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[12].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[13].Name
+      value: Shogun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[13].GunID
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: engineerWeapons.AllWeapons.Array.data[13].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[9].Name
+      value: Angel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[9].GunID
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[11].Name
+      value: Celina
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[11].GunID
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[11].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[12].Name
+      value: Scarlett
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[12].GunID
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[12].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[13].Name
+      value: Shogun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[13].GunID
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: supportWeapons.AllWeapons.Array.data[13].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[9].Name
+      value: Angel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[9].GunID
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[11].Name
+      value: Celina
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[11].GunID
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[11].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[12].Name
+      value: Scarlett
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[12].GunID
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[12].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[13].Name
+      value: Shogun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[13].GunID
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: reconWeapons.AllWeapons.Array.data[13].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[9].Name
+      value: Angel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[9].GunID
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[11].Name
+      value: Celina
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[11].GunID
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[11].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[12].Name
+      value: Scarlett
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[12].GunID
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[12].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[13].Name
+      value: Shogun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[13].GunID
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: dragosWeapons.AllWeapons.Array.data[13].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: angelWeapons.AllWeapons.Array.data[11].Name
+      value: Celina
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: angelWeapons.AllWeapons.Array.data[11].GunID
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: angelWeapons.AllWeapons.Array.data[11].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: angelWeapons.AllWeapons.Array.data[12].Name
+      value: Scarlett
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: angelWeapons.AllWeapons.Array.data[12].GunID
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: angelWeapons.AllWeapons.Array.data[12].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: angelWeapons.AllWeapons.Array.data[13].Name
+      value: Shogun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: angelWeapons.AllWeapons.Array.data[13].GunID
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: angelWeapons.AllWeapons.Array.data[13].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[0].Name
+      value: Rifle
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[0].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[1].Name
+      value: Pistol
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[1].GunID
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[1].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[2].Name
+      value: Shotgun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[2].GunID
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[2].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[3].Name
+      value: Grenade
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[3].GunID
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[3].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[4].Name
+      value: Sniper
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[4].GunID
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[4].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[5].Name
+      value: Knife
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[5].GunID
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[5].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[6].Name
+      value: Molotov
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[6].GunID
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[6].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[7].Name
+      value: Grenade Launcher
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[7].GunID
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[7].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[8].Name
+      value: Dragos
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[8].GunID
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[8].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[9].Name
+      value: Johnny
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[9].GunID
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[9].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[10].Name
+      value: Angel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[10].GunID
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[10].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[11].Name
+      value: Celina
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[11].GunID
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[11].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[12].Name
+      value: Scarlett
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[12].GunID
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[12].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[13].Name
+      value: Shogun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[13].GunID
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: shogunWeapons.AllWeapons.Array.data[13].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[0].Name
+      value: Rifle
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[0].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[1].Name
+      value: Pistol
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[1].GunID
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[1].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[2].Name
+      value: Shotgun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[2].GunID
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[2].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[3].Name
+      value: Grenade
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[3].GunID
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[3].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[4].Name
+      value: Sniper
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[4].GunID
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[4].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[5].Name
+      value: Knife
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[5].GunID
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[5].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[6].Name
+      value: Molotov
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[6].GunID
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[6].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[7].Name
+      value: Grenade Launcher
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[7].GunID
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[7].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[8].Name
+      value: Dragos
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[8].GunID
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[8].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[9].Name
+      value: Johnny
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[9].GunID
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[9].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[10].Name
+      value: Angel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[10].GunID
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[10].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[11].Name
+      value: Celina
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[11].GunID
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[11].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[12].Name
+      value: Scarlett
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[12].GunID
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[12].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[13].Name
+      value: Shogun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[13].GunID
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: scarlettWeapons.AllWeapons.Array.data[13].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[0].Name
+      value: Rifle
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[0].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[1].Name
+      value: Pistol
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[1].GunID
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[1].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[2].Name
+      value: Shotgun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[2].GunID
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[2].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[3].Name
+      value: Grenade
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[3].GunID
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[3].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[4].Name
+      value: Sniper
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[4].GunID
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[4].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[5].Name
+      value: Knife
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[5].GunID
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[5].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[6].Name
+      value: Molotov
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[6].GunID
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[6].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[7].Name
+      value: Grenade Launcher
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[7].GunID
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[7].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[8].Name
+      value: Dragos
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[8].GunID
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[8].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[9].Name
+      value: Johnny
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[9].GunID
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[9].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[10].Name
+      value: Angel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[10].GunID
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[10].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[11].Name
+      value: Celina
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[11].GunID
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[11].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[12].Name
+      value: Scarlett
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[12].GunID
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[12].isEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[13].Name
+      value: Shogun
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[13].GunID
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 114219315168752814, guid: 7e118b1a80f210049831c229aedf8ffd,
+        type: 3}
+      propertyPath: celinaWeapons.AllWeapons.Array.data[13].isEnabled
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224167328828944426, guid: 7e118b1a80f210049831c229aedf8ffd,

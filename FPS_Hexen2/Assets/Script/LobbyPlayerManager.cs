@@ -70,7 +70,9 @@ public class LobbyPlayerManager : MonoBehaviour
 	public static void SavePlayerClass(int _selectedModel_int)
     {
         string key = string.Format(PLAYER_HERO_SKIN_KEY, Application.productName);
+        //string CKey = string.Format(PLAYER_HERO_CLASS,)
         PlayerPrefs.SetInt(key, (int)_selectedModel_int);
+        //PlayerPrefs.SetInt()
     }
 
     /// <summary>
@@ -99,6 +101,7 @@ public class LobbyPlayerManager : MonoBehaviour
                 CurrentlyDisplayedHero = Instantiate(CurrentLobbyModel, gameObject.transform.position, gameObject.transform.rotation);
                 mClass = PlayerClass.Dragos;
                 bl_ClassManager.Instance.m_Class = mClass;
+                MFPS.ClassCustomization.bl_ClassCustomize.Instance.ChangeClass(mClass);
                 GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(PlayerClass.Dragos);
                 Set();
                 SavePlayerClass(0);
@@ -110,6 +113,7 @@ public class LobbyPlayerManager : MonoBehaviour
                 CurrentlyDisplayedHero = Instantiate(CurrentLobbyModel, gameObject.transform.position, gameObject.transform.rotation);
                 mClass = PlayerClass.Assault;
                 bl_ClassManager.Instance.m_Class = mClass;
+                MFPS.ClassCustomization.bl_ClassCustomize.Instance.ChangeClass(mClass);
                 GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(PlayerClass.Assault);
                 Set();
                 SavePlayerClass(1);
@@ -121,6 +125,7 @@ public class LobbyPlayerManager : MonoBehaviour
                 CurrentlyDisplayedHero = Instantiate(CurrentLobbyModel, gameObject.transform.position, gameObject.transform.rotation);
                 mClass = PlayerClass.Angel;
                 bl_ClassManager.Instance.m_Class = mClass;
+                MFPS.ClassCustomization.bl_ClassCustomize.Instance.ChangeClass(mClass);
                 GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(PlayerClass.Angel);
                 Set();
                 SavePlayerClass(2);
@@ -132,6 +137,7 @@ public class LobbyPlayerManager : MonoBehaviour
                 CurrentlyDisplayedHero = Instantiate(CurrentLobbyModel, gameObject.transform.position, gameObject.transform.rotation);
                 mClass = PlayerClass.Shogun;
                 bl_ClassManager.Instance.m_Class = mClass;
+                MFPS.ClassCustomization.bl_ClassCustomize.Instance.ChangeClass(mClass);
                 GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(PlayerClass.Shogun);
                 Set();
                 SavePlayerClass(3);
@@ -143,6 +149,7 @@ public class LobbyPlayerManager : MonoBehaviour
                 CurrentlyDisplayedHero = Instantiate(CurrentLobbyModel, gameObject.transform.position, gameObject.transform.rotation);
                 mClass = PlayerClass.Scarlett;
                 bl_ClassManager.Instance.m_Class = mClass;
+                MFPS.ClassCustomization.bl_ClassCustomize.Instance.ChangeClass(mClass);
                 GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(PlayerClass.Scarlett);
                 Set();
                 SavePlayerClass(4);
@@ -154,6 +161,7 @@ public class LobbyPlayerManager : MonoBehaviour
                 CurrentlyDisplayedHero = Instantiate(CurrentLobbyModel, gameObject.transform.position, gameObject.transform.rotation);
                 mClass = PlayerClass.Celina;
                 bl_ClassManager.Instance.m_Class = mClass;
+                MFPS.ClassCustomization.bl_ClassCustomize.Instance.ChangeClass(mClass);
                 GameObject.FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>()?.TakeCurrentClass(PlayerClass.Celina);
                 Set();
                 SavePlayerClass(5);

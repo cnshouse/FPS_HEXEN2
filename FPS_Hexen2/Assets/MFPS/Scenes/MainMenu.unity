@@ -322,11 +322,20 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
-    - Name: Machinegun
-      GunID: 9
-      isEnabled: 1
     - Name: Angel
       GunID: 10
+      isEnabled: 1
+    - Name: Johnny
+      GunID: 9
+      isEnabled: 1
+    - Name: Celina
+      GunID: 11
+      isEnabled: 1
+    - Name: Scarlett
+      GunID: 12
+      isEnabled: 1
+    - Name: Shogun
+      GunID: 13
       isEnabled: 1
   engineerWeapons:
     AllWeapons:
@@ -357,11 +366,20 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
-    - Name: Machinegun
-      GunID: 9
-      isEnabled: 1
     - Name: Angel
       GunID: 10
+      isEnabled: 1
+    - Name: Johnny
+      GunID: 9
+      isEnabled: 1
+    - Name: Celina
+      GunID: 11
+      isEnabled: 1
+    - Name: Scarlett
+      GunID: 12
+      isEnabled: 1
+    - Name: Shogun
+      GunID: 13
       isEnabled: 1
   supportWeapons:
     AllWeapons:
@@ -392,11 +410,20 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
-    - Name: Machinegun
-      GunID: 9
-      isEnabled: 1
     - Name: Angel
       GunID: 10
+      isEnabled: 1
+    - Name: Johnny
+      GunID: 9
+      isEnabled: 1
+    - Name: Celina
+      GunID: 11
+      isEnabled: 1
+    - Name: Scarlett
+      GunID: 12
+      isEnabled: 1
+    - Name: Shogun
+      GunID: 13
       isEnabled: 1
   reconWeapons:
     AllWeapons:
@@ -427,11 +454,20 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
-    - Name: Machinegun
-      GunID: 9
-      isEnabled: 1
     - Name: Angel
       GunID: 10
+      isEnabled: 1
+    - Name: Johnny
+      GunID: 9
+      isEnabled: 1
+    - Name: Celina
+      GunID: 11
+      isEnabled: 1
+    - Name: Scarlett
+      GunID: 12
+      isEnabled: 1
+    - Name: Shogun
+      GunID: 13
       isEnabled: 1
   dragosWeapons:
     AllWeapons:
@@ -462,11 +498,20 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
-    - Name: Machinegun
-      GunID: 9
-      isEnabled: 1
     - Name: Angel
       GunID: 10
+      isEnabled: 1
+    - Name: Johnny
+      GunID: 9
+      isEnabled: 1
+    - Name: Celina
+      GunID: 11
+      isEnabled: 1
+    - Name: Scarlett
+      GunID: 12
+      isEnabled: 1
+    - Name: Shogun
+      GunID: 13
       isEnabled: 1
   angelWeapons:
     AllWeapons:
@@ -497,11 +542,20 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
-    - Name: Machinegun
-      GunID: 9
-      isEnabled: 1
     - Name: Angel
       GunID: 10
+      isEnabled: 1
+    - Name: Johnny
+      GunID: 9
+      isEnabled: 1
+    - Name: Celina
+      GunID: 11
+      isEnabled: 1
+    - Name: Scarlett
+      GunID: 12
+      isEnabled: 1
+    - Name: Shogun
+      GunID: 13
       isEnabled: 1
   shogunWeapons:
     AllWeapons:
@@ -532,11 +586,20 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
-    - Name: Machinegun
-      GunID: 9
-      isEnabled: 1
     - Name: Angel
       GunID: 10
+      isEnabled: 1
+    - Name: Johnny
+      GunID: 9
+      isEnabled: 1
+    - Name: Celina
+      GunID: 11
+      isEnabled: 1
+    - Name: Scarlett
+      GunID: 12
+      isEnabled: 1
+    - Name: Shogun
+      GunID: 13
       isEnabled: 1
   scarlettWeapons:
     AllWeapons:
@@ -567,11 +630,20 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
-    - Name: Machinegun
-      GunID: 9
-      isEnabled: 1
     - Name: Angel
       GunID: 10
+      isEnabled: 1
+    - Name: Johnny
+      GunID: 9
+      isEnabled: 1
+    - Name: Celina
+      GunID: 11
+      isEnabled: 1
+    - Name: Scarlett
+      GunID: 12
+      isEnabled: 1
+    - Name: Shogun
+      GunID: 13
       isEnabled: 1
   celinaWeapons:
     AllWeapons:
@@ -602,17 +674,27 @@ MonoBehaviour:
     - Name: Dragos
       GunID: 8
       isEnabled: 1
-    - Name: Machinegun
-      GunID: 9
-      isEnabled: 1
     - Name: Angel
       GunID: 10
+      isEnabled: 1
+    - Name: Johnny
+      GunID: 9
+      isEnabled: 1
+    - Name: Celina
+      GunID: 11
+      isEnabled: 1
+    - Name: Scarlett
+      GunID: 12
+      isEnabled: 1
+    - Name: Shogun
+      GunID: 13
       isEnabled: 1
   PrimaryAllowedWeapons:
     AllowMachineGuns: 1
     AllowPistols: 1
     AllowShotguns: 1
     AllowSnipers: 1
+    AllowLaunchers: 1
     AllowKnifes: 0
     AllowGrenades: 0
   SecondaryAllowedWeapons:
@@ -620,6 +702,7 @@ MonoBehaviour:
     AllowPistols: 1
     AllowShotguns: 1
     AllowSnipers: 1
+    AllowLaunchers: 1
     AllowKnifes: 0
     AllowGrenades: 0
   KnifeAllowedWeapons:
@@ -627,6 +710,7 @@ MonoBehaviour:
     AllowPistols: 0
     AllowShotguns: 0
     AllowSnipers: 0
+    AllowLaunchers: 1
     AllowKnifes: 1
     AllowGrenades: 0
   GrenadesAllowedWeapons:
@@ -634,6 +718,7 @@ MonoBehaviour:
     AllowPistols: 0
     AllowShotguns: 0
     AllowSnipers: 0
+    AllowLaunchers: 1
     AllowKnifes: 0
     AllowGrenades: 1
   ClassManager: {fileID: 0}
