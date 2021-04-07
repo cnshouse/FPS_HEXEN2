@@ -49,7 +49,9 @@ public class bl_CustomizerWeapon : MonoBehaviour
     public void ApplyAttachments()
     {
         Attachments.Apply(AttachmentsIds);
+
         CamoRender.ApplyCamo(WeaponName, AttachmentsIds[(int)bl_AttachType.Camo]);
+
     }
 
     /// <summary>
@@ -59,7 +61,9 @@ public class bl_CustomizerWeapon : MonoBehaviour
     public void ApplyAttachments(int[] customIds)
     {
         Attachments.Apply(customIds);
+
         CamoRender.ApplyCamo(WeaponName, customIds[(int)bl_AttachType.Camo]);
+
     }
 
     /// <summary>

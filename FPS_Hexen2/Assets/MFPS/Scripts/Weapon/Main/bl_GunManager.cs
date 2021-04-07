@@ -119,42 +119,42 @@ public class bl_GunManager : bl_MonoBehaviour
     /// </summary>
     void SetupLoadout()
     {
-#if CLASS_CUSTOMIZER
+//#if CLASS_CUSTOMIZER
         bl_ClassManager.Instance.SetUpClasses(this);
-#else
+//#else
         //when player instance select player class select in bl_RoomMenu
-        bl_PlayerClassLoadout pcl = null;
-        var currentClass = PlayerClass.Assault.GetSavePlayerClass();
-        switch (currentClass)
-        {
-            case PlayerClass.Assault:
-                pcl = m_AssaultClass;
-                break;
-            case PlayerClass.Recon:
-                pcl = m_ReconClass;
-                break;
-            case PlayerClass.Engineer:
-                pcl = m_EngineerClass;
-                break;
-            case PlayerClass.Support:
-                pcl = m_SupportClass;
-                break;
-        }
+//        bl_PlayerClassLoadout pcl = null;
+//        var currentClass = PlayerClass.Assault.GetSavePlayerClass();
+//        switch (currentClass)
+//        {
+//            case PlayerClass.Assault:
+//                pcl = m_AssaultClass;
+//                break;
+//            case PlayerClass.Recon:
+//                pcl = m_ReconClass;
+//                break;
+//            case PlayerClass.Engineer:
+//                pcl = m_EngineerClass;
+//                break;
+//            case PlayerClass.Support:
+//                pcl = m_SupportClass;
+//                break;
+//        }
 
-        if (pcl == null)
-        {
-            Debug.LogError($"Player Class Loadout has not been assigned for the class {currentClass.ToString()}");
-            return;
-        }
-        Debug.LogError("WEAPON COUNT: " + PlayerEquip.Count);
+//        if (pcl == null)
+//        {
+//            Debug.LogError($"Player Class Loadout has not been assigned for the class {currentClass.ToString()}");
+//            return;
+//        }
+//        Debug.LogError("WEAPON COUNT: " + PlayerEquip.Count);
 
-        PlayerEquip[0] = GetGunOnListById(pcl.Primary);
-        PlayerEquip[1] = GetGunOnListById(pcl.Secondary);
-        PlayerEquip[2] = GetGunOnListById(pcl.Letal);
-        PlayerEquip[3] = GetGunOnListById(pcl.Perks);
+//        PlayerEquip[0] = GetGunOnListById(pcl.Primary);
+//        PlayerEquip[1] = GetGunOnListById(pcl.Secondary);
+//        PlayerEquip[2] = GetGunOnListById(pcl.Letal);
+//        PlayerEquip[3] = GetGunOnListById(pcl.Perks);
         //PlayerEquip[4] = GetGunOnListById(pcl.Knife);
         //PlayerEquip[5] = GetGunOnListById(pcl.Special);
-#endif
+//#endif
         for (int i = 0; i < PlayerEquip.Count; i++)
         {
             if (PlayerEquip[i] == null) continue;
@@ -458,6 +458,12 @@ public class bl_GunManager : bl_MonoBehaviour
     {
         CanSwich = false;
         bl_UIReferences.Instance.PlayerUI.LoadoutUI.ChangeWeapon(newID);
+        
+        if(IDfrom == null)
+		{
+            IDfrom = 1;
+		}
+
         float hideTime = PlayerEquip[IDfrom].DisableWeapon();
         //instantly disable the current weapon and active the next weapon
         if (changeWeaponStyle == ChangeWeaponStyle.CounterStrike)

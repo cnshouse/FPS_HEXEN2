@@ -170,6 +170,11 @@ namespace MFPS.Addon.Customizer
             }
             oldm.SetTextureOffset("_MainTex", Vector2.zero);
             CamoRender.Render.material.SetTextureOffset("_MainTex", Vector2.zero);
+
+            foreach(Renderer r in CamoRender.AdditionalRenders)
+			{
+                r.material.SetTextureOffset("_MainTex", Vector2.zero);
+            }
         }
 
         IEnumerator ChangeMovement(bl_AttachType _type)

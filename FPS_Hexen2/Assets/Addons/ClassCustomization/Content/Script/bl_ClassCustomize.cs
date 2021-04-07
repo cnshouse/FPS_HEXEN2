@@ -438,6 +438,10 @@ namespace MFPS.ClassCustomization
                     switch (slot)
                     {
                         case 0:
+                            LobbyWeaponsManager lm = FindObjectOfType<LobbyWeaponsManager>();
+                            if (slot == 0)
+                                lm?.ChangePrimarySlot(scarlettWeapons.AllWeapons[id].Name);
+
                             UI.Primary_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
                             UI.Primary_HUD.WeaponNameText.text = scarlettWeapons.AllWeapons[id].Info.Name.ToUpper();
                             UI.Active_HUD.Icon.sprite = scarlettWeapons.AllWeapons[id].Info.GunIcon;
@@ -479,6 +483,10 @@ namespace MFPS.ClassCustomization
                     switch (slot)
                     {
                         case 0:
+                            LobbyWeaponsManager lm = FindObjectOfType<LobbyWeaponsManager>();
+                            if (slot == 0)
+                                lm?.ChangePrimarySlot(celinaWeapons.AllWeapons[id].Name);
+
                             UI.Primary_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;
                             UI.Primary_HUD.WeaponNameText.text = celinaWeapons.AllWeapons[id].Info.Name.ToUpper();
                             UI.Active_HUD.Icon.sprite = celinaWeapons.AllWeapons[id].Info.GunIcon;

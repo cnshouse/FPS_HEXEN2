@@ -101,7 +101,7 @@ LightmapSettings:
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 112000000, guid: 20171f5e8b3916d4b9b2a88d35ac7af4,
     type: 2}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!196 &5
 NavMeshSettings:
   serializedVersion: 2
@@ -6310,6 +6310,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114898432356870366, guid: c3c2b2b588061954dbb6044474df0805,
+        type: 3}
+      propertyPath: SlotsGroups.Array.size
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 1512625349301152151, guid: c3c2b2b588061954dbb6044474df0805,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -6463,32 +6468,32 @@ PrefabInstance:
     - target: {fileID: 1720529221712429541, guid: c3c2b2b588061954dbb6044474df0805,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1720529221712429541, guid: c3c2b2b588061954dbb6044474df0805,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1720529221712429541, guid: c3c2b2b588061954dbb6044474df0805,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 1720529221712429541, guid: c3c2b2b588061954dbb6044474df0805,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 1720529221712429541, guid: c3c2b2b588061954dbb6044474df0805,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -7
       objectReference: {fileID: 0}
     - target: {fileID: 1720529221712429541, guid: c3c2b2b588061954dbb6044474df0805,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 1720529221712440505, guid: c3c2b2b588061954dbb6044474df0805,
         type: 3}

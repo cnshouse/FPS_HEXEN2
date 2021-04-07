@@ -212,6 +212,9 @@ MonoBehaviour:
   - Name: explosion
     Prefab: {fileID: 1577321590075106, guid: 3c0fb8b353537b9469c5fef13421be3d, type: 3}
     Lenght: 7
+  - Name: Bullet_Angel
+    Prefab: {fileID: 100000, guid: 715b6d33ec9ce2a48a957d3084270f8e, type: 3}
+    Lenght: 100
 --- !u!114 &114469179219543914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -388,9 +391,10 @@ Camera:
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0.019607844}
   m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_GateFitMode: 2
   m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MFPS.Addon.Customizer;
 
 [System.Serializable]
 public class LobbyWeapon:MonoBehaviour
@@ -8,8 +9,10 @@ public class LobbyWeapon:MonoBehaviour
 	public string _WeaponName;
     public RuntimeAnimatorController _animationController;
 	public GameObject _Weapon;
-    
-	public MFPS.Addon.Customizer.CustomizerCamoRender _Mesh;
+    private int[] AttachmentsIds = new int[] { 0, 0, 0, 0, 0 };
+
+    public MFPS.Addon.Customizer.CustomizerCamoRender _Mesh;
+    public CustomizerAttachments Attachments;
     private int _Camo;
 
 	public void Start()
@@ -32,6 +35,8 @@ public class LobbyWeapon:MonoBehaviour
             array = DecompileLine(t);
             Debug.Log("Line: " + t);
         }
+        AttachmentsIds = array;
+        Apply(AttachmentsIds);
         return array;
     }
 
@@ -64,11 +69,36 @@ public class LobbyWeapon:MonoBehaviour
 	{
         GameObject LobbyPlayer = FindObjectOfType<Animator>().gameObject;
         RuntimeAnimatorController _curAC = LobbyPlayer.GetComponent<Animator>().runtimeAnimatorController;
-        Debug.Log("Player is : " + LobbyPlayer.name);
+        //Debug.Log("Player is : " + LobbyPlayer.name);
         if (_animationController != null && _curAC != _animationController)
         {
             LobbyPlayer.GetComponent<Animator>().runtimeAnimatorController = _animationController;
         }
+    }
+
+    public void Apply(int[] array)
+    {
+        Attachments.Suppressers.ForEach(x => { SetActive(x.Model, false); });
+        Attachments.Sights.ForEach(x => { SetActive(x.Model, false); });
+        Attachments.Foregrips.ForEach(x => { SetActive(x.Model, false); });
+        Attachments.Magazines.ForEach(x => { SetActive(x.Model, false); });
+
+        ActiveModelInList(Attachments.Suppressers, array[0]);
+        ActiveModelInList(Attachments.Sights, array[1]);
+        ActiveModelInList(Attachments.Foregrips, array[2]);
+        ActiveModelInList(Attachments.Magazines, array[3]);
+    }
+
+    void ActiveModelInList(List<CustomizerModelInfo> list, int id, bool active = true)
+    {
+        if (list == null || id >= list.Count || list[id].Model == null) return;
+        list[id].Model.SetActive(active);
+    }
+
+    void SetActive(GameObject obj, bool active)
+    {
+        if (obj == null) return;
+        obj.SetActive(active);
     }
 
 }

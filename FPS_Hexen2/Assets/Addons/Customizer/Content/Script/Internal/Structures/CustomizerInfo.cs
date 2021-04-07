@@ -45,6 +45,7 @@ namespace MFPS.Addon.Customizer
     {
         public int MaterialID = 0;
         public Renderer Render;
+        public Renderer[] AdditionalRenders;
 
         [HideInInspector] public CamoInfo Info;
 

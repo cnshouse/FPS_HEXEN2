@@ -36,8 +36,10 @@ public class bl_WeaponLoadoutUI : MonoBehaviour
     {
         for (int i = 0; i < SlotsGroups.Length; i++)
         {
-            IconsImg[i].canvasRenderer.SetColor(Color.white);
-            if(guns[i] == null || guns[i].Info == null) { SlotsGroups[i].gameObject.SetActive(false); continue; }
+            IconsImg[i]?.canvasRenderer.SetColor(Color.white);
+            Debug.Log("Weapon int Count i: " + i.ToString());
+            if (i > 3) return;  //Cap off the ui buttons size to avoid conflict with list size for now. CNS
+            if(guns[i] == null || guns[i]?.Info == null) { SlotsGroups[i]?.gameObject.SetActive(false); continue; }
             
             Image img = SlotsGroups[i].GetComponentInChildren<Image>(false);
             img.sprite = guns[i].Info.GunIcon;

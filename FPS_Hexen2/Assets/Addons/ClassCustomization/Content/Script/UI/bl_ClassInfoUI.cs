@@ -69,7 +69,9 @@ namespace MFPS.ClassCustomization
             }
 #endif
 #pragma warning restore 219
-            StartCoroutine(Fade(lID * 0.04f));
+            if(Alpha != null)
+             if(Alpha.isActiveAndEnabled)
+                StartCoroutine(Fade(lID * 0.04f));
         }
 
         /// <summary>

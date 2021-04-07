@@ -199,9 +199,6 @@ MonoBehaviour:
       - Name: Holo Sight
         ID: 1
         Description: 
-      - Name: Cobra
-        ID: 2
-        Description: 
       Foregrips: []
       Magazines:
       - Name: Normal
@@ -216,7 +213,7 @@ MonoBehaviour:
     - Name: Default
       GlobalID: 0
       ID: 0
-      Camo: {fileID: 2100000, guid: cb1b5a3a394ad6b42a597e2bda0d81ad, type: 2}
+      Camo: {fileID: 2100000, guid: 945aaec0f1828e646801493d7db7d8f1, type: 2}
       OverridePreview: {fileID: 0}
       ofWeaponID: 4
     - Name: Hydro
@@ -224,6 +221,18 @@ MonoBehaviour:
       ID: 1
       Camo: {fileID: 2100000, guid: 95c54ca002c4d6c4199b023f68275932, type: 2}
       OverridePreview: {fileID: 2800000, guid: 19516943777febc499922c851560f17c, type: 3}
+      ofWeaponID: 4
+    - Name: Gold
+      GlobalID: 11
+      ID: 2
+      Camo: {fileID: 2100000, guid: 1228c5540f8b11843a799c3fe162b834, type: 2}
+      OverridePreview: {fileID: 2800000, guid: 9608c2cafdb2d8d4c86b44b0e63d2fd2, type: 3}
+      ofWeaponID: 4
+    - Name: Dark Blue
+      GlobalID: 14
+      ID: 3
+      Camo: {fileID: 2100000, guid: 8b7bb5512fdeb814d85ace4993d48701, type: 2}
+      OverridePreview: {fileID: 2800000, guid: 9e6afb22f1fd2054dbe67a3eca5a4757, type: 3}
       ofWeaponID: 4
     Attachments:
       Suppressers:
@@ -269,6 +278,12 @@ MonoBehaviour:
       Camo: {fileID: 2100000, guid: 20b284430ee2b8e488ee5a9e57dee5bb, type: 2}
       OverridePreview: {fileID: 2800000, guid: 1841c7889eb056d4193d2771ae2886d6, type: 3}
       ofWeaponID: 5
+    - Name: Dark Blue
+      GlobalID: 14
+      ID: 4
+      Camo: {fileID: 2100000, guid: 1f4c74d16edbbdf4482b85fc8374023a, type: 2}
+      OverridePreview: {fileID: 2800000, guid: 4981101a78cf416429eb4451b5242a49, type: 3}
+      ofWeaponID: 5
     Attachments:
       Suppressers:
       - Name: No Suppressor
@@ -283,8 +298,14 @@ MonoBehaviour:
       - Name: Normal
         ID: 0
         Description: 
-      - Name: Hydro-Mag
-        ID: 9
+      - Name: Toxic
+        ID: 1
+        Description: 
+      - Name: Blue
+        ID: 2
+        Description: 
+      - Name: Gold
+        ID: 3
         Description: 
   - WeaponName: Dragos
     GunID: 8
@@ -299,7 +320,19 @@ MonoBehaviour:
       GlobalID: 9
       ID: 1
       Camo: {fileID: 2100000, guid: e73c881640356414f89f16df5e682f55, type: 2}
-      OverridePreview: {fileID: 2800000, guid: cd419051581e25942b9d4e33fa5854c6, type: 3}
+      OverridePreview: {fileID: 2800000, guid: 33e35a67de6db4f4d819eddaa91745ba, type: 3}
+      ofWeaponID: 6
+    - Name: Gold
+      GlobalID: 11
+      ID: 2
+      Camo: {fileID: 2100000, guid: 549589d8b0d9e754ba2b5ed86d4961d4, type: 2}
+      OverridePreview: {fileID: 2800000, guid: a0917d36d0190c145bc029050bb30f63, type: 3}
+      ofWeaponID: 6
+    - Name: Dark Blue
+      GlobalID: 14
+      ID: 3
+      Camo: {fileID: 2100000, guid: 2d149da055e1caa43a55f03d14a9555c, type: 2}
+      OverridePreview: {fileID: 2800000, guid: 70de92afe7866044b945b3eef815a066, type: 3}
       ofWeaponID: 6
     Attachments:
       Suppressers:
@@ -338,17 +371,23 @@ MonoBehaviour:
       - Name: No Suppressor
         ID: 0
         Description: 
+      - Name: Silencer
+        ID: 1
+        Description: 
+      - Name: Small Barrel
+        ID: 2
+        Description: 
       Sights:
       - Name: Iron Sight
         ID: 0
+        Description: 
+      - Name: Holo Sight
+        ID: 1
         Description: 
       Foregrips: []
       Magazines:
       - Name: Normal
         ID: 0
-        Description: 
-      - Name: Hydro-Mag
-        ID: 9
         Description: 
   - WeaponName: Scarlett
     GunID: 12
@@ -359,8 +398,8 @@ MonoBehaviour:
       Camo: {fileID: 2100000, guid: c38913a890014ee42b21ccd8110cae33, type: 2}
       OverridePreview: {fileID: 0}
       ofWeaponID: 8
-    - Name: Scarlett Two
-      GlobalID: 12
+    - Name: Dark Blue
+      GlobalID: 14
       ID: 1
       Camo: {fileID: 2100000, guid: 8b58f1fad6c4212439d79ad17e7ede0d, type: 2}
       OverridePreview: {fileID: 2800000, guid: a274e5b232f8749409d8133709e77dee, type: 3}
@@ -397,8 +436,8 @@ MonoBehaviour:
       Camo: {fileID: 2100000, guid: a6474c6b4acc66845aa2010d2ab8c064, type: 2}
       OverridePreview: {fileID: 0}
       ofWeaponID: 9
-    - Name: Shogun Two
-      GlobalID: 13
+    - Name: Dark Blue
+      GlobalID: 14
       ID: 1
       Camo: {fileID: 2100000, guid: c4451db29382e46488d058cfeb33cdf8, type: 2}
       OverridePreview: {fileID: 2800000, guid: e3a542e32ba0e88499d8fcf4826ab60f, type: 3}
@@ -493,6 +532,11 @@ MonoBehaviour:
     Description: 
     m_sprite: {fileID: 0}
   - Name: Shogun Two
+    Preview: {fileID: 2800000, guid: 9d9fed4687c0a5748a125147a54885d5, type: 3}
+    Price: 0
+    Description: 
+    m_sprite: {fileID: 0}
+  - Name: Dark Blue
     Preview: {fileID: 2800000, guid: 9d9fed4687c0a5748a125147a54885d5, type: 3}
     Price: 0
     Description: 

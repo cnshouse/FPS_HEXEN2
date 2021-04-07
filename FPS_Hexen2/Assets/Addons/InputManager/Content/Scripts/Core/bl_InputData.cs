@@ -106,7 +106,7 @@ namespace MFPS.InputManager
                 if (index >= 0) { cachedKeys.Add(key, mappedInstance.ButtonMap[index]); }
                 else
                 {
-                    Debug.Log($"Key {key} has not been mapped in the InputManager.");
+                    //Debug.Log($"Key {key} has not been mapped in the InputManager.");
                     return false;
                 }
             }

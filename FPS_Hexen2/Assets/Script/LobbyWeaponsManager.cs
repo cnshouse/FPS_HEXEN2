@@ -6,6 +6,7 @@ public class LobbyWeaponsManager : MonoBehaviour
 {
 	public GameObject[] _LobbyWeapons;
     public PlayerClass _player;
+	private MFPS.ClassCustomization.bl_ClassCustomize cClass;
 
     public void ChangePrimarySlot(string WeaponName)
 	{
@@ -23,9 +24,15 @@ public class LobbyWeaponsManager : MonoBehaviour
 			lw.SetActive(false);
             
 		}
-        //PlayerPrefs.SetString("LastEquipedWeapon", WeaponName);
-        MFPS.ClassCustomization.bl_ClassCustomize.Instance.RefreshLists();
-    }
+#if UNITY_EDITOR
+		if (cClass != null)
+		{
+			cClass.RefreshLists();
+		}
+#endif
+		//PlayerPrefs.SetString("LastEquipedWeapon", WeaponName);
+		// MFPS.ClassCustomization.bl_ClassCustomize.Instance.RefreshLists();
+	}
 
 	public void OnEnable()
 	{
@@ -33,6 +40,8 @@ public class LobbyWeaponsManager : MonoBehaviour
         
         if(_weaponName != null && _weaponName != "")
             ChangePrimarySlot(_weaponName);
+
+		cClass = FindObjectOfType<MFPS.ClassCustomization.bl_ClassCustomize>();
     }
 
 }
